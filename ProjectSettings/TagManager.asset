@@ -20,11 +20,11 @@ TagManager:
   - 
   - 
   - 
-  - 
-  - 
-  - 
-  - 
-  - 
+  - agents_objects
+  - agents_labels
+  - scenery_road
+  - scenery_signs
+  - scenery_objects
   - 
   - 
   - 

@@ -3,64 +3,121 @@ using System.Linq;
 using UnityEngine;
 
 namespace Scenery.RoadNetwork {
+    
+    /// <summary>
+    /// Class representing a LaneSection from OpenDrive. Provides access methods for Lanes and parameters as well as
+    /// function methods to communicate with its children Lanes or with its parent Road.
+    /// </summary>
     public class LaneSection : SceneryElement {
-        private List<Lane> _leftLanes;
-        private Lane _centerLane;
-        private List<Lane> _rightLanes;
+        
+        /// <summary>
+        /// Left (in road direction) Lane-Objects for this section
+        /// </summary>
+        public List<Lane> LeftLanes { get; private set; }
+        
+        /// <summary>
+        /// CenterLane-object for this section
+        /// </summary>
+        public Lane CenterLane { get; set; }
+        
+        /// <summary>
+        /// Right (in road direction) Lane-objects for this section
+        /// </summary>
+        public List<Lane> RightLanes { get; private set; }
 
-        public Dictionary<string, Lane> LaneIdMappings { get; private set; }
+        /// <summary>
+        /// All Lane-objects mapped to their id (string)
+        /// </summary>
+        public Dictionary<string, Lane> LaneIdMappings { get; }
+        
+        /// <summary>
+        /// Starting distance on the road for this lane section
+        /// </summary>
+        public float S { get; set; }
+        
+        /// <summary>
+        /// Length of this lane section
+        /// </summary>
+        public float Length { get; set; }
+        
+        /// <summary>
+        /// Road-object this LaneSection-object belongs to
+        /// </summary>
+        public Road Parent { get; set; }
+
+        /// <summary>
+        /// If this section is completely within a line geometry, will be used to simplify mesh generation for children
+        /// Lanes. Gets set in parent Road.
+        /// </summary>
+        public bool CompletelyOnLineSegment { get; set; }
 
         public LaneSection() {
-            _leftLanes = new List<Lane>();
-            _rightLanes = new List<Lane>();
+            LeftLanes = new List<Lane>();
+            RightLanes = new List<Lane>();
             LaneIdMappings = new Dictionary<string, Lane>();
         }
 
-        public float S { get; set; }
-        
-        public float Length { get; set; }
-        
-        public Road Parent { get; set; }
-
+        /// <summary>
+        /// Adds a left Lane to the list (in road direction). Will sort the list afterwards (based on the sign() of the
+        /// id of the Lane.
+        /// </summary>
+        /// <param name="lane">The Lane to be added.</param>
         public void AddLeftLane(Lane lane) {
-            _leftLanes.Add(lane);
-            var ordered = _leftLanes.AsEnumerable().OrderBy(l => l.LaneId);
-            _leftLanes = ordered.ToList();
+            LeftLanes.Add(lane);
+            var ordered = LeftLanes.AsEnumerable().OrderBy(l => l.LaneId);
+            LeftLanes = ordered.ToList();
 
             LaneIdMappings[lane.OpenDriveId] = lane;
         }
         
+        /// <summary>
+        /// Adds a right Lane to the list (in road direction). Will sort the list afterwards (based on the sign() of the
+        /// id of the Lane.
+        /// </summary>
+        /// <param name="lane">The Lane to be added.</param>
         public void AddRightLane(Lane lane) {
-            _rightLanes.Add(lane);
-            var ordered = _rightLanes.AsEnumerable().OrderByDescending(l => l.LaneId);
-            _rightLanes = ordered.ToList();
+            RightLanes.Add(lane);
+            var ordered = RightLanes.AsEnumerable().OrderByDescending(l => l.LaneId);
+            RightLanes = ordered.ToList();
             
             LaneIdMappings[lane.OpenDriveId] = lane;
         }
 
-        public Lane CenterLane {
-            set => _centerLane = value;
-        }
-        
-        public bool CompletelyOnLineSegment { get; set; }
-
+        /// <summary>
+        /// Starts the mesh generation for this LaneSections children Lanes. Also sets the neighbors for the children
+        /// Lanes.
+        /// </summary>
         public void StartMeshGeneration() {
-            for (var i = 0; i < _leftLanes.Count; i++) {
-                if (i == 0) _leftLanes[i].Neighbor = _centerLane;
-                else _leftLanes[i].Neighbor = _leftLanes[i - 1];
+            for (var i = 0; i < LeftLanes.Count; i++) {
+                LeftLanes[i].InnerNeighbor = i == 0 ? CenterLane : LeftLanes[i - 1];
+                LeftLanes[i].OuterNeighbor = i == LeftLanes.Count - 1 ? null : LeftLanes[i + 1];
             }
             
-            for (var i = 0; i < _rightLanes.Count; i++) {
-                if (i == 0) _rightLanes[i].Neighbor = _centerLane;
-                else _rightLanes[i].Neighbor = _rightLanes[i - 1];
+            for (var i = 0; i < RightLanes.Count; i++) {
+                RightLanes[i].InnerNeighbor = i == 0 ? CenterLane : RightLanes[i - 1];
+                RightLanes[i].OuterNeighbor = i == RightLanes.Count - 1 ? null : RightLanes[i + 1];
+            }
+
+            CenterLane.OuterNeighbor = RightLanes.Count != 0 ? RightLanes[0] : null;
+            CenterLane.InnerNeighbor = LeftLanes.Count != 0 ? LeftLanes[0] : null;
+
+            foreach (var entry in LaneIdMappings) {
+                entry.Value.GenerateMesh();
             }
             
-            _leftLanes.ForEach(l => l.GenerateMesh());
-            _rightLanes.ForEach(l => l.GenerateMesh());
+            CenterLane.GenerateMesh();
+            CenterLane.RoadMark.GenerateMesh();
         }
 
-        public Vector3 EvaluatePoint(float s, float t) {
-            return Parent.EvaluatePoint(S + s, t);
+        /// <summary>
+        /// Evaluates a point on the geometry of the parent Road. Transforms the local s into global S value.
+        /// </summary>
+        /// <param name="s">Lane-local s value</param>
+        /// <param name="t">t value</param>
+        /// <param name="h">height value (used for sidewalks)</param>
+        /// <returns></returns>
+        public Vector3 EvaluatePoint(float s, float t, float h = 0f) {
+            return Parent.EvaluatePoint(S + s, t, h);
         }
 
         // TODO

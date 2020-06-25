@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Xml.Linq;
@@ -7,10 +8,12 @@ using JetBrains.Annotations;
 using Scenery.RoadNetwork;
 using Scenery.RoadNetwork.RoadGeometries;
 using UnityEngine;
+using ContactPoint = Scenery.RoadNetwork.ContactPoint;
 
 namespace Importer.XMLHandlers {
+    [SuppressMessage("ReSharper", "ConvertSwitchStatementToSwitchExpression")]
     public class SceneryXmlHandler : XmlHandler {
-        public NetworkHolder networkHolder;
+        public RoadNetworkHolder roadNetworkHolder;
 
         private int _roadIdCounter;
 
@@ -23,7 +26,7 @@ namespace Importer.XMLHandlers {
             
             ImportRoads();
 
-            networkHolder.CreateMeshes();
+            roadNetworkHolder.CreateMeshes();
         }
 
         public override List<GameObject> GetInfoFields() {
@@ -32,6 +35,15 @@ namespace Importer.XMLHandlers {
 
         private void ImportRoads() {
             var roadElements = xmlDocument.Root?.Elements("road");
+            var junctionElements = xmlDocument.Root?.Elements("junction");
+
+            if (junctionElements != null) {
+                foreach (var junction in junctionElements) {
+                    CreateJunction(junction);
+                }
+            } else {
+                // TODO error handling
+            }
 
             if (roadElements != null)
                 foreach (var road in roadElements) {
@@ -42,14 +54,26 @@ namespace Importer.XMLHandlers {
             }
         }
 
+        private void CreateJunction(XElement junction) {
+            var junctionId = junction.Attribute("id")?.Value ??
+                             throw new ArgumentMissingException("Junction has no id!");
+
+            var junctionName = junction.Attribute("name")?.Value ?? "junction";
+
+            var junctionObject = roadNetworkHolder.CreateJunction(junctionId);
+            junctionObject.OpenDriveId = junctionId;
+            junctionObject.name = junctionName;
+        }
+
         private void CreateRoad(XElement road) {
             var roadId = road.Attribute("id")?.Value ?? "-1";
             var roadName = road.Attribute("name")?.Value ?? "Road #" + _roadIdCounter;
             if (roadName == "" || roadName == " ") roadName = "Road #" + _roadIdCounter;
             _roadIdCounter++;
 
-            
-            var roadObject = networkHolder.CreateRoad(roadId);
+            var junctionId = road.Attribute("junction")?.Value ?? "-1";
+
+            var roadObject = roadNetworkHolder.CreateRoad(roadId, junctionId);
             roadObject.name = roadName;
             roadObject.Length = float.Parse(road.Attribute("length")?.Value ??
                                             throw new ArgumentMissingException(
@@ -60,6 +84,9 @@ namespace Importer.XMLHandlers {
 
             var successorId = road.Element("link")?.Element("successor")?.Attribute("elementId")?.Value ?? "-1";
             roadObject.SuccessorOdId = successorId;
+
+            var contactPoint = road.Element("link")?.Element("successor")?.Attribute("contactPoint")?.Value ?? "end";
+            roadObject.SuccessorContactPoint = contactPoint.ToLower() == "end" ? ContactPoint.End : ContactPoint.Start;
 
             try {
                 ParseGeometries(road, roadObject);
@@ -174,9 +201,10 @@ namespace Importer.XMLHandlers {
                     throw new ArgumentMissingException("s-value for lane section of road " + road.OpenDriveId +
                                                        " missing."), CultureInfo.InvariantCulture.NumberFormat);
 
-                var laneSectionObject = networkHolder.CreateLaneSection(road);
+                var laneSectionObject = roadNetworkHolder.CreateLaneSection(road);
                 laneSectionObject.Parent = road;
                 laneSectionObject.S = s;
+                laneSectionObject.name = "LaneSection";
 
                 var centerLane = laneSection.Element("center")?.Element("lane");
                 if (centerLane != null) CreateLane(centerLane, laneSectionObject, LaneDirection.Center);
@@ -203,7 +231,7 @@ namespace Importer.XMLHandlers {
                 throw new ArgumentMissingException("A lane of road " + parentSection.Parent.OpenDriveId +
                                                    " has no id!");
 
-            var laneObject = networkHolder.CreateLane(parentSection);
+            var laneObject = roadNetworkHolder.CreateLane(parentSection);
             laneObject.LaneId = id;
             laneObject.OpenDriveId = id + "";
             laneObject.Parent = parentSection;
@@ -225,6 +253,8 @@ namespace Importer.XMLHandlers {
                               RoadEnumStrings.laneTypeToString[(int) laneObject.LaneType] + "]";
 
             laneObject.SuccessorId = lane.Element("link")?.Element("successor")?.Attribute("id")?.Value ?? "0";
+            
+            CreateRoadMark(lane.Element("roadMark"), laneObject);
 
             switch (laneDirection) {
                 case LaneDirection.Center:
@@ -270,6 +300,70 @@ namespace Importer.XMLHandlers {
                                 "d-value missing for width of lane of road " + parentSection.Parent.OpenDriveId),
                     CultureInfo.InvariantCulture.NumberFormat)
             );
+        }
+
+        private void CreateRoadMark(XElement roadMark, Lane parent) {
+            var color = roadMark?.Attribute("color")?.Value ?? "standard";
+            var type = roadMark?.Attribute("type")?.Value ?? "none";
+            var width = roadMark?.Attribute("width")?.Value ?? "0.25";
+            var widthFloat = float.Parse(width, CultureInfo.InvariantCulture.NumberFormat);
+
+            RoadMarkType t;
+            switch (type) {
+                case "broken":
+                    t = RoadMarkType.Broken;
+                    break;
+                case "solid":
+                    t = RoadMarkType.Solid;
+                    break;
+                case "solid solid":
+                    t = RoadMarkType.SolidSolid;
+                    break;
+                case "solid broken":
+                    t = RoadMarkType.SolidBroken;
+                    break;
+                case "broken solid":
+                    t = RoadMarkType.BrokenSolid;
+                    break;
+                case "broken broken":
+                    t = RoadMarkType.BrokenBroken;
+                    break;
+                default:
+                    t = RoadMarkType.None;
+                    break;
+            }
+
+            Color c;
+            switch (color) {
+                case "white":
+                case "standard":
+                    c = Color.white;
+                    break;
+                case "blue":
+                    c = new Color(0, 0, 153);
+                    break;
+                case "green":
+                    c = new Color(0, 153, 51);
+                    break;
+                case "red":
+                    c = new Color(204, 0, 0);
+                    break;
+                case "yellow":
+                    c = new Color(230, 230, 0);
+                    break;
+                case "orange":
+                    c = new Color(255, 153, 0);
+                    break;
+                default:
+                    c = Color.white;
+                    break;
+            }
+
+            var roadMarkObject = roadNetworkHolder.CreateRoadMark(parent);
+            roadMarkObject.Width = widthFloat;
+            roadMarkObject.RoadMarkType = t;
+            roadMarkObject.RoadMarkColor = c;
+            roadMarkObject.name = "RoadMark";
         }
     }
 }

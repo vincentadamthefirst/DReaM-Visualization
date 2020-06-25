@@ -33,6 +33,10 @@
         Left, Center, Right
     }
 
+    public enum ContactPoint {
+        Start, End
+    }
+
     public class RoadEnumStrings {
         
         public static string[] laneDirectionToString = {"Left", "Center", "Right"};

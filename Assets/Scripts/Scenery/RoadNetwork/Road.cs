@@ -15,6 +15,8 @@ namespace Scenery.RoadNetwork {
         
         public string SuccessorOdId { get; set; }
         public Road Successor { get; set; }
+        
+        public ContactPoint SuccessorContactPoint { get; set; }
 
         public List<LaneSection> LaneSections { get; private set; }
 
@@ -55,7 +57,7 @@ namespace Scenery.RoadNetwork {
             LaneSections.ForEach(l => l.StartMeshGeneration());
         }
 
-        public Vector3 EvaluatePoint(float globalS, float t) {
+        public Vector3 EvaluatePoint(float globalS, float t, float h = 0f) {
             var geometry = _roadGeometries[0];
             for (var i = 0; i < _roadGeometries.Count; i++) {
                 if (i == _roadGeometries.Count) geometry = _roadGeometries[i];
@@ -68,9 +70,9 @@ namespace Scenery.RoadNetwork {
             }
             
             var result = geometry.Evaluate(globalS - geometry.SStart, t);
-            return new Vector3(result.x, 0, result.y);
+            return new Vector3(result.x, h, result.y);
         }
-        
+
         public List<RoadGeometry> RoadGeometries => _roadGeometries;
 
         // TODO
