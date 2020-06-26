@@ -42,6 +42,15 @@ namespace Scenery.RoadNetwork {
         public bool disableStraightSidewalkOnJunction = true;
         public bool disableSidewalkOnJunction;
 
+        [Header("Models")] 
+        public GameObject streetLight;
+        public float streetLightBaseRadius;
+        public GameObject pole;
+        public float poleBaseRadius;
+        public GameObject tree;
+        public float treeBaseRadius;
+        public float treeBaseHeight;
+
         public Material GetMaterialForLaneType(LaneType laneType) {
             switch (laneType) {
                 case LaneType.None:

@@ -42,7 +42,7 @@ namespace Scenery.RoadNetwork {
         public LaneSection Parent { get; set; }
         
         /// <summary>
-        /// The id of the successor Lane-object as string, "-1" if there is no successor
+        /// The id of the successor Lane-object as string, "x" if there is no successor
         /// </summary>
         public string SuccessorId { get; set; }
         
@@ -113,7 +113,7 @@ namespace Scenery.RoadNetwork {
             return max;
         }
         
-        private float GetMaxWidthSelf(int stepSize) {
+        public float GetMaxWidthSelf(int stepSize) {
             var max = float.NegativeInfinity;
             for (var i = 0f; i < Parent.Length; i += Parent.Length / stepSize) {
                 var tmp = _a + _b * i + _c * i * i + _d * i * i * i;

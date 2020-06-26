@@ -47,6 +47,19 @@ public class TestScript : MonoBehaviour {
         
         handler.StartImport();
 
+        var pp3 = new ParamPoly3Geometry(0,20.8223882805909f, 23.8280193652608f, 1.21674411102422f, 30.0002638524053f, 0, 0, 0, 1, -0.184118986238162f, 86.9999999970155f, 0.184220104515203f, -57.9999999980103f);
+        ps.Add(pp3.Evaluate(0,0));
+        ps.Add(pp3.Evaluate(0, 2));
+        ps.Add(pp3.Evaluate(0, -2));
+        ps.Add(pp3.Evaluate(30.0002638524053f,0));
+        ps.Add(pp3.Evaluate(30.0002638524053f, 2));
+        ps.Add(pp3.Evaluate(30.0002638524053f,-2));
+
+        // foreach (var p in ps) {
+        //     Debug.Log(p);
+        // }
+        //
+        
         // Vector2 tmp = new Vector2(2, 3);
         // Debug.Log(2 * tmp);
         //
@@ -58,6 +71,15 @@ public class TestScript : MonoBehaviour {
         // }
         //
         // Time.fixedDeltaTime = 0.01f;
+    }
+    
+    List<Vector3> ps = new List<Vector3>();
+
+    private void OnDrawGizmos() {
+        Gizmos.color = Color.red;
+        foreach (var p in ps) {
+            Gizmos.DrawSphere(p, 0.5f);
+        }
     }
 
     // void FixedUpdate() {

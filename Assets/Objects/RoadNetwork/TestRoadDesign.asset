@@ -18,8 +18,8 @@ MonoBehaviour:
   junctionPrefab: {fileID: 8144626824674827851, guid: 85e4b06cd66cf354ba117ecfcd37cb1e, type: 3}
   roadMarkPrefab: {fileID: 3689535253008410456, guid: 3245dccf41f655d4b97a8b74d74de4d2, type: 3}
   samplePrecision: 40
-  sidewalkHeight: 0.3
-  sidewalkCurbWidth: 0.2
+  sidewalkHeight: 0.2
+  sidewalkCurbWidth: 0.15
   offsetHeight: 0.0001
   roadBase: {fileID: 2100000, guid: 75b6e04128e56ae48937231d8c186a76, type: 2}
   sidewalkCurb: {fileID: 2100000, guid: c42d1e85ca6f6014ca39655d237583c8, type: 2}
@@ -27,10 +27,17 @@ MonoBehaviour:
   roadBiking: {fileID: 2100000, guid: f65280bda1c384c409151987f54c0e55, type: 2}
   roadRestricted: {fileID: 2100000, guid: f65280bda1c384c409151987f54c0e55, type: 2}
   none: {fileID: 2100000, guid: f65280bda1c384c409151987f54c0e55, type: 2}
-  broken: {fileID: 0}
-  solid: {fileID: 0}
-  closeMeshToNextMesh: 1
+  broken: {fileID: 2100000, guid: 2f4467df87b60c94194fc747d6eadd69, type: 2}
+  solid: {fileID: 2100000, guid: 6167fb03689a18c469165924fb85de49, type: 2}
   disableRoadMarkForCenterLaneOnJunction: 0
-  disableRoadMarkOnJunction: 0
+  disableRoadMarkOnJunction: 1
+  closeMeshToNextMesh: 1
   disableStraightSidewalkOnJunction: 1
   disableSidewalkOnJunction: 0
+  streetLight: {fileID: 8712757401458445344, guid: 2f4099b5433b208458260b0037acb921, type: 3}
+  streetLightBaseRadius: 0.3
+  pole: {fileID: 3704800687811875084, guid: 8b510f9b52e48c84bba89b98d0622b8a, type: 3}
+  poleBaseRadius: 0.2
+  tree: {fileID: 6323603905406780566, guid: 6f26ce8e3033ba24abdf1ee1b34d889d, type: 3}
+  treeBaseRadius: 4
+  treeBaseHeight: 4

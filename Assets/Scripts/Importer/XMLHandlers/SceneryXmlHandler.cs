@@ -5,8 +5,10 @@ using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Xml.Linq;
 using JetBrains.Annotations;
+using Packages.Rider.Editor;
 using Scenery.RoadNetwork;
 using Scenery.RoadNetwork.RoadGeometries;
+using Scenery.RoadNetwork.RoadObjects;
 using UnityEngine;
 using ContactPoint = Scenery.RoadNetwork.ContactPoint;
 
@@ -87,6 +89,8 @@ namespace Importer.XMLHandlers {
 
             var contactPoint = road.Element("link")?.Element("successor")?.Attribute("contactPoint")?.Value ?? "end";
             roadObject.SuccessorContactPoint = contactPoint.ToLower() == "end" ? ContactPoint.End : ContactPoint.Start;
+            
+            CreateRoadObjects(road.Element("objects")?.Elements("object"), roadObject);
 
             try {
                 ParseGeometries(road, roadObject);
@@ -100,6 +104,101 @@ namespace Importer.XMLHandlers {
             CreateLaneSections(
                 road.Element("lanes") ??
                 throw new ArgumentMissingException("No lanes given for road " + roadObject.OpenDriveId), roadObject);
+        }
+
+        private void CreateRoadObjects(IEnumerable<XElement> roadObjects, Road road) {
+            if (roadObjects == null) return;
+            foreach (var roadObject in roadObjects) {
+                var type = roadObject.Attribute("type")?.Value ?? "None";
+                if (type == "None") continue;
+                switch (type.ToLower()) {
+                    case "streetlamp":
+                    case "tree":
+                    case "pole":
+                        CreateRoundRoadObject(roadObject, road, type.ToLower());
+                        break;
+                    case "building":
+                        break;
+                    case "crosswalk":
+                        break;
+                    case "parkingspace":
+                        break;
+                }
+            }
+        }
+
+        private void CreateRoundRoadObject(XElement obj, Road road, string type) {
+            var newRoadObj = roadNetworkHolder.CreateRoadObjectRound(road);
+            GetBasicRoadObjectInfo(newRoadObj, obj);
+            newRoadObj.Radius = float.Parse(obj.Attribute("radius")?.Value ?? "1",
+                CultureInfo.InvariantCulture.NumberFormat);
+
+            switch (type) {
+                case "streetlamp":
+                    newRoadObj.RoadObjectType = RoadObjectType.StreetLamp;
+                    break;
+                case "pole":
+                    newRoadObj.RoadObjectType = RoadObjectType.Pole;
+                    break;
+                case "tree":
+                    newRoadObj.RoadObjectType = RoadObjectType.Tree;
+                    break;
+            }
+        }
+
+        private void GetBasicRoadObjectInfo(RoadObject roadObject, XElement obj) {
+            var orientation = obj.Attribute("orientation")?.Value ?? "none";
+            roadObject.name = obj.Attribute("name")?.Value ?? "roadObject";
+            roadObject.S = float.Parse(obj.Attribute("s")?.Value ?? "0",
+                CultureInfo.InvariantCulture.NumberFormat);
+            roadObject.T = float.Parse(obj.Attribute("t")?.Value ?? "0",
+                CultureInfo.InvariantCulture.NumberFormat);
+            roadObject.ZOffset = float.Parse(obj.Attribute("zOffset")?.Value ?? "0",
+                CultureInfo.InvariantCulture.NumberFormat);
+            roadObject.Heading = float.Parse(obj.Attribute("hdg")?.Value ?? "0",
+                CultureInfo.InvariantCulture.NumberFormat);
+            roadObject.Height = float.Parse(obj.Attribute("height")?.Value ?? "1",
+                CultureInfo.InvariantCulture.NumberFormat);
+            
+            switch (orientation) {
+                case "+":
+                    roadObject.Orientation = RoadObjectOrientation.Positive;
+                    break;
+                case "-":
+                    roadObject.Orientation = RoadObjectOrientation.Negative;
+                    break;
+                default:
+                    roadObject.Orientation = RoadObjectOrientation.None;
+                    break;
+            }
+            
+            GetRoadObjectRepeatInfo(roadObject, obj);
+        }
+
+        private static void GetRoadObjectRepeatInfo(RoadObject roadObject, XElement obj) {
+            var repeat = obj.Element("repeat");
+            if (repeat == null) return;
+
+            roadObject.RepeatParameters = new RepeatParameters {
+                SStart = float.Parse(repeat.Attribute("s")?.Value ?? "0",
+                    CultureInfo.InvariantCulture.NumberFormat),
+                Length = float.Parse(repeat.Attribute("length")?.Value ?? "1",
+                    CultureInfo.InvariantCulture.NumberFormat),
+                Distance = float.Parse(repeat.Attribute("distance")?.Value ?? "1",
+                    CultureInfo.InvariantCulture.NumberFormat),
+                TStart = float.Parse(repeat.Attribute("tStart")?.Value ?? "0",
+                    CultureInfo.InvariantCulture.NumberFormat),
+                TEnd = float.Parse(repeat.Attribute("tEnd")?.Value ?? "0",
+                    CultureInfo.InvariantCulture.NumberFormat),
+                HeightStart = float.Parse(repeat.Attribute("heightStart")?.Value ?? "1",
+                    CultureInfo.InvariantCulture.NumberFormat),
+                HeightEnd = float.Parse(repeat.Attribute("heightEnd")?.Value ?? "1",
+                    CultureInfo.InvariantCulture.NumberFormat),
+                ZOffsetStart = float.Parse(repeat.Attribute("zOffsetEnd")?.Value ?? "0",
+                    CultureInfo.InvariantCulture.NumberFormat),
+                ZOffsetEnd = float.Parse(repeat.Attribute("zOffsetStart")?.Value ?? "0",
+                    CultureInfo.InvariantCulture.NumberFormat)
+            };
         }
 
         private static void ParseGeometries(XContainer road, Road roadObject) {
@@ -337,7 +436,7 @@ namespace Importer.XMLHandlers {
             switch (color) {
                 case "white":
                 case "standard":
-                    c = Color.white;
+                    c = new Color(1f, 1f, 1f, 0.1f);
                     break;
                 case "blue":
                     c = new Color(0, 0, 153);

@@ -30,7 +30,7 @@ namespace Scenery.RoadNetwork.RoadGeometries {
                 return zeroPoint;
             }
 
-            if (s > length) s = length;
+            if (s >= length) s = length - 0.1f;
 
             var k = 0f;
             var lastPosition = new Vector2();

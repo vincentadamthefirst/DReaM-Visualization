@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using Scenery.RoadNetwork.RoadObjects;
 using UnityEngine;
 
 namespace Scenery.RoadNetwork {
@@ -104,6 +106,17 @@ namespace Scenery.RoadNetwork {
             newRoadMark.ParentLane = parentLane;
             parentLane.RoadMark = newRoadMark;
             return newRoadMark;
+        }
+
+        public RoadObjectRound CreateRoadObjectRound(Road parentRoad) {
+            var newObj = new GameObject();
+            newObj.transform.position = Vector3.zero;
+            newObj.transform.rotation = Quaternion.identity;
+            var newRoadObjectRound = newObj.AddComponent<RoadObjectRound>();
+            newRoadObjectRound.Parent = parentRoad;
+            newRoadObjectRound.RoadDesign = roadDesign;
+            parentRoad.RoadObjects.Add(newRoadObjectRound);
+            return newRoadObjectRound;
         }
     }
 }

@@ -342,8 +342,6 @@ namespace Scenery.RoadNetwork {
 
             var w0 = m * (l.EvaluateWidth(0) - roadMark.Width / 2f);
             var w1 = m * (l.EvaluateWidth(0) + roadMark.Width / 2f);
-            
-            Debug.Log(w0 + " | " + w1 + " : " + roadMark.Width + " : " + m);
 
             if (l.LaneDirection == LaneDirection.Center) {
                 if (l.OuterNeighbor == null || l.OuterNeighbor.LaneType == LaneType.Sidewalk) w0 = 0;
@@ -358,7 +356,7 @@ namespace Scenery.RoadNetwork {
             };
 
             var uvs = new[] {
-                Vector2.zero, new Vector2(0, 1), new Vector2(1, 0), new Vector2(1, 1),  
+                Vector2.zero, new Vector2(1, 0), new Vector2(0, 1), new Vector2(1, 1),  
             };
 
             var ts = new[] {0, 2, 3, 0, 3, 1};
@@ -398,7 +396,7 @@ namespace Scenery.RoadNetwork {
                 });
                 
                 uvs.AddRange(new[] {
-                    new Vector2(i / s, 0), new Vector2(i / s, 1),
+                    new Vector2(0, i / s), new Vector2(1, i / s),
                 });
             }
             
@@ -427,22 +425,26 @@ namespace Scenery.RoadNetwork {
                 s = sr.Length;
                 m *= -1;
             }
-
+            
             var w0 = m * (sl.EvaluateWidth(s) - roadMark.Width / 2);
             var w1 = m * (sl.EvaluateWidth(s) + roadMark.Width / 2);
             if (sl.LaneDirection == LaneDirection.Center) {
                 if (sl.OuterNeighbor == null || sl.OuterNeighbor.LaneType == LaneType.Sidewalk) w1 = 0;
                 if (sl.InnerNeighbor == null || sl.InnerNeighbor.LaneType == LaneType.Sidewalk) w0 = 0;
             } else if (sl.OuterNeighbor == null || sl.OuterNeighbor.LaneType == LaneType.Sidewalk) {
-                w1 = m * roadMark.ParentLane.EvaluateWidth(s);
+                w1 = m * sl.EvaluateWidth(s);
             }
 
             var i = ps.Count - 2;
 
             ps.AddRange(new[]
-                {sr.EvaluatePoint(s, m * w0), sr.EvaluatePoint(s, m * w1)});
+                {sr.EvaluatePoint(s, w0), sr.EvaluatePoint(s, w1)});
+            
+            if (roadMark.ParentLane.Parent.Parent.name == "534608_5") {
+                Debug.Log("Closing to " + sl.LaneId + " of road " + sr.name + " with " + sr.EvaluatePoint(s, m * w0) + " and " + sr.EvaluatePoint(s, m * w1));
+            }
 
-            uvs.AddRange(new[] {new Vector2(1, 0), new Vector2(1, 1) });
+            uvs.AddRange(new[] {new Vector2(0, 1), new Vector2(1, 1) });
 
             var tsTmp = new[] {i, i + 2, i + 3, i, i + 3, i + 1};
             ts.AddRange(ld == LaneDirection.Right ? tsTmp : TriangleDirectionChange(tsTmp));

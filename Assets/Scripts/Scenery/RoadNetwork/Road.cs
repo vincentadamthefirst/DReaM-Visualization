@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Scenery.RoadNetwork.RoadGeometries;
+using Scenery.RoadNetwork.RoadObjects;
 using UnityEngine;
 using Debug = System.Diagnostics.Debug;
 
@@ -19,10 +20,13 @@ namespace Scenery.RoadNetwork {
         public ContactPoint SuccessorContactPoint { get; set; }
 
         public List<LaneSection> LaneSections { get; private set; }
+        
+        public List<RoadObject> RoadObjects { get; private set; }
 
         public Road() {
             _roadGeometries = new List<RoadGeometry>();
             LaneSections = new List<LaneSection>();
+            RoadObjects = new List<RoadObject>();
         }
 
         public void AddRoadGeometry(RoadGeometry geometry) {
@@ -55,6 +59,8 @@ namespace Scenery.RoadNetwork {
             }
             
             LaneSections.ForEach(l => l.StartMeshGeneration());
+            
+            RoadObjects.ForEach(ro => ro.Show());
         }
 
         public Vector3 EvaluatePoint(float globalS, float t, float h = 0f) {
