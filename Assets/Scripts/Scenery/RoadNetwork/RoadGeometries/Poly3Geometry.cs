@@ -6,5 +6,9 @@ namespace Scenery.RoadNetwork.RoadGeometries {
         public override Vector2 Evaluate(float s, float t) {
             throw new System.NotImplementedException();
         }
+
+        public override float EvaluateHeading(float s) {
+            throw new System.NotImplementedException();
+        }
     }
 }

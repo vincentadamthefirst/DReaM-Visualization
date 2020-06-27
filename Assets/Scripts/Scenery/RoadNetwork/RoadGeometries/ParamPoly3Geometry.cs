@@ -22,15 +22,7 @@ namespace Scenery.RoadNetwork.RoadGeometries {
             _dU = dU;
         }
         public override Vector2 Evaluate(float s, float t) {
-            if (Math.Abs(s) < Tolerance) {
-                var zeroPoint = new Vector2(s, t);
-                zeroPoint.RotateRadians(hdg);
-                zeroPoint.x += x;
-                zeroPoint.y += y;
-                return zeroPoint;
-            }
-
-            if (s >= length) s = length - 0.1f;
+            if (s >= length) s = length - 0.2f;
 
             var k = 0f;
             var lastPosition = new Vector2();
@@ -74,6 +66,51 @@ namespace Scenery.RoadNetwork.RoadGeometries {
             offset.y += y;
 
             return offset;
+        }
+
+        public override float EvaluateHeading(float s) {
+            var k = 0f;
+            var lastPosition = new Vector2();
+            var delta = new Vector2();
+            var p = 0f;
+            var position = new Vector2(_aU, _aV);
+
+            while (k < s) {
+                lastPosition = position;
+                p += 1 / length;
+
+                position.x = _aU + _bU * p + _cU * p * p + _dU * p * p * p;
+                position.y = _aV + _bV * p + _cV * p * p + _dV * p * p * p;
+
+                delta = position - lastPosition;
+                var deltaLength = delta.magnitude;
+
+                if (Math.Abs(deltaLength) < Tolerance) {
+                    throw new RoadGeometryGenerationException("ParamPoly3 generation could not be finished.");
+                }
+
+                if (k + deltaLength > s) {
+                    var scale = (s - k) / deltaLength;
+                    delta *= scale;
+                    deltaLength = s - k;
+                }
+
+                k += deltaLength;
+            }
+
+            var direction = new Vector2();
+            if (s > 0) direction = delta;
+            else direction.x = 1f;
+
+            direction.RotateRadians(hdg);
+            direction.Normalize();
+
+            if (direction.y > 1f) direction.y = 1f;
+            if (direction.y < -1f) direction.y = -1f;
+
+            var angle = Mathf.Asin(direction.y);
+            if (direction.x >= 0f) return angle;
+            return Mathf.PI - angle;
         }
     }
 }

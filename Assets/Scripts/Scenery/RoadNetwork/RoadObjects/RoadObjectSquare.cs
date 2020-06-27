@@ -1,4 +1,6 @@
-﻿namespace Scenery.RoadNetwork.RoadObjects {
+﻿using UnityEngine;
+
+namespace Scenery.RoadNetwork.RoadObjects {
     public class RoadObjectSquare : RoadObject {
         public float Length { get; set; }
         
@@ -23,6 +25,7 @@
                 newChild.Orientation = Orientation;
                 newChild.Parent = Parent;
                 newChild.RoadObjectType = RoadObjectType;
+                newChild.SubType = SubType;
                 newChild.RoadDesign = RoadDesign;
                 newChild.name = name;
                 newChild.Width = Width;
@@ -35,6 +38,9 @@
 
         public override void Show() {
             Repeat();
+            
+            var completeHdg = Parent.EvaluateHeading(S) + Heading;
+            transform.rotation = Quaternion.Euler(0, Mathf.Rad2Deg * completeHdg, 0);
         }
     }
 }

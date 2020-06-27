@@ -84,10 +84,10 @@ namespace Importer.XMLHandlers {
             roadObject.OnJunction = int.Parse(road.Attribute("junction")?.Value ?? "-1") != -1;
             roadObject.OpenDriveId = roadId + "";
 
-            var successorId = road.Element("link")?.Element("successor")?.Attribute("elementId")?.Value ?? "-1";
+            var successorId = road.Element("link")?.Element("successor")?.Attribute("elementId")?.Value ?? "x";
             roadObject.SuccessorOdId = successorId;
 
-            var contactPoint = road.Element("link")?.Element("successor")?.Attribute("contactPoint")?.Value ?? "end";
+            var contactPoint = road.Element("link")?.Element("successor")?.Attribute("contactPoint")?.Value ?? "start";
             roadObject.SuccessorContactPoint = contactPoint.ToLower() == "end" ? ContactPoint.End : ContactPoint.Start;
             
             CreateRoadObjects(road.Element("objects")?.Elements("object"), roadObject);
@@ -118,12 +118,24 @@ namespace Importer.XMLHandlers {
                         CreateRoundRoadObject(roadObject, road, type.ToLower());
                         break;
                     case "building":
+                        CreateBuildingRoadObject(roadObject, road, type);
                         break;
                     case "crosswalk":
-                        break;
                     case "parkingspace":
+                        CreateSquareRoadObject(roadObject, road, type);
                         break;
                 }
+            }
+        }
+
+        private void CreateBuildingRoadObject(XElement obj, Road road, string type) {
+            var rad = obj.Attribute("radius");
+            var len = obj.Attribute("length");
+            var wid = obj.Attribute("width");
+            if (rad != null) {
+                CreateRoundRoadObject(obj, road, type);
+            } else if (len != null && wid != null) {
+                CreateSquareRoadObject(obj, road, type);
             }
         }
 
@@ -143,6 +155,36 @@ namespace Importer.XMLHandlers {
                 case "tree":
                     newRoadObj.RoadObjectType = RoadObjectType.Tree;
                     break;
+                case "building":
+                    newRoadObj.RoadObjectType = RoadObjectType.Building;
+                    break;
+                default:
+                    newRoadObj.RoadObjectType = RoadObjectType.None;
+                    break;
+            }
+        }
+        
+        private void CreateSquareRoadObject(XElement obj, Road road, string type) {
+            var newRoadObj = roadNetworkHolder.CreateRoadObjectSquare(road);
+            GetBasicRoadObjectInfo(newRoadObj, obj);
+            newRoadObj.Width = float.Parse(obj.Attribute("width")?.Value ?? "1",
+                CultureInfo.InvariantCulture.NumberFormat);
+            newRoadObj.Length = float.Parse(obj.Attribute("length")?.Value ?? "1",
+                CultureInfo.InvariantCulture.NumberFormat);
+
+            switch (type) {
+                case "building":
+                    newRoadObj.RoadObjectType = RoadObjectType.Building;
+                    break;
+                case "crosswalk":
+                    newRoadObj.RoadObjectType = RoadObjectType.CrossWalk;
+                    break;
+                case "parkingspace":
+                    newRoadObj.RoadObjectType = RoadObjectType.ParkingSpace;
+                    break;
+                default:
+                    newRoadObj.RoadObjectType = RoadObjectType.None;
+                    break;
             }
         }
 
@@ -159,6 +201,7 @@ namespace Importer.XMLHandlers {
                 CultureInfo.InvariantCulture.NumberFormat);
             roadObject.Height = float.Parse(obj.Attribute("height")?.Value ?? "1",
                 CultureInfo.InvariantCulture.NumberFormat);
+            roadObject.SubType = obj.Attribute("subtype")?.Value ?? "random";
             
             switch (orientation) {
                 case "+":
@@ -351,7 +394,7 @@ namespace Importer.XMLHandlers {
             laneObject.name = RoadEnumStrings.laneDirectionToString[(int) laneDirection] + " Lane [" +
                               RoadEnumStrings.laneTypeToString[(int) laneObject.LaneType] + "]";
 
-            laneObject.SuccessorId = lane.Element("link")?.Element("successor")?.Attribute("id")?.Value ?? "0";
+            laneObject.SuccessorId = lane.Element("link")?.Element("successor")?.Attribute("id")?.Value ?? "x";
             
             CreateRoadMark(lane.Element("roadMark"), laneObject);
 

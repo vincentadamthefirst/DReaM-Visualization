@@ -32,6 +32,7 @@ namespace Scenery.RoadNetwork.RoadObjects {
                 newChild.Orientation = Orientation;
                 newChild.Parent = Parent;
                 newChild.RoadObjectType = RoadObjectType;
+                newChild.SubType = SubType;
                 newChild.RoadDesign = RoadDesign;
                 newChild.name = name;
                 newChild.Radius = Radius;
@@ -44,65 +45,94 @@ namespace Scenery.RoadNetwork.RoadObjects {
         public override void Show() {
             Repeat(); // repeat if the parameters are set
             if (markedForDelete) return;
-            
-            var m = Orientation == RoadObjectOrientation.Negative ? -1 : 1;
-            var position = Parent.EvaluatePoint(S, m * T, ZOffset);
 
-            GameObject initialized = null;
-            var scaleBaseRadius = 1f;
+            var rop = RoadDesign.GetRoadObjectPrefab(RoadObjectType, SubType);
 
+            // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
             switch (RoadObjectType) {
                 case RoadObjectType.Tree:
-                    initialized = Instantiate(RoadDesign.tree, transform, true);
-                    var scaleA = 2 * Radius / RoadDesign.treeBaseRadius;
-                    var scaleB = Height / RoadDesign.treeBaseHeight;
-                    
-                    initialized.transform.SetGlobalScale(new Vector3(scaleA, scaleB, scaleA));
-                    
+                    ShowTree(rop);
                     break;
                 case RoadObjectType.StreetLamp:
-                    initialized = Instantiate(RoadDesign.streetLight, transform, true);
-                    Height -= 1;
-
-                    var middleLocalScale = initialized.transform.GetChild(1).localScale;
-                    initialized.transform.GetChild(1).localScale =
-                        new Vector3(middleLocalScale.x, Height, middleLocalScale.z);
-                    initialized.transform.GetChild(2).localPosition += new Vector3(0, Height - 1, 0);
-                    scaleBaseRadius = RoadDesign.streetLightBaseRadius;
-                    
-                    var scale = 2 * Radius / scaleBaseRadius;
-                    transform.GetChild(0).SetGlobalScale(new Vector3(scale, 1, scale));
-
+                    ShowStreetLamp(rop);
                     break;
                 case RoadObjectType.Pole:
-                    initialized = Instantiate(RoadDesign.pole, transform, true);
-
-                    middleLocalScale = initialized.transform.GetChild(0).localScale;
-                    initialized.transform.GetChild(0).localScale =
-                        new Vector3(middleLocalScale.x, Height, middleLocalScale.z);
-                    initialized.transform.GetChild(1).localPosition += new Vector3(0, Height - 1, 0);
-                    scaleBaseRadius = RoadDesign.poleBaseRadius;
-                    
-                    scale = 2 * Radius / scaleBaseRadius;
-                    transform.GetChild(0).SetGlobalScale(new Vector3(scale, 1, scale));
-
+                    ShowPole(rop);
+                    break;
+                case RoadObjectType.Building:
+                    ShowBuilding();
                     break;
                 case RoadObjectType.CrossWalk:
                 case RoadObjectType.ParkingSpace:
-                case RoadObjectType.Building:
-                case RoadObjectType.None:
-                    break;
-                default:
+                case RoadObjectType.None: // these types are no supported round objects, destroy this object
+                    markedForDelete = true;
                     break;
             }
 
-            if (initialized != null) {
-                initialized.transform.position = position;
-                
-                
-            }
-            
             transform.parent = Parent.transform;
+        }
+
+        private void ShowStreetLamp(RoadObjectPrefab rop) {
+            if (rop == null) return;
+            
+            var streetLamp = Instantiate(rop.prefab, transform, true);
+            Height -= 1;
+
+            var middleLocalScale = streetLamp.transform.GetChild(1).localScale;
+            streetLamp.transform.GetChild(1).localScale =
+                new Vector3(middleLocalScale.x, Height, middleLocalScale.z);
+            streetLamp.transform.GetChild(2).localPosition += new Vector3(0, Height - 1, 0);
+
+            var scale = 2 * Radius / rop.baseRadius;
+            transform.GetChild(0).SetGlobalScale(new Vector3(scale, 1, scale));
+            
+            var m = Orientation == RoadObjectOrientation.Negative ? -1 : 1;
+            streetLamp.transform.position = Parent.EvaluatePoint(S, m * T, ZOffset);
+        }
+
+        private void ShowPole(RoadObjectPrefab rop) {
+            if (rop == null) return;
+            
+            var pole = Instantiate(rop.prefab, transform, true);
+
+            var middleLocalScale = pole.transform.GetChild(0).localScale;
+            pole.transform.GetChild(0).localScale =
+                new Vector3(middleLocalScale.x, Height, middleLocalScale.z);
+            pole.transform.GetChild(1).localPosition += new Vector3(0, Height - 1, 0);
+            var scaleBaseRadius = rop.baseRadius;
+                    
+            var scale = 2 * Radius / scaleBaseRadius;
+            transform.GetChild(0).SetGlobalScale(new Vector3(scale, 1, scale));
+            
+            var m = Orientation == RoadObjectOrientation.Negative ? -1 : 1;
+            pole.transform.position = Parent.EvaluatePoint(S, m * T, ZOffset);
+        }
+
+        private void ShowTree(RoadObjectPrefab rop) {
+            if (rop == null) return;
+            
+            var tree = Instantiate(rop.prefab, transform, true);
+            var scaleA = 2 * Radius / rop.baseRadius;
+            var scaleB = Height / rop.baseHeight;
+                    
+            tree.transform.SetGlobalScale(new Vector3(scaleA, scaleB, scaleA));
+            
+            var m = Orientation == RoadObjectOrientation.Negative ? -1 : 1;
+            tree.transform.position = Parent.EvaluatePoint(S, m * T, ZOffset);
+            
+            var completeHdg = Parent.EvaluateHeading(S) + Heading;
+            Debug.Log("Rotating to " + Parent.EvaluateHeading(S) + " + " + Heading);
+            tree.transform.Rotate(Vector3.up, Mathf.Rad2Deg * completeHdg);
+        }
+
+        private void ShowBuilding() {
+            var buildingBase = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            buildingBase.transform.SetGlobalScale(new Vector3(Radius * 2, Height / 2, Radius * 2));
+            buildingBase.GetComponent<MeshRenderer>().material =
+                RoadDesign.GetRoadObjectMaterial(RoadObjectType, SubType).material;
+            
+            var m = Orientation == RoadObjectOrientation.Negative ? -1 : 1;
+            buildingBase.transform.position = Parent.EvaluatePoint(S, m * T, ZOffset + Height / 2f);
         }
     }
 }

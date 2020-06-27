@@ -6,8 +6,8 @@ using Debug = UnityEngine.Debug;
 
 namespace Scenery.RoadNetwork.RoadGeometries {
     public class SpiralGeometry : RoadGeometry {
-        private float _curvatureStart;
-        private float _curvatureEnd;
+        private readonly float _curvatureStart;
+        private readonly float _curvatureEnd;
         
         private static readonly float SqrtPiHalf = Mathf.Sqrt(Mathf.PI / 2);
 
@@ -48,6 +48,24 @@ namespace Scenery.RoadNetwork.RoadGeometries {
                     ? SpiralPartC(s, t, curvatureStart, curvatureEnd)
                     : SpiralPartD(length - s, t, curvatureEnd, curvatureStart);
             }
+        }
+
+        public override float EvaluateHeading(float s) {
+            var curvatureStart = _curvatureStart;
+            var curvatureEnd = _curvatureEnd;
+
+            if (Math.Abs(curvatureStart - curvatureEnd) < Tolerance) {
+                throw new ArgumentException("Curvatures are the same for spiral!");
+            }
+
+            if (!((0.0 <= curvatureStart && 0.0 <= curvatureEnd) ||
+                  (0.0 >= curvatureStart && 0.0 >= curvatureEnd))) {
+                throw new ArgumentException("Curvatures must both have the same sign!");
+            }
+            
+            // TODO actual implementation
+
+            return hdg;
         }
 
         private Vector2 SpiralPartA(float s, float t, float curvatureStart, float curvatureEnd) {

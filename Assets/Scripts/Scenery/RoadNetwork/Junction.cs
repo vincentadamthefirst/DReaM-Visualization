@@ -10,6 +10,8 @@ namespace Scenery.RoadNetwork {
         public RoadNetworkHolder RoadNetworkHolder { get; set; }
         
         public RoadDesign RoadDesign { get; set; }
+        
+        public float LowestPoint { get; set; }
 
         public Junction() {
             _roadsOnJunction = new List<Road>();
@@ -36,13 +38,12 @@ namespace Scenery.RoadNetwork {
 
             for (var i = 0; i < ordered.Count; i++) {
                 ordered[i].transform.position -= new Vector3(0, i * RoadDesign.offsetHeight, 0);
+                LowestPoint = i * RoadDesign.offsetHeight;
             }
 
             var allRoadMarks = new List<RoadMark>();
             foreach (var section in _roadsOnJunction.SelectMany(road => road.LaneSections)) {
-                foreach (var entry in section.LaneIdMappings) {
-                    allRoadMarks.Add(entry.Value.RoadMark);
-                }
+                allRoadMarks.AddRange(section.LaneIdMappings.Select(entry => entry.Value.RoadMark));
             }
 
             var ordered2 = allRoadMarks.OrderByDescending(rm => rm.ParentLane.Parent.CompletelyOnLineSegment)

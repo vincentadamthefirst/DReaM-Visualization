@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using UnityEngine;
@@ -35,6 +36,10 @@ namespace Scenery.RoadNetwork {
                 GenerateSidewalkMeshNormalForLane(ref mesh, lane);
             
             if (lane.RoadDesign.closeMeshToNextMesh) CloseSidewalkMeshForLane(ref mesh, lane);
+            
+            mesh.Optimize();
+            mesh.RecalculateBounds();
+            mesh.RecalculateNormals();
         }
 
         private static void GenerateSidewalkMeshStraightForLane(ref Mesh mesh, Lane lane) {
@@ -68,12 +73,12 @@ namespace Scenery.RoadNetwork {
 
             var percentageUvCurb = h / (h + w);
             var uvs = new [] {
-                new Vector2(0, 0), new Vector2(0, percentageUvCurb), new Vector2(0, 1), 
-                new Vector2(0, 0), new Vector2(0, 1), 
-                new Vector2(0, 1), new Vector2(0, percentageUvCurb), new Vector2(0, 0), 
-                new Vector2(1, 0), new Vector2(1, percentageUvCurb), new Vector2(1, 1), 
-                new Vector2(1, 0), new Vector2(1, 1), 
-                new Vector2(1, 1), new Vector2(1, percentageUvCurb), new Vector2(1, 0), 
+                new Vector2(0, 0), new Vector2(percentageUvCurb, 0), new Vector2(1, 0), 
+                new Vector2(0, 0), new Vector2(1, 0), 
+                new Vector2(1, 0), new Vector2(percentageUvCurb, 0), new Vector2(0, 0), 
+                new Vector2(0, 1), new Vector2(percentageUvCurb, 1), new Vector2(1, 1), 
+                new Vector2(0, 1), new Vector2(1, 1), 
+                new Vector2(1, 1), new Vector2(percentageUvCurb, 1), new Vector2(0, 1), 
             }; // uvs for the mesh
 
             mesh.vertices = ps;
@@ -101,7 +106,7 @@ namespace Scenery.RoadNetwork {
             for (var i = 0f; i < s - s / (2 * p); i += s / p) {
                 var w0 = m * lane.InnerNeighbor.EvaluateWidth(i);
                 var w1 = m * (lane.InnerNeighbor.EvaluateWidth(i) + w);
-                var w2 = m * (lane.EvaluateWidth(0) - w);
+                var w2 = m * (lane.EvaluateWidth(i) - w);
                 var w3 = m * lane.EvaluateWidth(i);
 
                 ps.AddRange(new[] {
@@ -112,9 +117,9 @@ namespace Scenery.RoadNetwork {
                 
                 var percentageUvCurb = h / (h + w);
                 uvs.AddRange(new[] {
-                    new Vector2(i / s, 0), new Vector2(i / s, percentageUvCurb), new Vector2(i / s, 1), 
-                    new Vector2(i / s, 0), new Vector2(i / s, 1), 
-                    new Vector2(i / s, 1), new Vector2(i / s, percentageUvCurb), new Vector2(i / s, 0),
+                    new Vector2(0, i / s), new Vector2(percentageUvCurb, i / s), new Vector2(1, i / s), 
+                    new Vector2(0, i / s), new Vector2(1, i / s), 
+                    new Vector2(1, i / s), new Vector2(percentageUvCurb, i / s), new Vector2(0, i / s),
                 });
             }
 
@@ -144,33 +149,37 @@ namespace Scenery.RoadNetwork {
             var h = lane.RoadDesign.sidewalkHeight; // height of sidewalk
             var w = lane.RoadDesign.sidewalkCurbWidth; // curb width
             var ld = lane.LaneDirection; // direction of the lane
-            var r = lane.Parent.Parent; // parent road
             var sr = lane.Parent.Parent.Successor; // successor road
             var sl = lane.Successor; // successor lane
             var sln = sl.InnerNeighbor;
             var m = lane.Multiplier; // direction multiplier
             var s = 0f; // distance to evaluate the point of (depends on contact point)
-            if (r.SuccessorContactPoint == ContactPoint.End) {
-                s = sr.Length;
+            var sls = sl.Parent;
+            if (lane.SuccessorContactPoint == ContactPoint.End) {
+                s += sl.Parent.Length;
                 m *= -1;
+            }
+
+            if (lane.Parent.Parent.name == "j1_east-north") {
+                Debug.Log("Successor LaneSection: " + sls.S + " on " + sr.name);
             }
 
             var i = ps.Count - 8;
             
             ps.AddRange(new[] {
-                sr.EvaluatePoint(s, m * sln.EvaluateWidth(s)), sr.EvaluatePoint(s, m * sln.EvaluateWidth(s), h),
-                sr.EvaluatePoint(s, m * (sln.EvaluateWidth(s) + w), h),
-                sr.EvaluatePoint(s, m * (sln.EvaluateWidth(s) + w), h),
-                sr.EvaluatePoint(s, m * (sl.EvaluateWidth(s) - w), h),
-                sr.EvaluatePoint(s, m * (sl.EvaluateWidth(s) - w), h),
-                sr.EvaluatePoint(s, m * sl.EvaluateWidth(s), h), sr.EvaluatePoint(s, m * sl.EvaluateWidth(s)),
+                sls.EvaluatePoint(s, m * sln.EvaluateWidth(s)), sls.EvaluatePoint(s, m * sln.EvaluateWidth(s), h),
+                sls.EvaluatePoint(s, m * (sln.EvaluateWidth(s) + w), h),
+                sls.EvaluatePoint(s, m * (sln.EvaluateWidth(s) + w), h),
+                sls.EvaluatePoint(s, m * (sl.EvaluateWidth(s) - w), h),
+                sls.EvaluatePoint(s, m * (sl.EvaluateWidth(s) - w), h),
+                sls.EvaluatePoint(s, m * sl.EvaluateWidth(s), h), sls.EvaluatePoint(s, m * sl.EvaluateWidth(s)),
             });
 
             var percentageUvCurb = h / (h + w);
             uvs.AddRange(new[] {
-                new Vector2(1, 0), new Vector2(1, percentageUvCurb), new Vector2(1, 1), 
-                new Vector2(1, 0), new Vector2(1, 1),
-                new Vector2(1, 1), new Vector2(1, percentageUvCurb), new Vector2(1, 0), 
+                new Vector2(0, 1), new Vector2(percentageUvCurb, 1), new Vector2(1, 1), 
+                new Vector2(0, 1), new Vector2(1, 1),
+                new Vector2(1, 1), new Vector2(percentageUvCurb, 1), new Vector2(0, 1), 
             });
 
             var ts0Tmp = new[] {i + 0, i + 8, i + 1, i + 8, i + 9, i + 1, i + 1, i + 9, i + 10, i + 1, i + 10, i + 2};
@@ -213,7 +222,7 @@ namespace Scenery.RoadNetwork {
             };
 
             var uvs = new[] {
-                Vector2.zero, new Vector2(0, 1), new Vector2(1, 0), new Vector2(1, 1),  
+                new Vector2(0, 0), new Vector2(1, 0), new Vector2(0, 1), new Vector2(1, 1),  
             };
 
             var ts = new[] {0, 2, 3, 0, 3, 1};
@@ -245,8 +254,14 @@ namespace Scenery.RoadNetwork {
                     ls.EvaluatePoint(i, w0), ls.EvaluatePoint(i, w1)
                 });
                 
+                if (Math.Abs(i - upper) < 0.1f) {
+                    if (lane.Parent.Parent.name == "Zellescher Weg") {
+                        Debug.Log("Evaluating for " + lane.LaneId + " at w0 = " + w0 + " & w1 = " + w1 + ", Resulting points: " + ls.EvaluatePoint(i, w0) + " & " + ls.EvaluatePoint(i, w1) );
+                    }
+                }
+                
                 uvs.AddRange(new[] {
-                    new Vector2(i / s, 0), new Vector2(i / s, w1 / mw),
+                    new Vector2(0, i / s), new Vector2( w1 / mw, i / s),
                 });
             }
             
@@ -271,9 +286,9 @@ namespace Scenery.RoadNetwork {
             var sl = lane.Successor; // successor lane
             var sln = sl.InnerNeighbor; // neighbor of the successor lane
             var m = lane.Multiplier; // direction multiplier
-            var s = 0f; // distance to evaluate the point of (depends on contact point)
-            if (r.SuccessorContactPoint == ContactPoint.End) {
-                s = sr.Length;
+            var s = sl.Parent.S; // distance to evaluate the point of (depends on contact point)
+            if (lane.SuccessorContactPoint == ContactPoint.End) {
+                s = sl.Parent.Length;
                 m *= -1;
             }
 
@@ -285,7 +300,7 @@ namespace Scenery.RoadNetwork {
             ps.AddRange(new[]
                 {sr.EvaluatePoint(s, m * w0), sr.EvaluatePoint(s, m * w1)});
 
-            uvs.AddRange(new[] {new Vector2(1, 0), new Vector2(1, 1) });
+            uvs.AddRange(new[] {new Vector2(0, 1), new Vector2(1, 1) });
 
             var tsTmp = new[] {i, i + 2, i + 3, i, i + 3, i + 1};
             ts.AddRange(ld == LaneDirection.Right ? tsTmp : TriangleDirectionChange(tsTmp));
@@ -321,13 +336,6 @@ namespace Scenery.RoadNetwork {
             
             if (roadMark.RoadDesign.closeMeshToNextMesh) CloseSimpleMeshForRoadMark(ref mesh, roadMark);
 
-            // if (roadMark.ParentLane.LaneDirection == LaneDirection.Center) {
-            //     Debug.Log(mesh.vertices.Length + " " + mesh.triangles.Length);
-            //     foreach (var vertex in mesh.vertices) {
-            //         Debug.Log(vertex);
-            //     }
-            // }
-
             mesh.Optimize();
             mesh.RecalculateBounds();
             mesh.RecalculateNormals();
@@ -356,7 +364,7 @@ namespace Scenery.RoadNetwork {
             };
 
             var uvs = new[] {
-                Vector2.zero, new Vector2(1, 0), new Vector2(0, 1), new Vector2(1, 1),  
+                new Vector2(0, 0), new Vector2(1, 0), new Vector2(0, 1), new Vector2(1, 1),  
             };
 
             var ts = new[] {0, 2, 3, 0, 3, 1};
@@ -416,13 +424,12 @@ namespace Scenery.RoadNetwork {
             var ts = mesh.triangles.ToList();
             var uvs = mesh.uv.ToList();
             var ld = roadMark.ParentLane.LaneDirection; // direction of the lane
-            var r = roadMark.ParentLane.Parent.Parent; // parent road
             var sr = roadMark.ParentLane.Parent.Parent.Successor; // successor road
             var sl = roadMark.ParentLane.Successor; // successor lane
             var m = roadMark.ParentLane.Multiplier; // direction multiplier
-            var s = 0f; // distance to evaluate the point of (depends on contact point)
-            if (r.SuccessorContactPoint == ContactPoint.End) {
-                s = sr.Length;
+            var s = sl.Parent.S; // distance to evaluate the point of (depends on contact point)
+            if (roadMark.ParentLane.SuccessorContactPoint == ContactPoint.End) {
+                s = sl.Parent.Length;
                 m *= -1;
             }
             

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Scenery.RoadNetwork.RoadObjects;
 using UnityEngine;
+using Utils;
 
 namespace Scenery.RoadNetwork {
     public class RoadNetworkHolder : MonoBehaviour {
@@ -12,6 +14,12 @@ namespace Scenery.RoadNetwork {
         public RoadDesign roadDesign;
 
         private const int RoadLayer = 17;
+        private const int ObjectLayer = 19;
+        
+        // Properties for materials
+        private static readonly int BumpMap = Shader.PropertyToID("_BumpMap");
+        private static readonly int BaseMap = Shader.PropertyToID("_BaseMap");
+        private static readonly int OcclusionMap = Shader.PropertyToID("_OcclusionMap");
 
         public RoadNetworkHolder() {
             LaneSections = new List<LaneSection>();
@@ -19,10 +27,59 @@ namespace Scenery.RoadNetwork {
             Junctions = new Dictionary<string, Junction>();
         }
 
+        public void ShowSimpleGround(Terrain terrain) {
+            var bounds = GetCompleteBounds();
+
+            var width = bounds.extents.x * 2f;
+            var length = bounds.extents.z * 2f;
+            var i = (int) (width > length ? width : length);
+
+            i--;
+            i |= i >> 1;
+            i |= i >> 2;
+            i |= i >> 4;
+            i |= i >> 8;
+            i |= i >> 16;
+            i++;
+
+            terrain.terrainData.size = new Vector3(i, 0f, i);
+            terrain.terrainData.SetDetailResolution(i, 32);
+            terrain.transform.position =
+                new Vector3(bounds.center.x - i / 2f, 0, bounds.center.z -  i / 2f);
+
+            var material = new Material(roadDesign.terrain);
+            var p = material.GetTextureScale(BumpMap);
+            var v = new Vector2((bounds.extents.x * 2f + 100f) * p.x, (bounds.extents.z * 2f + 100f) * p.y);
+            material.SetTextureScale(BumpMap, v);
+            material.SetTextureScale(BaseMap, v);
+            material.SetTextureScale(OcclusionMap, v);
+
+            var lowest = float.PositiveInfinity;
+            foreach (var junction in Junctions) {
+                if (junction.Value.LowestPoint < lowest) lowest = junction.Value.LowestPoint;
+            }
+
+            if (lowest == float.PositiveInfinity) lowest = roadDesign.offsetHeight;
+
+            lowest += roadDesign.offsetHeight * 5;
+
+            terrain.transform.position += new Vector3(0, -lowest, 0);
+        }
+
+        private Bounds GetCompleteBounds() {
+            var toReturn = new Bounds();
+            foreach (var lane in Roads.Values.SelectMany(road =>
+                road.LaneSections.SelectMany(laneSection => laneSection.LaneIdMappings.Values))) {
+                toReturn.Encapsulate(lane.GetComponent<MeshFilter>().mesh.bounds);
+            }
+
+            return toReturn;
+        }
+
         public void CreateMeshes() {
             foreach (var roadEntry in Roads) {
                 var successorId = roadEntry.Value.SuccessorOdId;
-                if (successorId != "-1" && Roads.ContainsKey(successorId)) {
+                if (successorId != "x" && Roads.ContainsKey(successorId)) {
                     roadEntry.Value.Successor = Roads[successorId];
 
                     var lastLaneSections = roadEntry.Value.LaneSections;
@@ -39,6 +96,10 @@ namespace Scenery.RoadNetwork {
                     }
                 }
             }
+            
+            foreach (var roadsValue in Roads.Values) {
+                roadsValue.Prepare();
+            }
 
             foreach (var entry in Roads) {
                 entry.Value.StartMeshGeneration();
@@ -48,12 +109,6 @@ namespace Scenery.RoadNetwork {
                 entry.Value.ParentAllRoads();
                 entry.Value.DisplaceAllLanesAndRoadMarks();
             }
-            
-            // float displacement = 0;
-            // for (var i = 0; i < transform.childCount; i++) {
-            //     transform.GetChild(i).position += new Vector3(0, displacement, 0);
-            //     displacement -= 0.00001f;
-            // }
         }
 
         public Road CreateRoad(string openDriveId, string junctionId) {
@@ -109,7 +164,7 @@ namespace Scenery.RoadNetwork {
         }
 
         public RoadObjectRound CreateRoadObjectRound(Road parentRoad) {
-            var newObj = new GameObject();
+            var newObj = new GameObject {layer = ObjectLayer};
             newObj.transform.position = Vector3.zero;
             newObj.transform.rotation = Quaternion.identity;
             var newRoadObjectRound = newObj.AddComponent<RoadObjectRound>();
@@ -117,6 +172,17 @@ namespace Scenery.RoadNetwork {
             newRoadObjectRound.RoadDesign = roadDesign;
             parentRoad.RoadObjects.Add(newRoadObjectRound);
             return newRoadObjectRound;
+        }
+        
+        public RoadObjectSquare CreateRoadObjectSquare(Road parentRoad) {
+            var newObj = new GameObject {layer = ObjectLayer};
+            newObj.transform.position = Vector3.zero;
+            newObj.transform.rotation = Quaternion.identity;
+            var newRoadObjectSquare = newObj.AddComponent<RoadObjectSquare>();
+            newRoadObjectSquare.Parent = parentRoad;
+            newRoadObjectSquare.RoadDesign = roadDesign;
+            parentRoad.RoadObjects.Add(newRoadObjectSquare);
+            return newRoadObjectSquare;
         }
     }
 }

@@ -22,6 +22,8 @@ namespace Scenery.RoadNetwork.RoadGeometries {
 
         public abstract Vector2 Evaluate(float s, float t);
 
+        public abstract float EvaluateHeading(float s);
+
         public float Length => length;
 
         public float SStart => sStart;

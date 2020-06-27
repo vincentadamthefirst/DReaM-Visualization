@@ -84,10 +84,9 @@ namespace Scenery.RoadNetwork {
         }
 
         /// <summary>
-        /// Starts the mesh generation for this LaneSections children Lanes. Also sets the neighbors for the children
-        /// Lanes.
+        /// Prepares this LaneSection and its children for mesh generation by evaluating neighbors of lanes.
         /// </summary>
-        public void StartMeshGeneration() {
+        public void Prepare() {
             for (var i = 0; i < LeftLanes.Count; i++) {
                 LeftLanes[i].InnerNeighbor = i == 0 ? CenterLane : LeftLanes[i - 1];
                 LeftLanes[i].OuterNeighbor = i == LeftLanes.Count - 1 ? null : LeftLanes[i + 1];
@@ -100,13 +99,19 @@ namespace Scenery.RoadNetwork {
 
             CenterLane.OuterNeighbor = RightLanes.Count != 0 ? RightLanes[0] : null;
             CenterLane.InnerNeighbor = LeftLanes.Count != 0 ? LeftLanes[0] : null;
+        }
 
+        /// <summary>
+        /// Starts the mesh generation for this LaneSections children Lanes. Also sets the neighbors for the children
+        /// Lanes.
+        /// </summary>
+        public void StartMeshGeneration() {
+            CenterLane.GenerateMesh();
+            CenterLane.RoadMark.GenerateMesh();
+            
             foreach (var entry in LaneIdMappings) {
                 entry.Value.GenerateMesh();
             }
-            
-            CenterLane.GenerateMesh();
-            CenterLane.RoadMark.GenerateMesh();
         }
 
         /// <summary>
@@ -115,9 +120,18 @@ namespace Scenery.RoadNetwork {
         /// <param name="s">Lane-local s value</param>
         /// <param name="t">t value</param>
         /// <param name="h">height value (used for sidewalks)</param>
-        /// <returns></returns>
+        /// <returns>evaluated point</returns>
         public Vector3 EvaluatePoint(float s, float t, float h = 0f) {
             return Parent.EvaluatePoint(S + s, t, h);
+        }
+
+        /// <summary>
+        /// Evaluates the heading of the geometry of the parent road. Transforms the local s into global S value
+        /// </summary>
+        /// <param name="s">Lane-local s value</param>
+        /// <returns>evaluated heading</returns>
+        public float EvaluateHeading(float s) {
+            return Parent.EvaluateHeading(S + s);
         }
 
         // TODO

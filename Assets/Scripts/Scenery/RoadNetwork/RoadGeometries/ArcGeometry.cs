@@ -12,11 +12,6 @@ namespace Scenery.RoadNetwork.RoadGeometries {
         }
         
         public override Vector2 Evaluate(float s, float t) {
-            if (s > length) {
-                // TODO handle exceeding of length
-                s = length;
-            }
-
             var radius = 1f / _curvature;
             var circumference = 2f * Mathf.PI / _curvature;
 
@@ -31,6 +26,13 @@ namespace Scenery.RoadNetwork.RoadGeometries {
             offset.y += y;
 
             return offset;
+        }
+
+        public override float EvaluateHeading(float s) {
+            var circumference = 2f * Mathf.PI / _curvature;
+
+            var fractionRad = (s % circumference) * _curvature;
+            return hdg + fractionRad;
         }
     }
 }

@@ -14,5 +14,9 @@ namespace Scenery.RoadNetwork.RoadGeometries {
 
             return offset;
         }
+
+        public override float EvaluateHeading(float s) {
+            return hdg;
+        }
     }
 }

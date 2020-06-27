@@ -65,6 +65,13 @@ namespace Scenery.RoadNetwork {
         /// Multiplier for t-Offset, get calculated in GenerateMesh()
         /// </summary>
         public int Multiplier { get; set; }
+        
+        /// <summary>
+        /// Contact point type for the successor Lane-object. Get calculated internally, does not completely come from
+        /// OpenDrive. Lanes on last LaneSection for Road always share Road ContactPoint. For every other Lane
+        /// (internal Lane): ContactPoint.Start
+        /// </summary>
+        public ContactPoint SuccessorContactPoint { get; set; }
 
         // parameters for width function
         private float _sOffset, _a, _b, _c, _d;
@@ -72,7 +79,7 @@ namespace Scenery.RoadNetwork {
         // Properties for materials
         private static readonly int BumpMap = Shader.PropertyToID("_BumpMap");
         private static readonly int BaseMap = Shader.PropertyToID("_BaseMap");
-        
+        private static readonly int OcclusionMap = Shader.PropertyToID("_OcclusionMap");
 
         public void SetWidthParameters(float sOffset, float a, float b, float c, float d) {
             _sOffset = sOffset;
@@ -146,22 +153,26 @@ namespace Scenery.RoadNetwork {
                 var m3 = new Material(RoadDesign.sidewalkCurb);
 
                 var p = m2.GetTextureScale(BaseMap);
-                var v1 = new Vector2(Parent.Length * p.x, p.y);
-                var v2 = new Vector2(Parent.Length* p.x, GetMaxWidthSelf(RoadDesign.samplePrecision) * p.y);
+                var v1 = new Vector2(p.x, Parent.Length * p.y);
+                var v2 = new Vector2(GetMaxWidthSelf(RoadDesign.samplePrecision) * p.x, Parent.Length * p.y);
                 
                 m1.SetTextureScale(BumpMap, v1);
                 m1.SetTextureScale(BaseMap, v1);
+                m1.SetTextureScale(OcclusionMap, v1);
                 m2.SetTextureScale(BumpMap, v2);
                 m2.SetTextureScale(BaseMap, v2);
+                m2.SetTextureScale(OcclusionMap, v2);
                 m3.SetTextureScale(BumpMap, v1);
                 m3.SetTextureScale(BaseMap, v1);
+                m3.SetTextureScale(OcclusionMap, v1);
                 meshRenderer.materials = new[] {m1, m2, m3};
             } else {
                 var material = new Material(RoadDesign.GetMaterialForLaneType(LaneType));
                 var p = material.GetTextureScale(BumpMap);
-                var v = new Vector2(Parent.Length * p.x, GetMaxWidthSelf(RoadDesign.samplePrecision) * p.y);
+                var v = new Vector2( GetMaxWidthSelf(RoadDesign.samplePrecision) * p.x, Parent.Length * p.y);
                 material.SetTextureScale(BumpMap, v);
                 material.SetTextureScale(BaseMap, v);
+                material.SetTextureScale(OcclusionMap, v);
                 meshRenderer.material = material;
             }
         }

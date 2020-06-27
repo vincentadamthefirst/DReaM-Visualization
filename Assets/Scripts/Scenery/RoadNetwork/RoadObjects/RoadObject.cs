@@ -4,6 +4,8 @@ namespace Scenery.RoadNetwork.RoadObjects {
     public abstract class RoadObject : SceneryElement {
         public RoadObjectType RoadObjectType { get; set; }
         
+        public string SubType { get; set; }
+        
         public RoadObjectOrientation Orientation { get; set; }
         
         public float S { get; set; }
