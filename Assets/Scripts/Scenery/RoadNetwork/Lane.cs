@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.InteropServices;
 using UnityEngine;
 
 namespace Scenery.RoadNetwork {
@@ -10,9 +12,14 @@ namespace Scenery.RoadNetwork {
     public class Lane : SceneryElement {
         
         /// <summary>
+        /// The OpenDrive id of this lane as string
+        /// </summary>
+        public string LaneId { get; set; }
+        
+        /// <summary>
         /// The OpenDrive id of this lane as integer, used for lane sorting from center out
         /// </summary>
-        public int LaneId { get; set; }
+        public int LaneIdInt { get; set; }
         
         /// <summary>
         /// The type of this lane.
@@ -50,7 +57,7 @@ namespace Scenery.RoadNetwork {
         /// The successor Lane-object to this lane, can be null
         /// </summary>
         public Lane Successor { get; set; }
-        
+
         /// <summary>
         /// Reference to the RoadDesign used for texturing
         /// </summary>
@@ -67,72 +74,84 @@ namespace Scenery.RoadNetwork {
         public int Multiplier { get; set; }
         
         /// <summary>
+        /// Height of this Lane at the inner edge
+        /// </summary>
+        public float InnerHeight { get; set; }
+        
+        /// <summary>
+        /// Height of this Lane at the outer edge
+        /// </summary>
+        public float OuterHeight { get; set; }
+        
+        /// <summary>
         /// Contact point type for the successor Lane-object. Get calculated internally, does not completely come from
         /// OpenDrive. Lanes on last LaneSection for Road always share Road ContactPoint. For every other Lane
         /// (internal Lane): ContactPoint.Start
         /// </summary>
         public ContactPoint SuccessorContactPoint { get; set; }
+        
+        /// <summary>
+        /// The widths of this Lane segment, ordered by sOffset (low to high)
+        /// </summary>
+        private List<LaneWidth> Widths { get; set; }
+        
 
-        // parameters for width function
-        private float _sOffset, _a, _b, _c, _d;
-
-        // Properties for materials
-        private static readonly int BumpMap = Shader.PropertyToID("_BumpMap");
-        private static readonly int BaseMap = Shader.PropertyToID("_BaseMap");
-        private static readonly int OcclusionMap = Shader.PropertyToID("_OcclusionMap");
-
-        public void SetWidthParameters(float sOffset, float a, float b, float c, float d) {
-            _sOffset = sOffset;
-            _a = a;
-            _b = b;
-            _c = c;
-            _d = d;
+        public Lane() {
+            Widths = new List<LaneWidth>();
         }
 
-        public float GetAParameter() {
-            return _a;
+        public void AddWidthEntry(float sOffset, float a, float b, float c, float d) {
+            var newEntry = new LaneWidth(sOffset, a, b, c, d);
+            Widths.Add(newEntry);
+            var ordered = Widths.OrderBy(w => w.SOffset);
+            Widths = ordered.ToList();
         }
 
-        public float EvaluateWidth(float initialS) {
-            var s = _sOffset + initialS + Parent.S;
-            
-            if (LaneDirection == LaneDirection.Center) return (_a + _b * s + _c * s * s + _d * s * s * s) / 2f;
-            
-            if (s > Parent.Length) return InnerNeighbor.EvaluateWidth(Parent.Length) + _a + _b * s + _c * s * s + _d * s * s * s;
-            
-            if (InnerNeighbor != null) return InnerNeighbor.EvaluateWidth(s) + _a + _b * s + _c * s * s + _d * s * s * s;
-            else return _a + _b * s + _c * s * s + _d * s * s * s;
+        private float EvaluateWidthSelf(float s) {
+            if (LaneDirection == LaneDirection.Center) return 0f;
+
+            for (var i = 0; i < Widths.Count - 1; i++) {
+                if ( s >= Widths[i].SOffset && s < Widths[i + 1].SOffset) {
+                    return Widths[i].Evaluate(s);
+                }
+            }
+
+            return Widths[Widths.Count - 1].Evaluate(s);
+        }
+
+        public float EvaluateWidth(float s) {
+            if (LaneDirection == LaneDirection.Center) return 0f;
+
+            return EvaluateWidthSelf(s) + InnerNeighbor.EvaluateWidth(s);
         }
 
         public bool IsConstantWidth() {
-            if (InnerNeighbor == null || LaneDirection == LaneDirection.Center)
-                return Math.Abs(_b) < Tolerance && Math.Abs(_c) < Tolerance && Math.Abs(_d) < Tolerance;
+            if (LaneDirection == LaneDirection.Center) return true;
             
-            return Math.Abs(_b) < Tolerance && Math.Abs(_c) < Tolerance && Math.Abs(_d) < Tolerance && InnerNeighbor.IsConstantWidth();
+            var resultSelf = true;
+            foreach (var widthEntry in Widths) {
+                resultSelf = resultSelf && Math.Abs(widthEntry.B) < Tolerance && Math.Abs(widthEntry.C) < Tolerance &&
+                         Math.Abs(widthEntry.D) < Tolerance;
+            }
+
+            if (InnerNeighbor == null) return resultSelf;
+            return resultSelf && InnerNeighbor.IsConstantWidth();
         }
 
-        public float GetMaxWidth(int stepSize) {
-            var max = float.NegativeInfinity;
-            for (var i = 0f; i < Parent.Length; i += Parent.Length / stepSize) {
-                var tmp = EvaluateWidth(i);
-                if (tmp > max) max = tmp;
-            }
-            return max;
-        }
-        
         public float GetMaxWidthSelf(int stepSize) {
-            var max = float.NegativeInfinity;
+            var maxWidth = float.NegativeInfinity;
             for (var i = 0f; i < Parent.Length; i += Parent.Length / stepSize) {
-                var tmp = _a + _b * i + _c * i * i + _d * i * i * i;
-                if (tmp > max) max = tmp;
+                var tmp = EvaluateWidthSelf(i);
+                if (tmp > maxWidth) maxWidth = tmp;
             }
-            return max;
+
+            return maxWidth;
         }
 
         public void GenerateMesh() {
             Multiplier = LaneDirection == LaneDirection.Right || LaneDirection == LaneDirection.Center ? -1 : 1;
-            if (IsConstantWidth() && Math.Abs(_a) < Tolerance) return;
             if (LaneDirection == LaneDirection.Center) return;
+            if (LaneType == LaneType.None) return;
 
             var mesh = new Mesh();
             RoadHelper.GenerateMeshForLane(ref mesh, this);
@@ -148,47 +167,63 @@ namespace Scenery.RoadNetwork {
             var meshRenderer = GetComponent<MeshRenderer>();
 
             if (LaneType == LaneType.Sidewalk) {
-                var m1 = new Material(RoadDesign.sidewalkCurb);
-                var m2 = new Material(RoadDesign.sidewalk);
-                var m3 = new Material(RoadDesign.sidewalkCurb);
+                var lm1 = RoadDesign.GetLaneMaterial(LaneType, "curb");
+                var lm2 = RoadDesign.GetLaneMaterial(LaneType, "top");
+                
+                var m1 = new Material(lm1.material); // curb
+                var m2 = new Material(lm2.material); // top
+                var m3 = new Material(lm1.material); // curb
 
                 var p = m2.GetTextureScale(BaseMap);
                 var v1 = new Vector2(p.x, Parent.Length * p.y);
                 var v2 = new Vector2(GetMaxWidthSelf(RoadDesign.samplePrecision) * p.x, Parent.Length * p.y);
                 
-                m1.SetTextureScale(BumpMap, v1);
+                m1.SetTextureScale(BumpMap, v1); // curb
                 m1.SetTextureScale(BaseMap, v1);
                 m1.SetTextureScale(OcclusionMap, v1);
-                m2.SetTextureScale(BumpMap, v2);
+                m2.SetTextureScale(BumpMap, v2); // top
                 m2.SetTextureScale(BaseMap, v2);
                 m2.SetTextureScale(OcclusionMap, v2);
-                m3.SetTextureScale(BumpMap, v1);
+                m3.SetTextureScale(BumpMap, v1); // curb
                 m3.SetTextureScale(BaseMap, v1);
                 m3.SetTextureScale(OcclusionMap, v1);
+                
+                m1.SetColor(BaseColor, lm1.color);
+                m2.SetColor(BaseColor, lm2.color);
+                m3.SetColor(BaseColor, lm1.color);
+                
                 meshRenderer.materials = new[] {m1, m2, m3};
             } else {
-                var material = new Material(RoadDesign.GetMaterialForLaneType(LaneType));
-                var p = material.GetTextureScale(BumpMap);
+                var lm = RoadDesign.GetLaneMaterial(LaneType);
+                var material = new Material(lm.material);
+                var p = material.GetTextureScale(BaseMap);
                 var v = new Vector2( GetMaxWidthSelf(RoadDesign.samplePrecision) * p.x, Parent.Length * p.y);
                 material.SetTextureScale(BumpMap, v);
                 material.SetTextureScale(BaseMap, v);
                 material.SetTextureScale(OcclusionMap, v);
+                material.SetColor(BaseColor, lm.color);
                 meshRenderer.material = material;
             }
         }
+    }
 
-        // TODO
-        // Kennt Parent LaneSection
-        // Kennt nächst linkere Lane (nächste Lane zum Zentrum der Straße)
-        // Werte: a, b, c, d für width-Berechnung
-        // Methode: public Methode um Width zu berechnen
-        // Methode: Generierung des Meshes
-        //     --> checkt ob LaneSection komplett im Line Segment ist && eigene Breite sich nicht ändert
-        //         --> ja: 2 (4) Punkte generieren: am Start und Ende
-        //         --> no: mit Genauigkeits-Integer mehrere Punkte generieren (Start & Endpunkt mit einbegriffen)
-        //     --> Breite: Eigene Breite + Breite der nächst linkeren Spur and der selben Stelle
-        //                 am weitesten in der Mitte liegende Spur hat Center Lane als linke Spur, Breite der
-        //                 Center Lane: 1/2 * Breitenfunktion der Center Lane
-        //     --> Punkt Errechnung über Lane Section Methode
+    public class LaneWidth {
+        public float SOffset { get; }
+        private float A { get; }
+        public float B { get; }
+        public float C { get; }
+        public float D { get; }
+
+        public LaneWidth(float sOffset, float a, float b, float c, float d) {
+            SOffset = sOffset;
+            A = a;
+            B = b;
+            C = c;
+            D = d;
+        }
+        
+        public float Evaluate(float s) {
+            return A + B * s + C * s * s + D * s * s * s;
+        }
     }
 }

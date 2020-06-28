@@ -27,12 +27,9 @@ namespace Scenery.RoadNetwork {
             RoadHelper.GenerateMeshForRoadMark(ref mesh, this);
 
             GetComponent<MeshFilter>().mesh = mesh;
-
-            GetComponent<MeshRenderer>().material = RoadDesign.none;
-            
-            transform.position += new Vector3(0, RoadDesign.offsetHeight, 0);
-            
             AddMaterial();
+
+            transform.position += new Vector3(0, RoadDesign.offsetHeight, 0);
         }
 
         private void AddMaterial() {

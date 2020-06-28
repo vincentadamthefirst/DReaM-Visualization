@@ -20,6 +20,7 @@ namespace Scenery {
                 var c = _ownRenderer.material.color;
                 c.a = 1f;
                 _ownRenderer.material.color = c;
+                _ownRenderer.material.SetFloat("_Surface", 0f);
             } catch (Exception e) { }
         }
 
@@ -28,6 +29,7 @@ namespace Scenery {
                 var c = _ownRenderer.material.color;
                 c.a = 0.5f;
                 _ownRenderer.material.color = c;
+                _ownRenderer.material.SetFloat("_Surface", 1f);
             } catch (Exception e) { }
         }
 
@@ -36,6 +38,7 @@ namespace Scenery {
                 var c = _ownRenderer.material.color;
                 c.a = alpha;
                 _ownRenderer.material.color = c;
+                _ownRenderer.material.SetFloat("_Surface", 1f);
             } catch (Exception e) { }
         }
 

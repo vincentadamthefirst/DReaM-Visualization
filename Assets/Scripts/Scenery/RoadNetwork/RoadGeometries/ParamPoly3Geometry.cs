@@ -22,7 +22,8 @@ namespace Scenery.RoadNetwork.RoadGeometries {
             _dU = dU;
         }
         public override Vector2 Evaluate(float s, float t) {
-            if (s >= length) s = length - 0.2f;
+            //if (s >= length) s = length - 0.5f;
+            // TODO check why this is so buggy
 
             var k = 0f;
             var lastPosition = new Vector2();

@@ -69,6 +69,8 @@ public class OcclusionController : MonoBehaviour {
     }
 
     private void Update() {
+        return; // TODO removed for debug purposes
+        
         if (preCheckViewFrustum) _planes = GeometryUtility.CalculateFrustumPlanes(cam);
         
         _targetPolygons.Clear();

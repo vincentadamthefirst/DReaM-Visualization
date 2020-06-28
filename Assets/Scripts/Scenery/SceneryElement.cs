@@ -7,9 +7,10 @@ namespace Scenery {
         // tolerance for checking if floating point number is 0
         protected const float Tolerance = 0.00001f;
 
-        protected const int RenderQueueOffsetStartRoads = 20;
-        protected const int RenderQueueOffsetEndRoads = 219;
-        protected const int RenderQueueOffsetStartRoadmark = 220;
-        protected const int RenderQueueOffsetEndRoadmark = 419;
+        // Properties for materials
+        protected static readonly int BumpMap = Shader.PropertyToID("_BumpMap");
+        protected static readonly int BaseMap = Shader.PropertyToID("_BaseMap");
+        protected static readonly int OcclusionMap = Shader.PropertyToID("_OcclusionMap");
+        protected static readonly int BaseColor = Shader.PropertyToID("_BaseColor");
     }
 }

@@ -17,17 +17,39 @@ MonoBehaviour:
   laneSectionPrefab: {fileID: 3958004189400049946, guid: 014fdef07401bb443a92a1ea914669e9, type: 3}
   junctionPrefab: {fileID: 8144626824674827851, guid: 85e4b06cd66cf354ba117ecfcd37cb1e, type: 3}
   roadMarkPrefab: {fileID: 3689535253008410456, guid: 3245dccf41f655d4b97a8b74d74de4d2, type: 3}
-  samplePrecision: 20
+  samplePrecision: 100
   sidewalkHeight: 0.2
   sidewalkCurbWidth: 0.15
   offsetHeight: 0.0001
-  roadBase: {fileID: 2100000, guid: 75b6e04128e56ae48937231d8c186a76, type: 2}
-  sidewalkCurb: {fileID: 2100000, guid: c42d1e85ca6f6014ca39655d237583c8, type: 2}
-  sidewalk: {fileID: 2100000, guid: 08177fa47b02a4f45a5b2fc16f242ed2, type: 2}
-  roadBiking: {fileID: 2100000, guid: f65280bda1c384c409151987f54c0e55, type: 2}
-  roadRestricted: {fileID: 2100000, guid: f65280bda1c384c409151987f54c0e55, type: 2}
-  none: {fileID: 2100000, guid: f65280bda1c384c409151987f54c0e55, type: 2}
-  terrain: {fileID: 2100000, guid: 8e52b52a5b31ad94f9ef727761e8847c, type: 2}
+  laneMaterials:
+  - laneType: 4
+    subType: top
+    color: {r: 1, g: 1, b: 1, a: 1}
+    material: {fileID: 2100000, guid: 08177fa47b02a4f45a5b2fc16f242ed2, type: 2}
+  - laneType: 4
+    subType: curb
+    color: {r: 1, g: 1, b: 1, a: 1}
+    material: {fileID: 2100000, guid: c42d1e85ca6f6014ca39655d237583c8, type: 2}
+  - laneType: 1
+    subType: 
+    color: {r: 1, g: 1, b: 1, a: 1}
+    material: {fileID: 2100000, guid: 75b6e04128e56ae48937231d8c186a76, type: 2}
+  - laneType: 2
+    subType: 
+    color: {r: 0.6037736, g: 0, b: 0, a: 1}
+    material: {fileID: 2100000, guid: 75b6e04128e56ae48937231d8c186a76, type: 2}
+  - laneType: 5
+    subType: 
+    color: {r: 1, g: 1, b: 1, a: 1}
+    material: {fileID: 2100000, guid: c42d1e85ca6f6014ca39655d237583c8, type: 2}
+  - laneType: 3
+    subType: 
+    color: {r: 0.5377358, g: 0.5377358, b: 0.5377358, a: 1}
+    material: {fileID: 2100000, guid: 08177fa47b02a4f45a5b2fc16f242ed2, type: 2}
+  - laneType: 6
+    subType: 
+    color: {r: 1, g: 1, b: 1, a: 1}
+    material: {fileID: 2100000, guid: dcddd444ee3a0c3459600d44915827a8, type: 2}
   broken: {fileID: 2100000, guid: 2f4467df87b60c94194fc747d6eadd69, type: 2}
   solid: {fileID: 2100000, guid: 6167fb03689a18c469165924fb85de49, type: 2}
   disableRoadMarkForCenterLaneOnJunction: 0
@@ -36,16 +58,16 @@ MonoBehaviour:
   disableStraightSidewalkOnJunction: 1
   disableSidewalkOnJunction: 0
   roadObjectPrefabs:
-  - prefab: {fileID: 6815245477105836053, guid: bca63c63e8fac2c4a939db4b32e60e30, type: 3}
+  - prefab: {fileID: 3097528833594922832, guid: ac47f2ffe2ee7c949a2d5a868b003c67, type: 3}
     type: 1
-    subType: tree_small
+    subType: tree_pine
     baseHeight: 4
-    baseRadius: 4
+    baseRadius: 3
     baseWidth: 1
     baseLength: 1
   - prefab: {fileID: 8716866544017449485, guid: d0d16680fce54a94cbf5143e76e48deb, type: 3}
     type: 1
-    subType: tree_big
+    subType: tree_birch
     baseHeight: 6
     baseRadius: 5
     baseWidth: 1
@@ -73,4 +95,19 @@ MonoBehaviour:
     subType: 
   - material: {fileID: 2100000, guid: d4ee88b623468fa4291d3d85f4f7e649, type: 2}
     type: 2
+    subType: 
+  - material: {fileID: 2100000, guid: 75b6e04128e56ae48937231d8c186a76, type: 2}
+    type: 6
+    subType: asphalt
+  - material: {fileID: 2100000, guid: 3342bda3ff801f649b22fe2980c9ba12, type: 2}
+    type: 6
+    subType: asphalt_broken
+  - material: {fileID: 2100000, guid: 08177fa47b02a4f45a5b2fc16f242ed2, type: 2}
+    type: 6
+    subType: concrete
+  - material: {fileID: 2100000, guid: abd51946e32bc3e4b8c6008dc1a5c91d, type: 2}
+    type: 6
+    subType: concrete_tiles
+  - material: {fileID: 2100000, guid: 27122d51c1ffa9e4fa3bc2fe2f564905, type: 2}
+    type: 5
     subType: 

@@ -18,7 +18,7 @@ namespace Scenery.RoadNetwork {
         /// <summary>
         /// CenterLane-object for this section
         /// </summary>
-        public Lane CenterLane { get; set; }
+        public Lane CenterLane { get; private set; }
         
         /// <summary>
         /// Right (in road direction) Lane-objects for this section
@@ -64,7 +64,7 @@ namespace Scenery.RoadNetwork {
         /// <param name="lane">The Lane to be added.</param>
         public void AddLeftLane(Lane lane) {
             LeftLanes.Add(lane);
-            var ordered = LeftLanes.AsEnumerable().OrderBy(l => l.LaneId);
+            var ordered = LeftLanes.AsEnumerable().OrderBy(l => l.LaneIdInt);
             LeftLanes = ordered.ToList();
 
             LaneIdMappings[lane.OpenDriveId] = lane;
@@ -77,16 +77,25 @@ namespace Scenery.RoadNetwork {
         /// <param name="lane">The Lane to be added.</param>
         public void AddRightLane(Lane lane) {
             RightLanes.Add(lane);
-            var ordered = RightLanes.AsEnumerable().OrderByDescending(l => l.LaneId);
+            var ordered = RightLanes.AsEnumerable().OrderByDescending(l => l.LaneIdInt);
             RightLanes = ordered.ToList();
             
             LaneIdMappings[lane.OpenDriveId] = lane;
         }
 
         /// <summary>
+        /// Sets the center Lane.
+        /// </summary>
+        /// <param name="lane">The new center Lane.</param>
+        public void SetCenterLane(Lane lane) {
+            CenterLane = lane;
+            LaneIdMappings[lane.OpenDriveId] = lane;
+        }
+
+        /// <summary>
         /// Prepares this LaneSection and its children for mesh generation by evaluating neighbors of lanes.
         /// </summary>
-        public void Prepare() {
+        public void PrepareNeighbors() {
             for (var i = 0; i < LeftLanes.Count; i++) {
                 LeftLanes[i].InnerNeighbor = i == 0 ? CenterLane : LeftLanes[i - 1];
                 LeftLanes[i].OuterNeighbor = i == LeftLanes.Count - 1 ? null : LeftLanes[i + 1];

@@ -4,7 +4,7 @@
      * All supported lane types
      */
     public enum LaneType {
-        None, Sidewalk, Driving, Biking, Restricted
+        None, Driving, Biking, Restricted, Sidewalk, Border, Shoulder
     }
 
     public enum RoadMarkType {
@@ -12,10 +12,10 @@
     }
 
     /**
-     * All supported element types
+     * All supported element types (for links)
      */
     public enum ElementType {
-        Junction, Road
+        None, Junction, Road
     }
 
     /// <summary>
@@ -40,7 +40,9 @@
     public class RoadEnumStrings {
         
         public static string[] laneDirectionToString = {"Left", "Center", "Right"};
-        public static string[] laneTypeToString = {"None", "Sidewalk", "Driving"};
+
+        public static string[] laneTypeToString =
+            {"None", "Driving", "Biking", "Restricted", "Sidewalk", "Border", "Shoulder"};
 
     }
     

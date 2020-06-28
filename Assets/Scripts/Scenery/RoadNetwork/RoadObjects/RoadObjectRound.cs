@@ -121,7 +121,6 @@ namespace Scenery.RoadNetwork.RoadObjects {
             tree.transform.position = Parent.EvaluatePoint(S, m * T, ZOffset);
             
             var completeHdg = Parent.EvaluateHeading(S) + Heading;
-            Debug.Log("Rotating to " + Parent.EvaluateHeading(S) + " + " + Heading);
             tree.transform.Rotate(Vector3.up, Mathf.Rad2Deg * completeHdg);
         }
 
@@ -130,6 +129,7 @@ namespace Scenery.RoadNetwork.RoadObjects {
             buildingBase.transform.SetGlobalScale(new Vector3(Radius * 2, Height / 2, Radius * 2));
             buildingBase.GetComponent<MeshRenderer>().material =
                 RoadDesign.GetRoadObjectMaterial(RoadObjectType, SubType).material;
+            buildingBase.transform.parent = transform;
             
             var m = Orientation == RoadObjectOrientation.Negative ? -1 : 1;
             buildingBase.transform.position = Parent.EvaluatePoint(S, m * T, ZOffset + Height / 2f);

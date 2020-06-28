@@ -28,14 +28,8 @@ namespace Scenery.RoadNetwork {
         public float sidewalkCurbWidth;
         public float offsetHeight = 0.0001f;
         
-        [Header("Main Materials")]
-        public Material roadBase;
-        public Material sidewalkCurb;
-        public Material sidewalk;
-        public Material roadBiking;
-        public Material roadRestricted;
-        public Material none;
-        public Material terrain;
+        [Header("Lane Materials")]
+        public List<LaneMaterial> laneMaterials = new List<LaneMaterial>();
 
         [Header("RoadMark Options")] 
         public Material broken;
@@ -56,21 +50,8 @@ namespace Scenery.RoadNetwork {
 
         private Random _random;
 
-        public Material GetMaterialForLaneType(LaneType laneType) {
-            switch (laneType) {
-                case LaneType.None:
-                case LaneType.Sidewalk:
-                    // handled in Lane
-                    return none;
-                case LaneType.Driving:
-                    return roadBase;
-                case LaneType.Biking:
-                    return roadBiking;
-                case LaneType.Restricted:
-                    return roadRestricted;
-                default:
-                    return none;
-            }
+        public LaneMaterial GetLaneMaterial(LaneType laneType, string subType = "") {
+            return laneMaterials.First(lm => lm.laneType == laneType && lm.subType == subType);
         }
 
         public RoadObjectPrefab GetRoadObjectPrefab(RoadObjectType type, string subType = "") {
@@ -122,5 +103,13 @@ namespace Scenery.RoadNetwork {
         public Material material;
         public RoadObjectType type;
         public string subType;
+    }
+
+    [Serializable]
+    public class LaneMaterial {
+        public LaneType laneType;
+        public string subType = "";
+        public Color color;
+        public Material material;
     }
 }

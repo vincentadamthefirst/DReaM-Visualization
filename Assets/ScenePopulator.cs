@@ -26,6 +26,7 @@ public class ScenePopulator : MonoBehaviour {
             var newRandom = Instantiate(randomObjectPrefab);
             newRandom.name = "Object " + count;
             newRandom.transform.position = new Vector3(Random.Range(-areaWidth / 2, areaWidth / 2), Random.Range(0, areaHeight), Random.Range(-areaLength / 2, areaLength / 2));
+            newRandom.GetComponent<MeshRenderer>().material.renderQueue = 5000;
             if (randomRotation) newRandom.transform.rotation = Random.rotation;
             cameraScript.AddPossibleOccludingObject(newRandom.GetComponent<SceneryObject>());
             
@@ -36,6 +37,7 @@ public class ScenePopulator : MonoBehaviour {
             var newCube = Instantiate(randomObjectPrefab);
             newCube.transform.position = new Vector3(3f - (float) i * 1.5f, 1, -30f);
             cameraScript.AddPossibleOccludingObject(newCube.GetComponent<SceneryObject>());
+            newCube.GetComponent<MeshRenderer>().material.renderQueue = 5000;
         }
     }
 }

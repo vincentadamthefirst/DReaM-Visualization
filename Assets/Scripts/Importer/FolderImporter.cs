@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using Importer.XMLHandlers;
-using Utils.VisualizationSystem;
 
 namespace Importer {
 

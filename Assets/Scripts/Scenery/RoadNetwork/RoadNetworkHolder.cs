@@ -47,19 +47,12 @@ namespace Scenery.RoadNetwork {
             terrain.transform.position =
                 new Vector3(bounds.center.x - i / 2f, 0, bounds.center.z -  i / 2f);
 
-            var material = new Material(roadDesign.terrain);
-            var p = material.GetTextureScale(BumpMap);
-            var v = new Vector2((bounds.extents.x * 2f + 100f) * p.x, (bounds.extents.z * 2f + 100f) * p.y);
-            material.SetTextureScale(BumpMap, v);
-            material.SetTextureScale(BaseMap, v);
-            material.SetTextureScale(OcclusionMap, v);
-
-            var lowest = float.PositiveInfinity;
+            var lowest = float.NegativeInfinity;
             foreach (var junction in Junctions) {
-                if (junction.Value.LowestPoint < lowest) lowest = junction.Value.LowestPoint;
+                if (junction.Value.LowestPoint > lowest) lowest = junction.Value.LowestPoint;
             }
 
-            if (lowest == float.PositiveInfinity) lowest = roadDesign.offsetHeight;
+            if (float.IsNegativeInfinity(lowest)) lowest = roadDesign.offsetHeight;
 
             lowest += roadDesign.offsetHeight * 5;
 
@@ -77,28 +70,20 @@ namespace Scenery.RoadNetwork {
         }
 
         public void CreateMeshes() {
-            foreach (var roadEntry in Roads) {
-                var successorId = roadEntry.Value.SuccessorOdId;
-                if (successorId != "x" && Roads.ContainsKey(successorId)) {
-                    roadEntry.Value.Successor = Roads[successorId];
-
-                    var lastLaneSections = roadEntry.Value.LaneSections;
-                    var nextLaneSections = Roads[successorId].LaneSections;
-
-                    var lastLaneSection = lastLaneSections[lastLaneSections.Count - 1];
-                    var nextLaneSection = Roads[successorId].SuccessorContactPoint == ContactPoint.End
-                        ? nextLaneSections[nextLaneSections.Count - 1]
-                        : nextLaneSections[0];
-
-                    foreach (var laneEntry in lastLaneSection.LaneIdMappings) {
-                        if (!nextLaneSection.LaneIdMappings.ContainsKey(laneEntry.Value.SuccessorId)) continue;
-                        laneEntry.Value.Successor = nextLaneSection.LaneIdMappings[laneEntry.Value.SuccessorId];
-                    }
+            foreach (var road in Roads.Values) {
+                if (road.SuccessorElementType == ElementType.Road) {
+                    if (Roads.ContainsKey(road.SuccessorOdId)) road.Successor = Roads[road.SuccessorOdId];
+                } else { // successor is junction
+                    if (Junctions.ContainsKey(road.SuccessorOdId)) road.Successor = Junctions[road.SuccessorOdId];
                 }
+            }
+
+            foreach (var road in Roads.Values) {
+                road.PrepareLaneSuccessors();
             }
             
             foreach (var roadsValue in Roads.Values) {
-                roadsValue.Prepare();
+                roadsValue.PrepareLaneSectionsAndGeometries();
             }
 
             foreach (var entry in Roads) {
