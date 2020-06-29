@@ -8,56 +8,72 @@ using Scenery.RoadNetwork;
 using Scenery.RoadNetwork.RoadGeometries;
 using UnityEngine;
 using Utils.VersionSystem;
+using Visualization;
 
 public class TestScript : MonoBehaviour {
 
     public RoadNetworkHolder roadNetworkHolder;
 
+    public VisualizationMaster visualizationMaster;
+
     public Terrain terrain;
 
     public int debugTestFile = 0;
-
-    // Start is called before the first frame update
+    
     void Start() {
-        SceneryXmlHandler handler = new SceneryXmlHandler();
+        // IMPORT OF OPENDRIVE
+        
+        var sceneryImporter = new SceneryXmlHandler();
 
         switch (debugTestFile) {
             case 0:
-                handler.SetFilePath("C:\\OpenPass\\bin\\configs\\SceneryConfiguration.xodr");
+                sceneryImporter.SetFilePath("C:\\OpenPass\\bin\\configs\\SceneryConfiguration.xodr");
                 break;
             case 1:
-                handler.SetFilePath("C:\\OpenPass\\bin\\configs\\Ackermann_Zellesch.xodr");
+                sceneryImporter.SetFilePath("C:\\OpenPass\\bin\\configs\\Ackermann_Zellesch.xodr");
                 break;
             case 2:
-                handler.SetFilePath("C:\\OpenPass\\bin\\configs\\Budapester_Nossener.xodr");
+                sceneryImporter.SetFilePath("C:\\OpenPass\\bin\\configs\\Budapester_Nossener.xodr");
                 break;
             case 3:
-                handler.SetFilePath("C:\\OpenPass\\bin\\configs\\Chemnitzer_Würzburger.xodr");
+                sceneryImporter.SetFilePath("C:\\OpenPass\\bin\\configs\\Chemnitzer_Würzburger.xodr");
                 break;
             case 4:
-                handler.SetFilePath("C:\\OpenPass\\bin\\configs\\DeadEnd.xodr");
+                sceneryImporter.SetFilePath("C:\\OpenPass\\bin\\configs\\DeadEnd.xodr");
                 break;
             case 5:
-                handler.SetFilePath("C:\\OpenPass\\bin\\configs\\Crossing8Course.xodr");
+                sceneryImporter.SetFilePath("C:\\OpenPass\\bin\\configs\\Crossing8Course.xodr");
                 break;
             case 6:
-                handler.SetFilePath("C:\\OpenPass\\bin\\configs\\Roundabout8Course.xodr");
+                sceneryImporter.SetFilePath("C:\\OpenPass\\bin\\configs\\Roundabout8Course.xodr");
                 break;
             case 7:
-                handler.SetFilePath("C:\\OpenPass\\bin\\configs\\CrossingComplex8Course.xodr");
+                sceneryImporter.SetFilePath("C:\\OpenPass\\bin\\configs\\CrossingComplex8Course.xodr");
                 break;
             case 8:
-                handler.SetFilePath("C:\\OpenPass\\bin\\configs\\whack.xodr");
+                sceneryImporter.SetFilePath("C:\\OpenPass\\bin\\configs\\whack.xodr");
                 break;
             default:
-                handler.SetFilePath("C:\\OpenPass\\bin\\configs\\SceneryConfiguration.xodr");
+                sceneryImporter.SetFilePath("C:\\OpenPass\\bin\\configs\\SceneryConfiguration.xodr");
                 break;
         }
         
-        handler.roadNetworkHolder = roadNetworkHolder;
+        sceneryImporter.roadNetworkHolder = roadNetworkHolder;
         
-        handler.StartImport();
+        sceneryImporter.StartImport();
         
         roadNetworkHolder.ShowSimpleGround(terrain);
+        
+        // IMPORT OF OPENPASS (OpenSpaaaaaaaß)
+        
+        var outputImporter = new SimulationOutputXmlHandler();
+        outputImporter.SetFilePath("C:\\OpenPass\\bin\\results\\simulationOutput.xml");
+        outputImporter.visualizationMaster = visualizationMaster;
+        outputImporter.StartImport();
+
+        // TODO implement parsing of ModelsCatalog
+        
+        visualizationMaster.PrepareAgents();
+        
     }
 }

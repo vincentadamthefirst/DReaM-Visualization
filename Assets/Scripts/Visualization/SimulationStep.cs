@@ -1,20 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using UnityEngine;
-using Vector2 = System.Numerics.Vector2;
 
 namespace Visualization {
-    public class SimulationStep<T> where T : AdditionalAgentInformation {
-        /// <summary>
-        /// The previous SimulationStep, might be null if this is the first step.
-        /// </summary>
-        public SimulationStep<T> Previous { get; set; }
-        
+    public class SimulationStep {
         /// <summary>
         /// The next SimulationStep, might be null if this is the last step.
         /// </summary>
-        public SimulationStep<T> Next { get; set; }
+        public SimulationStep Next { get; set; }
         
         /// <summary>
         /// The time (in ms) of this SimulationStep.
@@ -49,7 +41,7 @@ namespace Visualization {
         /// <summary>
         /// The additional information for an agent at this SimulationStep
         /// </summary>
-        public T AdditionalInformation { get; set; }
+        public AdditionalAgentInformation AdditionalInformation { get; set; }
     }
 
     public abstract class SensorInformation {
