@@ -26,5 +26,25 @@ namespace Utils {
         public static int RoundDownToMultipleOf(this int toRound, int multiple) {
             return toRound - (toRound % multiple);
         }
+
+        public static void ScaleToValue(this Transform transform, float length, float width, float height) {
+            var allBounds = new Bounds();
+            var renderers = transform.GetComponentsInChildren<Renderer>();
+            foreach (var renderer in renderers) {
+                allBounds.Encapsulate(renderer.bounds);
+            }
+
+            var sizeX = allBounds.size.x;
+            var sizeY = allBounds.size.y;
+            var sizeZ = allBounds.size.z;
+
+            var rescale = transform.localScale;
+            
+            rescale.x = length * rescale.x / sizeX;
+            rescale.y = height * rescale.y / sizeY;
+            rescale.z = width * rescale.z / sizeZ;
+            
+            transform.localScale = rescale;
+        }
     }
 }

@@ -16,7 +16,7 @@ MonoBehaviour:
   vehiclePrefab: {fileID: 1355119702227136009, guid: e612f190c653f194385110a5f17f48a8, type: 3}
   agentModels:
   - agentType: 0
-    model: {fileID: 8792099527049791519, guid: 358f5d1e2c8c11a43854c90e540b3f52, type: 3}
+    model: {fileID: 9121800192995023630, guid: 065e7830a165f024f9807bd6c831065a, type: 3}
     modelName: bmw_7_1
   - agentType: 1
     model: {fileID: 6657759557755102578, guid: a0db774c791ad834899632ff88998c3a, type: 3}

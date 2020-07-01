@@ -80,6 +80,8 @@ namespace Importer.XMLHandlers {
 
         private void ParseVehicleSampleValues(SimulationStep step, XmlAgent agent, XElement sample) {
             // TODO implement
+            var info = new AdditionalVehicleInformation();
+            step.AdditionalInformation = info;
         }
 
         private void ParsePedestrianSampleValues(SimulationStep step, XmlAgent agent, XElement sample) {

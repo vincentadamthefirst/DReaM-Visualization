@@ -56,7 +56,7 @@ namespace Visualization.Agents {
         /// <summary>
         /// Prepares this agent
         /// </summary>
-        public void Prepare() {
+        public virtual void Prepare() {
             maxTimeStep = SimulationSteps.Max(e => e.Key);
             minTimeStep = SimulationSteps.Min(e => e.Key);
 
@@ -66,10 +66,6 @@ namespace Visualization.Agents {
             }
 
             timeStepSize = SimulationSteps.Values.ToArray()[1].Time - SimulationSteps.Values.ToArray()[0].Time;
-            
-            Model.transform.GetChild(0).transform.localPosition -= new Vector3(1.285f, 0, 0);
-
-            // TODO offset using ModelInformation
         }
 
         /// <summary>

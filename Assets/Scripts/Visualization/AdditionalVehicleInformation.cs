@@ -23,5 +23,10 @@ namespace Visualization {
         /// Other Agents that his agent sees at this point in time
         /// </summary>
         public Tuple<Vector2, float, float>[] OtherAgents { get; set; }
+        
+        /// <summary>
+        /// The WheelRotation at this sample
+        /// </summary>
+        public float WheelRotation { get; set; }
     }
 }
