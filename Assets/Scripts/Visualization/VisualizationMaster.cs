@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using UI;
 using UnityEngine;
 using Visualization.Agents;
 
 namespace Visualization {
     public class VisualizationMaster : MonoBehaviour {
+
+        public PlaybackControl playbackControl;
 
         public List<Agent> Agents { get; } = new List<Agent>();
 
@@ -17,11 +20,18 @@ namespace Visualization {
         public bool PlayBackwards { get; set; }
 
         public bool Pause { get; set; } = true;
-
+        
         public void PrepareAgents() {
             Agents.ForEach(a => a.Prepare());
+            
+            playbackControl.SetTotalTime(MaxSampleTime);
         }
 
+        /// <summary>
+        /// Initializes a new vehicle agent and returns a reference to it.
+        /// </summary>
+        /// <param name="modelType">The model type of the agent</param>
+        /// <returns>The instantiated agent</returns>
         public VehicleAgent InstantiateVehicleAgent(string modelType) {
             var na = Instantiate(agentDesigns.vehiclePrefab, transform, true);
             var model = Instantiate(agentDesigns.GetAgentModel(AgentType.Vehicle, modelType).model, na.transform, true);
@@ -31,27 +41,20 @@ namespace Visualization {
             return na;
         }
         
+        /// <summary>
+        /// Initializes a new pedestrian agent and returns a reference to it.
+        /// </summary>
+        /// <returns>The instantiated agent</returns>
         public PedestrianAgent InstantiatePedestrian() {
             var na = Instantiate(agentDesigns.pedestrianPrefab, transform, true);
+            var model = Instantiate(agentDesigns.GetAgentModel(AgentType.Pedestrian, "pedestrian").model, na.transform, true);
             Agents.Add(na);
-
+            na.Model = model;
+            
             return na;
         }
 
         private void Update() {
-            if (Input.GetKeyUp(KeyCode.Space)) {
-                if (Pause)
-                    Pause = false;
-                else {
-                    Agents.ForEach(a => a.Pause());
-                    Pause = true;
-                }
-            }
-
-            if (Input.GetKeyUp(KeyCode.Backspace)) {
-                PlayBackwards = !PlayBackwards;
-            }
-            
             if (Pause) return;
             
             CurrentTime = PlayBackwards
@@ -64,6 +67,8 @@ namespace Visualization {
             foreach (var agent in Agents) {
                 agent.UpdateForTimeStep(CurrentTime);
             }
+            
+            playbackControl.UpdateCurrentTime(CurrentTime);
         }
     }
 }

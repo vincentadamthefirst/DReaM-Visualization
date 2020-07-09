@@ -30,28 +30,28 @@ public class TestScript : MonoBehaviour {
                 sceneryImporter.SetFilePath("C:\\OpenPass\\bin\\configs\\SceneryConfiguration.xodr");
                 break;
             case 1:
-                sceneryImporter.SetFilePath("C:\\OpenPass\\bin\\configs\\Ackermann_Zellesch.xodr");
+                sceneryImporter.SetFilePath("C:\\OpenPass\\bin\\configs\\Configset Juli 2020\\Ackermann_Zellesch.xodr");
                 break;
             case 2:
-                sceneryImporter.SetFilePath("C:\\OpenPass\\bin\\configs\\Budapester_Nossener.xodr");
+                sceneryImporter.SetFilePath("C:\\OpenPass\\bin\\configs\\Configset Juli 2020\\Budapester_Nossener.xodr");
                 break;
             case 3:
-                sceneryImporter.SetFilePath("C:\\OpenPass\\bin\\configs\\Chemnitzer_Würzburger.xodr");
+                sceneryImporter.SetFilePath("C:\\OpenPass\\bin\\configs\\Configset Juli 2020\\Chemnitzer_Würzburger.xodr");
                 break;
             case 4:
-                sceneryImporter.SetFilePath("C:\\OpenPass\\bin\\configs\\DeadEnd.xodr");
+                sceneryImporter.SetFilePath("C:\\OpenPass\\bin\\configs\\Configset Juli 2020\\DeadEnd.xodr");
                 break;
             case 5:
-                sceneryImporter.SetFilePath("C:\\OpenPass\\bin\\configs\\Crossing8Course.xodr");
+                sceneryImporter.SetFilePath("C:\\OpenPass\\bin\\configs\\Configset Juli 2020\\Crossing8Course.xodr");
                 break;
             case 6:
-                sceneryImporter.SetFilePath("C:\\OpenPass\\bin\\configs\\Roundabout8Course.xodr");
+                sceneryImporter.SetFilePath("C:\\OpenPass\\bin\\configs\\Configset Juli 2020\\Roundabout8Course.xodr");
                 break;
             case 7:
-                sceneryImporter.SetFilePath("C:\\OpenPass\\bin\\configs\\CrossingComplex8Course.xodr");
+                sceneryImporter.SetFilePath("C:\\OpenPass\\bin\\configs\\Configset Juli 2020\\CrossingComplex8Course.xodr");
                 break;
             case 8:
-                sceneryImporter.SetFilePath("C:\\OpenPass\\bin\\configs\\whack.xodr");
+                sceneryImporter.SetFilePath("C:\\OpenPass\\bin\\configs\\Configset Juli 2020\\whack.xodr");
                 break;
             default:
                 sceneryImporter.SetFilePath("C:\\OpenPass\\bin\\configs\\SceneryConfiguration.xodr");
@@ -67,7 +67,7 @@ public class TestScript : MonoBehaviour {
         // IMPORT OF OPENPASS (OpenSpaaaaaaaß)
         
         var outputImporter = new SimulationOutputXmlHandler();
-        outputImporter.SetFilePath("C:\\OpenPass\\bin\\results\\simulationOutput.xml");
+        outputImporter.SetFilePath("C:\\OpenPass\\bin - Kopie\\results\\simulationOutput.xml");
         outputImporter.visualizationMaster = visualizationMaster;
         outputImporter.StartImport();
 

@@ -8,9 +8,6 @@ using UnityEngine.UI;
 
 namespace UI.MagicUI {
     public class MagicUiButton : MagicUiComponent, IPointerEnterHandler, IPointerExitHandler {
-        public Animation fillAnimation;
-        public Animation textAnimation;
-
         [Header("Button")]
         public Color buttonNormalColor;
         public Color buttonHoverColor;
@@ -34,8 +31,6 @@ namespace UI.MagicUI {
 
         protected override void OnSkinUI() {
             base.OnSkinUI();
-            
-            
         }
 
         public void Start() {

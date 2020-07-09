@@ -23,8 +23,15 @@ namespace Scenery.RoadNetwork.RoadGeometries {
             _dU = dU;
         }
         public override Vector2 Evaluate(float s, float t) {
-            //if (s >= length) s = length - 0.5f;
-            // TODO check why this is so buggy
+            if (Math.Abs(_aV) < Tolerance && Math.Abs(_bV) < Tolerance && Math.Abs(_cV) < Tolerance &&
+                Math.Abs(_dV) < Tolerance) {
+                var offsetLine = new Vector2(s, t);
+                offsetLine.RotateRadians(hdg);
+                offsetLine.x += x;
+                offsetLine.y += y;
+
+                return offsetLine;
+            }
 
             var k = 0f;
             var lastPosition = new Vector2();
@@ -71,6 +78,12 @@ namespace Scenery.RoadNetwork.RoadGeometries {
         }
 
         public override float EvaluateHeading(float s) {
+            if (Math.Abs(_aV) < Tolerance && Math.Abs(_bV) < Tolerance && Math.Abs(_cV) < Tolerance &&
+                Math.Abs(_dV) < Tolerance) {
+                return hdg;
+            }
+            
+            
             var k = 0f;
             var lastPosition = new Vector2();
             var delta = new Vector2();

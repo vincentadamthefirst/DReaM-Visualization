@@ -22,7 +22,7 @@ public class ScenePopulator : MonoBehaviour {
         Debug.Assert(Camera.main != null, "Camera.main != null");
         var cameraScript = Camera.main.GetComponent<OcclusionController>();
 
-        while (count < randomObjectCount) {
+        while (count < randomObjectCount - 1) {
             var newRandom = Instantiate(randomObjectPrefab);
             newRandom.name = "Object " + count;
             newRandom.transform.position = new Vector3(Random.Range(-areaWidth / 2, areaWidth / 2), Random.Range(0, areaHeight), Random.Range(-areaLength / 2, areaLength / 2));
@@ -33,6 +33,7 @@ public class ScenePopulator : MonoBehaviour {
             count++;
         }
 
+        return;
         for (var i = 0; i < 10; i++) {
             var newCube = Instantiate(randomObjectPrefab);
             newCube.transform.position = new Vector3(3f - (float) i * 1.5f, 1, -30f);

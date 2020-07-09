@@ -112,38 +112,13 @@ namespace Scenery.RoadNetwork {
                         var lastLane = lastLaneSection.LaneIdMappings[ll.From];
                         var nextLane = nextLaneSection.LaneIdMappings[ll.To];
 
+                        // TODO maybe add? Changes lane that is considered the important successor)
                         //if (lastLane.Successor == null) {
                             lastLane.Successor = nextLane;
                             lastLane.SuccessorContactPoint = conn.ContactPoint;
                         //}
                     }
                 }
-
-                return;
-                // var successor = Successor as Junction;
-                // if (successor == null) return;
-                //
-                // foreach (var connection in successor.Connections) {
-                //     if (connection.IncomingRoadOdId != OpenDriveId) continue;
-                //     if (!successor.Roads.ContainsKey(connection.ConnectingRoadOdId)) continue;
-                //     
-                //     var successorRoad = successor.Roads[connection.ConnectingRoadOdId]; // connection road
-                //
-                //     var cls = LaneSections[LaneSections.Count - 1]; // current LaneSection
-                //     var nls = connection.ContactPoint == ContactPoint.Start // next LaneSection
-                //         ? successorRoad.LaneSections[0]
-                //         : successorRoad.LaneSections[successorRoad.LaneSections.Count - 1];
-                //
-                //     foreach (var laneLink in connection.LaneLinks) {
-                //         if (cls.LaneIdMappings.ContainsKey(laneLink.From) && nls.LaneIdMappings.ContainsKey(laneLink.To)) {
-                //             if (cls.LaneIdMappings[laneLink.From].Successor == null) {
-                //                 cls.LaneIdMappings[laneLink.From] = nls.LaneIdMappings[laneLink.To];
-                //                 cls.LaneIdMappings[laneLink.From].SuccessorContactPoint =
-                //                     connection.ContactPoint;
-                //             }
-                //         }
-                //     }
-                // }
             }
         }
 

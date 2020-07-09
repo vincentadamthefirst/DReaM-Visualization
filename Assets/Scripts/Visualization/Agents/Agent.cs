@@ -35,10 +35,10 @@ namespace Visualization.Agents {
         protected int globalTimeMs;
 
         // the maximum time step for this agent
-        protected int maxTimeStep;
+        public int MaxTimeStep { get; private set; }
         
         // the minimum time step for this agent
-        protected int minTimeStep;
+        public int MinTimeStep { get; private set; }
 
         // the delta time to the previous sample
         protected int deltaTMs;
@@ -57,8 +57,8 @@ namespace Visualization.Agents {
         /// Prepares this agent
         /// </summary>
         public virtual void Prepare() {
-            maxTimeStep = SimulationSteps.Max(e => e.Key);
-            minTimeStep = SimulationSteps.Min(e => e.Key);
+            MaxTimeStep = SimulationSteps.Max(e => e.Key);
+            MinTimeStep = SimulationSteps.Min(e => e.Key);
 
             var ordered = SimulationSteps.Values.OrderBy(s => s.Time).ToArray();
             for (var i = 0; i < SimulationSteps.Values.Count - 1; i++) {
@@ -76,7 +76,7 @@ namespace Visualization.Agents {
         public void UpdateForTimeStep(int timeStep) {
             globalTimeMs = timeStep;
 
-            if (timeStep > maxTimeStep || timeStep < minTimeStep) {
+            if (timeStep > MaxTimeStep || timeStep < MinTimeStep) {
                 if (!deactivated) Deactivate();
             } else {
                 if (deactivated) Activate();
@@ -85,6 +85,8 @@ namespace Visualization.Agents {
             if (deactivated) return;
             
             previous = SimulationSteps[timeStep.RoundDownToMultipleOf(timeStepSize)];
+
+            if (previous.Next == null) return;
 
             deltaTMs = timeStep - previous.Time;
             if (Mathf.Abs(previous.Acceleration) < 0.00001f) {

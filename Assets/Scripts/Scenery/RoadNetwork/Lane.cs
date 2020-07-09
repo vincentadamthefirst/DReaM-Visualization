@@ -93,12 +93,7 @@ namespace Scenery.RoadNetwork {
         /// <summary>
         /// The widths of this Lane segment, ordered by sOffset (low to high)
         /// </summary>
-        private List<LaneWidth> Widths { get; set; }
-        
-
-        public Lane() {
-            Widths = new List<LaneWidth>();
-        }
+        private List<LaneWidth> Widths { get; set; } = new List<LaneWidth>();
 
         public void AddWidthEntry(float sOffset, float a, float b, float c, float d) {
             var newEntry = new LaneWidth(sOffset, a, b, c, d);

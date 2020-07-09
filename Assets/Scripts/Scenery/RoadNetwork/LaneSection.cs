@@ -111,8 +111,7 @@ namespace Scenery.RoadNetwork {
         }
 
         /// <summary>
-        /// Starts the mesh generation for this LaneSections children Lanes. Also sets the neighbors for the children
-        /// Lanes.
+        /// Starts the mesh generation for this LaneSections children Lanes.
         /// </summary>
         public void StartMeshGeneration() {
             CenterLane.GenerateMesh();
@@ -142,13 +141,5 @@ namespace Scenery.RoadNetwork {
         public float EvaluateHeading(float s) {
             return Parent.EvaluateHeading(S + s);
         }
-
-        // TODO
-        // Referenz auf das zugehörige Road Objekt
-        // Werte: start sOffset
-        // Methode um Mesh Generierung zu starten
-        //     --> berechnet einen boolean, ob diese Lane Section sich komplett in einem Line-Segment befindet
-        //     --> kaskadiert Mesh Generierung an alle Lanes
-        // Methode um an s & t Coordinate geometry auszuwerten (returnt Ergebnis von der parent road)
     }
 }

@@ -15,11 +15,6 @@ namespace Scenery.RoadNetwork {
 
         private const int RoadLayer = 17;
         private const int ObjectLayer = 19;
-        
-        // Properties for materials
-        private static readonly int BumpMap = Shader.PropertyToID("_BumpMap");
-        private static readonly int BaseMap = Shader.PropertyToID("_BaseMap");
-        private static readonly int OcclusionMap = Shader.PropertyToID("_OcclusionMap");
 
         public RoadNetworkHolder() {
             LaneSections = new List<LaneSection>();
@@ -82,8 +77,8 @@ namespace Scenery.RoadNetwork {
                 road.PrepareLaneSuccessors();
             }
             
-            foreach (var roadsValue in Roads.Values) {
-                roadsValue.PrepareLaneSectionsAndGeometries();
+            foreach (var road in Roads.Values) {
+                road.PrepareLaneSectionsAndGeometries();
             }
 
             foreach (var entry in Roads) {

@@ -193,7 +193,7 @@ namespace Importer.XMLHandlers {
             newRoadObj.Radius = float.Parse(obj.Attribute("radius")?.Value ?? "1",
                 CultureInfo.InvariantCulture.NumberFormat);
 
-            switch (type) {
+            switch (type.ToLower()) {
                 case "streetlamp":
                     newRoadObj.RoadObjectType = RoadObjectType.StreetLamp;
                     break;
@@ -220,7 +220,7 @@ namespace Importer.XMLHandlers {
             newRoadObj.Length = float.Parse(obj.Attribute("length")?.Value ?? "1",
                 CultureInfo.InvariantCulture.NumberFormat);
 
-            switch (type) {
+            switch (type.ToLower()) {
                 case "building":
                     newRoadObj.RoadObjectType = RoadObjectType.Building;
                     break;
@@ -277,17 +277,17 @@ namespace Importer.XMLHandlers {
                     CultureInfo.InvariantCulture.NumberFormat),
                 Distance = float.Parse(repeat.Attribute("distance")?.Value ?? "1",
                     CultureInfo.InvariantCulture.NumberFormat),
-                TStart = float.Parse(repeat.Attribute("tStart")?.Value ?? "0",
+                TStart = float.Parse(repeat.Attribute("tStart")?.Value ?? roadObject.T + "",
                     CultureInfo.InvariantCulture.NumberFormat),
-                TEnd = float.Parse(repeat.Attribute("tEnd")?.Value ?? "0",
+                TEnd = float.Parse(repeat.Attribute("tEnd")?.Value ?? roadObject.T + "",
                     CultureInfo.InvariantCulture.NumberFormat),
-                HeightStart = float.Parse(repeat.Attribute("heightStart")?.Value ?? "1",
+                HeightStart = float.Parse(repeat.Attribute("heightStart")?.Value ?? roadObject.Height + "",
                     CultureInfo.InvariantCulture.NumberFormat),
-                HeightEnd = float.Parse(repeat.Attribute("heightEnd")?.Value ?? "1",
+                HeightEnd = float.Parse(repeat.Attribute("heightEnd")?.Value ?? roadObject.Height + "",
                     CultureInfo.InvariantCulture.NumberFormat),
-                ZOffsetStart = float.Parse(repeat.Attribute("zOffsetEnd")?.Value ?? "0",
+                ZOffsetStart = float.Parse(repeat.Attribute("zOffsetEnd")?.Value ?? roadObject.ZOffset + "",
                     CultureInfo.InvariantCulture.NumberFormat),
-                ZOffsetEnd = float.Parse(repeat.Attribute("zOffsetStart")?.Value ?? "0",
+                ZOffsetEnd = float.Parse(repeat.Attribute("zOffsetStart")?.Value ?? roadObject.ZOffset + "",
                     CultureInfo.InvariantCulture.NumberFormat)
             };
         }
