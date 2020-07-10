@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using Scenery;
+using Scenery.RoadNetwork;
 using UnityEngine;
 
 namespace Visualization {
@@ -7,6 +9,11 @@ namespace Visualization {
         /// The next SimulationStep, might be null if this is the last step.
         /// </summary>
         public SimulationStep Next { get; set; }
+        
+        /// <summary>
+        /// The previous SimulationStep, might be null if this is the first step.
+        /// </summary>
+        public SimulationStep Previous { get; set; }
         
         /// <summary>
         /// The time (in ms) of this SimulationStep.
@@ -42,6 +49,31 @@ namespace Visualization {
         /// The additional information for an agent at this SimulationStep
         /// </summary>
         public AdditionalAgentInformation AdditionalInformation { get; set; }
+
+        /// <summary>
+        /// The id of the OpenDrive Objects that the agent is currently on, can be a road or junction id
+        /// </summary>
+        public string OnId { get; set; } = "-1";
+        
+        /// <summary>
+        /// The element that the agent is on
+        /// </summary>
+        public GameObject OnElement { get; set; }
+        
+        /// <summary>
+        /// Whether the agent is currently on a junction
+        /// </summary>
+        public bool OnJunction { get; set; }
+        
+        /// <summary>
+        /// If the id of the road the agent is on is different from the next road
+        /// </summary>
+        public bool OnIdChangedTowardsNext { get; set; }
+        
+        /// <summary>
+        /// If the id of the road the agent is on is different from the previous road
+        /// </summary>
+        public bool OnIdChangedTowardsPrevious { get; set; }
     }
 
     public abstract class SensorInformation {

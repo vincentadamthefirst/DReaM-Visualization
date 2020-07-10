@@ -46,5 +46,12 @@ namespace Utils {
             
             transform.localScale = rescale;
         }
+        
+        public static void SetLayerRecursive(this GameObject obj, int layer) {
+            obj.layer = layer;
+            foreach (Transform child in obj.transform) {
+                SetLayerRecursive(child.gameObject, layer);
+            }
+        }
     }
 }

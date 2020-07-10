@@ -1,5 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
+using Scenery;
+using Scenery.RoadNetwork;
 using UnityEngine;
 using Utils;
 
@@ -22,8 +26,16 @@ namespace Visualization.Agents {
         /// The Model Information for this Agent
         /// </summary>
         public ModelInformation ModelInformation { get; set; }
+        
+        /// <summary>
+        /// The RoadNetworkHolder to Perfom layer change for certain roads
+        /// </summary>
+        public RoadNetworkHolder RoadNetworkHolder { get; set; }
 
         // TODO add Label
+        
+        // if the agent is a target object
+        private bool _isTarget;
 
         // if the agent is deactivated
         protected bool deactivated;
@@ -62,7 +74,26 @@ namespace Visualization.Agents {
 
             var ordered = SimulationSteps.Values.OrderBy(s => s.Time).ToArray();
             for (var i = 0; i < SimulationSteps.Values.Count - 1; i++) {
+                // setting the next simulation step
                 ordered[i].Next = ordered[i + 1];
+                ordered[i + 1].Previous = ordered[i];
+
+                // setting the bools to check if there was a road change
+                if (ordered[i].OnId == ordered[i + 1].OnId) continue;
+                ordered[i].OnIdChangedTowardsNext = true;
+                ordered[i + 1].OnIdChangedTowardsPrevious = true;
+            }
+
+            ordered[0].OnIdChangedTowardsPrevious = true;
+            ordered[ordered.Length - 1].OnIdChangedTowardsNext = true;
+
+            foreach (var simulationStep in SimulationSteps.Values) {
+                if (simulationStep.OnId != "" && RoadNetworkHolder.Roads.ContainsKey(simulationStep.OnId)) {
+                    var road = RoadNetworkHolder.Roads[simulationStep.OnId];
+
+                    simulationStep.OnElement = road.OnJunction ? road.ParentJunction.gameObject : road.gameObject;
+                    simulationStep.OnJunction = road.OnJunction;
+                }
             }
 
             timeStepSize = SimulationSteps.Values.ToArray()[1].Time - SimulationSteps.Values.ToArray()[0].Time;
@@ -73,7 +104,7 @@ namespace Visualization.Agents {
         /// former Position.
         /// </summary>
         /// <param name="timeStep">The new time step</param>
-        public void UpdateForTimeStep(int timeStep) {
+        public void UpdateForTimeStep(int timeStep, bool backwards) {
             globalTimeMs = timeStep;
 
             if (timeStep > MaxTimeStep || timeStep < MinTimeStep) {
@@ -99,13 +130,35 @@ namespace Visualization.Agents {
 
             UpdatePosition();
             UpdateRotation();
+            
+            if (_isTarget) UpdateRoadLayers(backwards);
         }
 
         protected abstract void UpdatePosition();
 
         protected abstract void UpdateRotation();
-
+        
         public abstract void Pause();
+
+        private void UpdateRoadLayers(bool backwards) {
+            if (backwards) {
+                if (!previous.OnIdChangedTowardsNext) return;
+                previous.OnElement.SetLayerRecursive(14);
+                try {
+                    previous.Next.OnElement.SetLayerRecursive(17);
+                } catch (Exception e) {
+                    // ignored
+                }
+            } else {
+                if (!previous.OnIdChangedTowardsPrevious) return;
+                previous.OnElement.SetLayerRecursive(14);
+                try {
+                    previous.Previous.OnElement.SetLayerRecursive(17);
+                } catch (Exception e) {
+                    // ignored
+                }
+            }
+        }
 
         protected void Deactivate() {
             deactivated = true;
@@ -115,6 +168,11 @@ namespace Visualization.Agents {
         protected void Activate() {
             deactivated = false;
             Model.SetActive(true);
+        }
+
+        public void SetIsTarget(bool target) {
+            Model.SetLayerRecursive(target ? 14 : 15);
+            _isTarget = target;
         }
     }
 }

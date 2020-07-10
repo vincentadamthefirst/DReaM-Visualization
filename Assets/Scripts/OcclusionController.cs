@@ -17,6 +17,8 @@ public class OcclusionController : MonoBehaviour {
 
     [Header("Testing")]
     public Material focusObjectMaterial;
+
+    public bool disable;
     
     [Header("Occlusion Detection")] 
     public List<SceneryObject> targetObjects = new List<SceneryObject>();
@@ -69,7 +71,7 @@ public class OcclusionController : MonoBehaviour {
     }
 
     private void Update() {
-        //return; // TODO removed for debug purposes
+        if (disable) return;
         
         if (preCheckViewFrustum) _planes = GeometryUtility.CalculateFrustumPlanes(cam);
         

@@ -15,6 +15,8 @@ namespace Scenery.RoadNetwork {
         
         public bool OnJunction { get; set; }
         
+        public Junction ParentJunction { get; set; }
+        
         public ElementType SuccessorElementType { get; set; }
         
         public string SuccessorOdId { get; set; }

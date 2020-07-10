@@ -14,12 +14,12 @@ TagManager:
   - 
   - 
   - target
+  - targetSurround
+  - testLayer
   - 
   - 
   - 
-  - 
-  - 
-  - 
+  - targets
   - agents_objects
   - agents_labels
   - scenery_road

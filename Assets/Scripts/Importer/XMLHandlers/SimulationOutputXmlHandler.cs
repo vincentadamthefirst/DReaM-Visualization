@@ -150,6 +150,8 @@ namespace Importer.XMLHandlers {
             step.Rotation = float.Parse(sampleSplit[agent.ValuePositions["YawAngle"]],
                 CultureInfo.InvariantCulture.NumberFormat);
 
+            step.OnId = sampleSplit[agent.ValuePositions["Road"]].Replace(" ", "");
+
             var posX = float.Parse(posXString, CultureInfo.InvariantCulture.NumberFormat);
             var posY = float.Parse(posYString, CultureInfo.InvariantCulture.NumberFormat);
             

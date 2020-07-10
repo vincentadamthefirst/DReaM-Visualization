@@ -100,6 +100,7 @@ namespace Scenery.RoadNetwork {
 
             if (Junctions.ContainsKey(junctionId)) {
                 Junctions[junctionId].AddRoad(newRoad);
+                newRoad.ParentJunction = Junctions[junctionId];
             }
             
             return newRoad;
