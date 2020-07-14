@@ -42,6 +42,9 @@ namespace Visualization {
             var model = Instantiate(agentDesigns.GetAgentModel(AgentType.Vehicle, modelType).model, na.transform, true);
             Agents.Add(na);
             na.Model = model;
+
+            var label = Instantiate(agentDesigns.labelPrefabScene, transform);
+            na.OwnLabel = label;
             
             return na;
         }
@@ -56,6 +59,9 @@ namespace Visualization {
             var model = Instantiate(agentDesigns.GetAgentModel(AgentType.Pedestrian, "pedestrian").model, na.transform, true);
             Agents.Add(na);
             na.Model = model;
+            
+            var label = Instantiate(agentDesigns.labelPrefabScene, transform);
+            na.OwnLabel = label;
             
             return na;
         }

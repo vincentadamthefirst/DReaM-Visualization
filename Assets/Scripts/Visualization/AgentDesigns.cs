@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Visualization.Agents;
+using Visualization.Labels;
 
 namespace Visualization {
     [CreateAssetMenu(menuName = "AgentDesigns")]
@@ -11,6 +12,7 @@ namespace Visualization {
         [Header("Prefabs")] 
         public PedestrianAgent pedestrianPrefab;
         public VehicleAgent vehiclePrefab;
+        public VehicleSceneLabel labelPrefabScene;
         
         [Header("AgentModels")]
         public List<AgentModel> agentModels = new List<AgentModel>();

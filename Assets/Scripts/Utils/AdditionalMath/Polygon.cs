@@ -7,6 +7,8 @@ namespace Utils.AdditionalMath {
 		private IList<Vector2> _points;
 		private List<Vector2> _edges;
 
+		public Vector2 center;
+
 		public Polygon(IList<Vector2> points) {
 			_points = points;
 			_edges = new List<Vector2>();
@@ -16,8 +18,14 @@ namespace Utils.AdditionalMath {
 		private void BuildEdges() {
 			Vector2 p1;
 			Vector2 p2;
+			
+			center = new Vector2();
+
 			for (var i = 0; i < _points.Count; i++) {
 				p1 = _points[i];
+
+				center += _points[i];
+				
 				if (i + 1 >= _points.Count) {
 					p2 = _points[0];
 				} else {
@@ -25,6 +33,8 @@ namespace Utils.AdditionalMath {
 				}
 				_edges.Add(p2 - p1);
 			}
+
+			center /= _points.Count;
 		}
 
 		public List<Vector2> Edges() {

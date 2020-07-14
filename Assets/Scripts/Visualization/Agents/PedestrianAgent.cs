@@ -9,6 +9,10 @@ namespace Visualization.Agents {
             base.Prepare();
             
             Model.transform.ScaleToValue(0.5f,  0.5f, 1.8f);
+            
+            // preparing the label
+            //OwnLabel.SetStrings(gameObject.name);
+            //OwnLabel.SetFloats(1.8f + 0.5f); // TODO non static
         }
 
         protected override void UpdatePosition() {
@@ -23,8 +27,10 @@ namespace Visualization.Agents {
             // no implementation needed
         }
 
-        public override void Pause() {
-            // no implementation yet
+        protected override void UpdateLabel() {
+            var modelPosition = Model.transform.position;
+            OwnLabel.UpdateFloats(modelPosition.x, modelPosition.z, previous.Velocity, previous.Acceleration);
+            OwnLabel.transform.position = modelPosition + new Vector3(0, 1.8f + 1.4f, 0); // TODO non static values
         }
     }
 }

@@ -6,6 +6,7 @@ using Scenery;
 using Scenery.RoadNetwork;
 using UnityEngine;
 using Utils;
+using Visualization.Labels;
 
 namespace Visualization.Agents {
     public abstract class Agent : MonoBehaviour {
@@ -32,7 +33,10 @@ namespace Visualization.Agents {
         /// </summary>
         public RoadNetworkHolder RoadNetworkHolder { get; set; }
 
-        // TODO add Label
+        /// <summary>
+        /// The label of this agent
+        /// </summary>
+        public Label OwnLabel { get; set; }
         
         // if the agent is a target object
         private bool _isTarget;
@@ -61,7 +65,7 @@ namespace Visualization.Agents {
         // the previous simulation step for this agent
         protected SimulationStep previous;
 
-        public Agent() {
+        protected Agent() {
             SimulationSteps = new Dictionary<int, SimulationStep>();
         }
 
@@ -104,13 +108,20 @@ namespace Visualization.Agents {
         /// former Position.
         /// </summary>
         /// <param name="timeStep">The new time step</param>
+        /// <param name="backwards">If the playback is currently backwards</param>
         public void UpdateForTimeStep(int timeStep, bool backwards) {
             globalTimeMs = timeStep;
 
             if (timeStep > MaxTimeStep || timeStep < MinTimeStep) {
-                if (!deactivated) Deactivate();
+                if (!deactivated) {
+                    Deactivate();
+                    OwnLabel.Deactivate();
+                }
             } else {
-                if (deactivated) Activate();
+                if (deactivated) {
+                    Activate();
+                    OwnLabel.Activate();
+                }
             }
 
             if (deactivated) return;
@@ -130,15 +141,20 @@ namespace Visualization.Agents {
 
             UpdatePosition();
             UpdateRotation();
-            
-            if (_isTarget) UpdateRoadLayers(backwards);
+
+            if (!_isTarget) return;
+            UpdateRoadLayers(backwards);
+            UpdateLabel();
         }
 
         protected abstract void UpdatePosition();
 
         protected abstract void UpdateRotation();
-        
-        public abstract void Pause();
+
+        /// <summary>
+        /// Get called if the agent is a target. Update the Label of this Agent with the necessary data.
+        /// </summary>
+        protected abstract void UpdateLabel();
 
         private void UpdateRoadLayers(bool backwards) {
             if (backwards) {
@@ -160,12 +176,12 @@ namespace Visualization.Agents {
             }
         }
 
-        protected void Deactivate() {
+        private void Deactivate() {
             deactivated = true;
             Model.SetActive(false);
         }
 
-        protected void Activate() {
+        private void Activate() {
             deactivated = false;
             Model.SetActive(true);
         }

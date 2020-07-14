@@ -9,17 +9,19 @@ namespace Visualization.Agents {
         private Transform _wheelRearRight, _wheelRearLeft;
 
         private float _wheelCircumference;
-        
+
+        private float _currentHdg;
+
         public override void Prepare() {
             base.Prepare();
             
             // TODO actually read these values
             
             // offsetting the agent model inside its parent
-            Model.transform.GetChild(0).transform.localPosition -= new Vector3(1.285f, 0, 0);
+            Model.transform.GetChild(0).transform.localPosition -= new Vector3(1.285f, 0, 0); // TODO non static
 
             // scaling up the model
-            Model.transform.GetChild(0).ScaleToValue(5.26f,  2.18f, 1.51f);
+            Model.transform.GetChild(0).ScaleToValue(5.26f,  2.18f, 1.51f); // TODO non static
             
             // getting all wheel information
             _wheelFrontLeft = Model.transform.GetChild(0).GetChild(0);
@@ -41,6 +43,10 @@ namespace Visualization.Agents {
                 var rot = prevInfo.WheelRotation + ((dist / _wheelCircumference) * 360f) / 4f;
                 currInfo.WheelRotation = rot % 360;
             }
+            
+            // preparing the label
+           // OwnLabel.SetStrings(gameObject.name);
+            //OwnLabel.SetFloats(1.51f + 0.5f); // TODO non static
         }
 
         protected override void UpdatePosition() {
@@ -70,10 +76,16 @@ namespace Visualization.Agents {
         }
 
         protected override void UpdateRotation() {
-            var hdg = deltaTMs * ((previous.Next.Rotation - previous.Rotation) / 100) + previous.Rotation;
-            Model.transform.rotation = Quaternion.Euler(0, -hdg * Mathf.Rad2Deg, 0);
+            _currentHdg = deltaTMs * ((previous.Next.Rotation - previous.Rotation) / 100) + previous.Rotation;
+            Model.transform.rotation = Quaternion.Euler(0, -_currentHdg * Mathf.Rad2Deg, 0);
         }
 
-        public override void Pause() { }
+        protected override void UpdateLabel() {
+            var modelPosition = Model.transform.position;
+            OwnLabel.UpdateFloats(modelPosition.x, modelPosition.z, previous.Velocity, previous.Acceleration);
+            OwnLabel.transform.position = modelPosition + new Vector3(0, 1.51f + 1.4f, 0); // TODO non static values
+
+            // TODO update strings
+        }
     }
 }
