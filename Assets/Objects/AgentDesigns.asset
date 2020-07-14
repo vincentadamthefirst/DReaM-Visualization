@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   pedestrianPrefab: {fileID: 2622044893451893758, guid: a0db774c791ad834899632ff88998c3a, type: 3}
   vehiclePrefab: {fileID: 1355119702227136009, guid: e612f190c653f194385110a5f17f48a8, type: 3}
+  labelPrefabScene: {fileID: 8953704476547388144, guid: aa0749d2f6211e64cafb14999aba9978, type: 3}
   agentModels:
   - agentType: 0
     model: {fileID: 9121800192995023630, guid: 065e7830a165f024f9807bd6c831065a, type: 3}
