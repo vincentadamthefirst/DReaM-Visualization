@@ -1,14 +1,58 @@
 ﻿using System.Collections.Generic;
+using System.Globalization;
 using UnityEngine;
+using Visualization;
+using Visualization.Agents;
 
 namespace Importer.XMLHandlers {
     public class PedestrianModelsXmlHandler : XmlHandler {
+        
+        public VisualizationMaster VisualizationMaster { get; set; }
+        
         public override string GetName() {
-            throw new System.NotImplementedException();
+            return "PedestrianModelsXmlHandler";
         }
 
         public override void StartImport() {
-            throw new System.NotImplementedException();
+            ImportPedestrianModels();
+        }
+        
+        private void ImportPedestrianModels() {
+            var catalog = xmlDocument.Root?.Element("Catalog") ??
+                          throw new ArgumentMissingException("AgentModelsCatalog has not <Catalog> entry.");
+
+            foreach (var vehicle in catalog.Elements("Vehicle")) {
+                var name = vehicle.Attribute("name")?.Value ?? "-1";
+                if (name == "-1") continue;
+                
+                // body information 
+                var boundingBox = vehicle.Element("BoundingBox");
+                var center = boundingBox?.Element("Center");
+                var dimension = boundingBox?.Element("Dimension");
+
+                var centerPoint =
+                    new Vector2(
+                        float.Parse(center?.Attribute("x")?.Value ?? "0",
+                            CultureInfo.InvariantCulture.NumberFormat),
+                        float.Parse(center?.Attribute("y")?.Value ?? "0",
+                            CultureInfo.InvariantCulture.NumberFormat));
+
+                var width = float.Parse(dimension?.Attribute("width")?.Value ?? "0.7",
+                    CultureInfo.InvariantCulture.NumberFormat);
+                var length = float.Parse(dimension?.Attribute("length")?.Value ?? "0.7",
+                    CultureInfo.InvariantCulture.NumberFormat);
+                var height = float.Parse(dimension?.Attribute("width")?.Value ?? "1.8",
+                    CultureInfo.InvariantCulture.NumberFormat);
+
+                var info = new PedestrianModelInformation() {
+                    Width = width,
+                    Length = length,
+                    Height = height,
+                    Center = centerPoint,
+                };
+                
+                VisualizationMaster.PedestrianModelCatalog.Add(name, info);
+            }
         }
 
         public override List<GameObject> GetInfoFields() {

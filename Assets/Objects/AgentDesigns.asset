@@ -17,8 +17,9 @@ MonoBehaviour:
   labelPrefabScene: {fileID: 8953704476547388144, guid: aa0749d2f6211e64cafb14999aba9978, type: 3}
   agentModels:
   - agentType: 0
-    model: {fileID: 9121800192995023630, guid: 065e7830a165f024f9807bd6c831065a, type: 3}
+    model: {fileID: 8021603542940219362, guid: 065e7830a165f024f9807bd6c831065a, type: 3}
     modelName: bmw_7_1
   - agentType: 1
-    model: {fileID: 919132149155446097, guid: 90da044a889076241a25c32a8f5a16c2, type: 3}
+    model: {fileID: 5129726091690469822, guid: 8eb856c6103d8ef47a8a687752378dc7, type: 3}
     modelName: pedestrian
+  vehicleChassisBase: {fileID: 2100000, guid: 37bcefb3339b1a04694b35a056aea715, type: 2}

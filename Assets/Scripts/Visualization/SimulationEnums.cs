@@ -21,6 +21,10 @@
         None, ScanGlance, ObserveGlance
     }
 
+    public enum ScanAoI {
+        None, Right, Left
+    }
+
     /// <summary>
     /// The different Indicator States
     /// </summary>

@@ -3,12 +3,7 @@ using UnityEngine;
 
 namespace Visualization {
     public class AdditionalVehicleInformation : AdditionalAgentInformation {
-        
-        /// <summary>
-        /// The glance type of the driver
-        /// </summary>
-        public GlanceType GlanceType { get; set; }
-        
+
         /// <summary>
         /// The gaze points that his agent currently has, might be empty
         /// </summary>
@@ -28,5 +23,10 @@ namespace Visualization {
         /// The WheelRotation at this sample
         /// </summary>
         public float WheelRotation { get; set; }
+        
+        /// <summary>
+        /// If the agent is currently braking
+        /// </summary>
+        public bool Brake { get; set; }
     }
 }

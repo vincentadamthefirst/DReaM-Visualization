@@ -47,11 +47,6 @@ namespace Visualization.Labels {
             
             _agentName = labelMainObject.GetChild(1).GetChild(4).GetChild(1).GetComponent<TextMeshPro>();
 
-            Debug.Log(labelMainObject.name + " -> " 
-                                           + labelMainObject.GetChild(1).name + " -> " 
-                                           + labelMainObject.GetChild(1).GetChild(4).name + " -> " 
-                                           + labelMainObject.GetChild(1).GetChild(4).GetChild(1).name);
-            
             // TODO add minimap
             
             _position = labelMainObject.GetChild(2).GetChild(0).GetChild(1).GetComponent<TextMeshPro>();

@@ -41,7 +41,7 @@ namespace Importer.XMLHandlers {
             foreach (var xmlAgent in _xmlAgents.Values) {
                 switch (xmlAgent.AgentType) {
                     case AgentType.Pedestrian:
-                        xmlAgent.ActualAgent = visualizationMaster.InstantiatePedestrian();
+                        xmlAgent.ActualAgent = visualizationMaster.InstantiatePedestrian(xmlAgent.ModelType);
                         break;
                     default:
                         xmlAgent.ActualAgent = visualizationMaster.InstantiateVehicleAgent(xmlAgent.ModelType);
@@ -82,6 +82,30 @@ namespace Importer.XMLHandlers {
             // TODO implement
             var info = new AdditionalVehicleInformation();
             step.AdditionalInformation = info;
+            
+            var sampleString = string.Concat(sample.Nodes());
+            var sampleSplit = sampleString.Split(new[] {","}, StringSplitOptions.None);
+
+            if (agent.ValuePositions.ContainsKey("CrossingPhase") &&
+                agent.ValuePositions["CrossingPhase"] <= sampleSplit.Length - 1) {
+                
+                info.CrossingPhase = sampleSplit[agent.ValuePositions["CrossingPhase"]].Replace(" ", "");
+            }
+
+            if (agent.ValuePositions.ContainsKey("FieldOfView") &&
+                agent.ValuePositions["FieldOfView"] <= sampleSplit.Length - 1) {
+
+                var fovClean = sampleSplit[agent.ValuePositions["FieldOfView"]].Replace("[", "").Replace("]", "")
+                    .Replace(" ", "");
+                var fovSplit = fovClean.Split(new[] {"|"}, StringSplitOptions.None);
+
+                // not the correct amount of values inside the fov
+                if (fovSplit.Length != 4) return;
+                
+                
+                info.GlanceType = fovSplit[2];
+                info.ScanAoI = fovSplit[3];
+            }
         }
 
         private void ParsePedestrianSampleValues(SimulationStep step, XmlAgent agent, XElement sample) {

@@ -38,6 +38,11 @@ namespace Visualization.Agents {
         /// </summary>
         public Label OwnLabel { get; set; }
         
+        /// <summary>
+        /// The assigned color for this agent
+        /// </summary>
+        public Material ColorMaterial { get; set; }
+        
         // if the agent is a target object
         private bool _isTarget;
 

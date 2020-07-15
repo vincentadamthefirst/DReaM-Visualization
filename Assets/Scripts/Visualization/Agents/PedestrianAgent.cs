@@ -1,5 +1,6 @@
 ﻿using System.Transactions;
 using UnityEngine;
+using UnityEngine.UI;
 using Utils;
 
 namespace Visualization.Agents {
@@ -8,8 +9,8 @@ namespace Visualization.Agents {
         public override void Prepare() {
             base.Prepare();
             
-            Model.transform.ScaleToValue(0.5f,  0.5f, 1.8f);
-            
+            Model.transform.GetChild(1).localScale = new Vector3(ModelInformation.Length, ModelInformation.Width, 1);
+
             // preparing the label
             //OwnLabel.SetStrings(gameObject.name);
             //OwnLabel.SetFloats(1.8f + 0.5f); // TODO non static

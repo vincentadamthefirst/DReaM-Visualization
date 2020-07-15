@@ -17,6 +17,9 @@ namespace Visualization {
         [Header("AgentModels")]
         public List<AgentModel> agentModels = new List<AgentModel>();
 
+        [Header("Materials")]
+        public Material vehicleChassisBase;
+
         public AgentModel GetAgentModel(AgentType agentType, string vehicleModel) {
             var found = agentModels.Where(am => am.agentType == agentType && vehicleModel.Contains(am.modelName));
 

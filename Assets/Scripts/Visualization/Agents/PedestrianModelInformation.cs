@@ -1,5 +1,5 @@
 ﻿namespace Visualization.Agents {
-    public class PedestrianModelInformation {
-        
+    public class PedestrianModelInformation : ModelInformation {
+        // currently no extra parameters
     }
 }

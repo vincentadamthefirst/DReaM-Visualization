@@ -15,21 +15,33 @@ namespace Visualization.Agents {
         public override void Prepare() {
             base.Prepare();
             
-            // TODO actually read these values
+            // coloring the chassis
+            Model.transform.GetChild(0).GetComponent<MeshRenderer>().material = ColorMaterial;
             
             // offsetting the agent model inside its parent
-            Model.transform.GetChild(0).transform.localPosition -= new Vector3(1.285f, 0, 0); // TODO non static
+            Model.transform.GetChild(0).transform.localPosition -=
+                new Vector3(ModelInformation.Center.x, 0, ModelInformation.Center.y);
 
             // scaling up the model
-            Model.transform.GetChild(0).ScaleToValue(5.26f,  2.18f, 1.51f); // TODO non static
+            var chassis = Model.transform.GetChild(0);
+            //chassis.SetSize(ModelInformation.Length, ModelInformation.Height, ModelInformation.Width);
             
+            chassis.SetTotalSize(ModelInformation.Width, ModelInformation.Height, ModelInformation.Length);
+
             // getting all wheel information
             _wheelFrontLeft = Model.transform.GetChild(0).GetChild(0);
             _wheelFrontRight = Model.transform.GetChild(0).GetChild(1);
             _wheelRearLeft = Model.transform.GetChild(0).GetChild(2);
             _wheelRearRight = Model.transform.GetChild(0).GetChild(3);
 
-            _wheelCircumference = Mathf.PI * 0.68f;
+            var diameter = ((VehicleModelInformation) ModelInformation).WheelDiameter;
+            
+            _wheelFrontLeft.SetTotalSize(diameter, .3f, diameter);
+            _wheelFrontRight.SetTotalSize(diameter, .3f, diameter);
+            _wheelRearLeft.SetTotalSize(diameter, .3f, diameter);
+            _wheelRearRight.SetTotalSize(diameter, .3f, diameter);
+            
+            _wheelCircumference = Mathf.PI * diameter;
 
             // preparing the wheel rotations for each sample
             var stepValues = SimulationSteps.Values.ToList();
@@ -45,7 +57,7 @@ namespace Visualization.Agents {
             }
             
             // preparing the label
-           // OwnLabel.SetStrings(gameObject.name);
+            // OwnLabel.SetStrings(gameObject.name);
             //OwnLabel.SetFloats(1.51f + 0.5f); // TODO non static
         }
 
@@ -83,6 +95,8 @@ namespace Visualization.Agents {
         protected override void UpdateLabel() {
             var modelPosition = Model.transform.position;
             OwnLabel.UpdateFloats(modelPosition.x, modelPosition.z, previous.Velocity, previous.Acceleration);
+            OwnLabel.UpdateStrings(previous.AdditionalInformation.CrossingPhase, previous.AdditionalInformation.ScanAoI, previous.AdditionalInformation.GlanceType);
+            
             OwnLabel.transform.position = modelPosition + new Vector3(0, 1.51f + 1.4f, 0); // TODO non static values
 
             // TODO update strings

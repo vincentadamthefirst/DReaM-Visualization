@@ -6,8 +6,11 @@ namespace Visualization.Labels {
 
         private TextMeshPro _brake;
         
-        private readonly Color _brakeOnColor = new Color(0, .5f, 0);
-        private readonly Color _brakeOffColor = new Color(0, .8f, 0);
+        private readonly Color _brakeOffColor = new Color(.4f, 0, 0);
+        private readonly Color _brakeOnColor = new Color(.8f, 0, 0);
+        
+        private readonly Color _indicatorOffColor = new Color(0, .4f, 0);
+        private readonly Color _indicatorOnColor = new Color(0, .8f, 0);
         
         protected override void FindLabels() {
             base.FindLabels();
@@ -26,6 +29,8 @@ namespace Visualization.Labels {
         }
 
         public override void UpdateIntegers(params int[] parameters) {
+            base.UpdateIntegers();
+            
             // ReSharper disable once ConvertSwitchStatementToSwitchExpression
             switch (parameters[0]) {
                 case 0:

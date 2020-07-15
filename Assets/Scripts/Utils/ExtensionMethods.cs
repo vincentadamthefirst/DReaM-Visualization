@@ -26,8 +26,72 @@ namespace Utils {
         public static int RoundDownToMultipleOf(this int toRound, int multiple) {
             return toRound - (toRound % multiple);
         }
+        
+        public static void SetSizeX(this Transform transform, float newX) {
+            var allBounds = new Bounds();
+            foreach (var mf in transform.GetComponentsInChildren<MeshFilter>()) {
+                allBounds.Encapsulate(mf.mesh.bounds);
+            }
+            var size = allBounds.size;
+            var oldParent = transform.parent;
+            transform.parent = null;
 
-        public static void ScaleToValue(this Transform transform, float length, float width, float height) {
+            var oldScale = transform.localScale;
+            var newYScale = (oldScale.x / size.x) * newX;
+            oldScale.x = newYScale;
+
+            transform.localScale = oldScale;
+            
+            transform.parent = oldParent;
+        }
+
+        public static void SetSizeY(this Transform transform, float newY) {
+            var allBounds = new Bounds();
+            foreach (var mf in transform.GetComponentsInChildren<MeshFilter>()) {
+                allBounds.Encapsulate(mf.mesh.bounds);
+            }
+            var size = allBounds.size;
+            var oldParent = transform.parent;
+            transform.parent = null;
+
+            var oldScale = transform.localScale;
+            var newYScale = (oldScale.y / size.y) * newY;
+            oldScale.y = newYScale;
+
+            transform.localScale = oldScale;
+            
+            transform.parent = oldParent;
+        }
+
+        public static void SetSizeZ(this Transform transform, float newZ) {
+            var allBounds = new Bounds();
+            foreach (var mf in transform.GetComponentsInChildren<MeshFilter>()) {
+                allBounds.Encapsulate(mf.mesh.bounds);
+            }
+            var size = allBounds.size;
+            var oldParent = transform.parent;
+            transform.parent = null;
+
+            var oldScale = transform.localScale;
+            var newYScale = (oldScale.z / size.z) * newZ;
+            oldScale.z = newYScale;
+
+            transform.localScale = oldScale;
+            
+            transform.parent = oldParent;
+        }
+
+        public static void SetTotalSize(this Transform transform, float newX, float newY, float newZ) {
+            transform.SetSizeX(newX);
+            transform.SetSizeY(newY);
+            transform.SetSizeZ(newZ);
+        }
+
+        public static void SetSize(this Transform transform, float newSizeX, float newSizeY, float newSizeZ) {
+            var oldParent = transform.parent;
+
+            transform.parent = null;
+
             var allBounds = new Bounds();
             var renderers = transform.GetComponentsInChildren<Renderer>();
             foreach (var renderer in renderers) {
@@ -38,13 +102,17 @@ namespace Utils {
             var sizeY = allBounds.size.y;
             var sizeZ = allBounds.size.z;
 
-            var rescale = transform.localScale;
+            var oldScale = transform.localScale;
             
-            rescale.x = length * rescale.x / sizeX;
-            rescale.y = height * rescale.y / sizeY;
-            rescale.z = width * rescale.z / sizeZ;
-            
-            transform.localScale = rescale;
+            var newScale = new Vector3(
+                newSizeX * (oldScale.x / sizeX),
+                newSizeY * (oldScale.y / sizeY),
+                newSizeZ * (oldScale.z / sizeZ)
+            );
+
+            transform.localScale = newScale;
+
+            transform.parent = oldParent;
         }
         
         public static void SetLayerRecursive(this GameObject obj, int layer) {
