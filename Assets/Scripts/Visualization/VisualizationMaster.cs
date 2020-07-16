@@ -5,11 +5,14 @@ using Scenery.RoadNetwork;
 using UI;
 using UnityEngine;
 using Visualization.Agents;
+using Visualization.Labels;
 
 namespace Visualization {
     public class VisualizationMaster : MonoBehaviour {
 
         public PlaybackControl playbackControl;
+
+        public LabelOcclusionManager labelOcclusionManager;
 
         /// <summary>
         /// The catalog of possible vehicle models, populated by VehicleModelsXmlHandler
@@ -35,6 +38,8 @@ namespace Visualization {
         public bool PlayBackwards { get; set; }
 
         public bool Pause { get; set; } = true;
+        
+        public bool UseScreenLabel { get; set; }
         
         // fallback vehicle model
         private readonly VehicleModelInformation _basicVehicle = new VehicleModelInformation
@@ -84,8 +89,16 @@ namespace Visualization {
             vehicleAgent.Model = model;
 
             // adding label
-            var label = Instantiate(agentDesigns.labelPrefabScene, transform);
-            vehicleAgent.OwnLabel = label;
+            if (UseScreenLabel) {
+                var label = Instantiate(agentDesigns.labelPrefabScreen, labelOcclusionManager.transform);
+                label.Agent = vehicleAgent;
+                label.LabelOcclusionManager = labelOcclusionManager;
+                labelOcclusionManager.AllLabels.Add(label);
+                vehicleAgent.OwnLabel = label;
+            } else {
+                var label = Instantiate(agentDesigns.labelPrefabScene, transform);
+                vehicleAgent.OwnLabel = label;
+            }
 
             // retrieving model information
             vehicleAgent.ModelInformation = VehicleModelCatalog.ContainsKey(modelType)
@@ -111,8 +124,16 @@ namespace Visualization {
             pedestrianAgent.Model = model;
             
             // adding label TODO use other Label then vehicle!
-            var label = Instantiate(agentDesigns.labelPrefabScene, transform);
-            pedestrianAgent.OwnLabel = label;
+            if (UseScreenLabel) {
+                var label = Instantiate(agentDesigns.labelPrefabScreen, labelOcclusionManager.transform);
+                label.Agent = pedestrianAgent;
+                label.LabelOcclusionManager = labelOcclusionManager;
+                labelOcclusionManager.AllLabels.Add(label);
+                pedestrianAgent.OwnLabel = label;
+            } else {
+                var label = Instantiate(agentDesigns.labelPrefabScene, transform);
+                pedestrianAgent.OwnLabel = label;
+            }
             
             // retrieving model information
             pedestrianAgent.ModelInformation = PedestrianModelCatalog.ContainsKey(modelType)

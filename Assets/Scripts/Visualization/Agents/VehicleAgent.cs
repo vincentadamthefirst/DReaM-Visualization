@@ -57,12 +57,12 @@ namespace Visualization.Agents {
             }
             
             // preparing the label
-            // OwnLabel.SetStrings(gameObject.name);
-            //OwnLabel.SetFloats(1.51f + 0.5f); // TODO non static
+            OwnLabel.SetStrings(gameObject.name);
+            OwnLabel.SetFloats(ModelInformation.Height + 1.4f);
         }
 
         protected override void UpdatePosition() {
-            var nextPositionPointer = new Vector2(deltaS + 1.35f, 0);
+            var nextPositionPointer = new Vector2(deltaS, 0);
             nextPositionPointer.RotateRadians(previous.Rotation);
 
             Model.transform.position = new Vector3(previous.Position.x + nextPositionPointer.x, 0,
@@ -92,12 +92,15 @@ namespace Visualization.Agents {
             Model.transform.rotation = Quaternion.Euler(0, -_currentHdg * Mathf.Rad2Deg, 0);
         }
 
+        public override Vector3 GetAnchorPoint() {
+            var position = Model.transform.position;
+            return new Vector3(position.x, ModelInformation.Height, position.z);
+        }
+
         protected override void UpdateLabel() {
             var modelPosition = Model.transform.position;
             OwnLabel.UpdateFloats(modelPosition.x, modelPosition.z, previous.Velocity, previous.Acceleration);
             OwnLabel.UpdateStrings(previous.AdditionalInformation.CrossingPhase, previous.AdditionalInformation.ScanAoI, previous.AdditionalInformation.GlanceType);
-            
-            OwnLabel.transform.position = modelPosition + new Vector3(0, 1.51f + 1.4f, 0); // TODO non static values
 
             // TODO update strings
         }

@@ -17,7 +17,7 @@ namespace Visualization.Labels {
         private TextMeshPro _scanAoi;
         private TextMeshPro _gazeType;
 
-        private TextMeshPro _agentName;
+        private float _height = 3f;
 
         /// <summary>
         /// Called on program start, retrieves the necessary objects to display information
@@ -44,8 +44,6 @@ namespace Visualization.Labels {
             _gazeType = labelMainObject.GetChild(0).GetChild(0).GetChild(1).GetComponent<TextMeshPro>();
             _scanAoi = labelMainObject.GetChild(0).GetChild(1).GetChild(1).GetComponent<TextMeshPro>();
             _crossingPhase = labelMainObject.GetChild(0).GetChild(2).GetChild(1).GetComponent<TextMeshPro>();
-            
-            _agentName = labelMainObject.GetChild(1).GetChild(4).GetChild(1).GetComponent<TextMeshPro>();
 
             // TODO add minimap
             
@@ -76,6 +74,8 @@ namespace Visualization.Labels {
             _position.text = Math.Round(posX, 1) + "/" + Math.Round(posY, 1);
             _velocity.text = Math.Round(vel, 2) + "m/s";
             _acceleration.text = Math.Round(acc, 2) + "m/s²";
+            
+            transform.position = new Vector3(posX, _height, posY);
         }
 
         public override void SetColors(params Color[] parameters) {
@@ -83,13 +83,11 @@ namespace Visualization.Labels {
         }
 
         public override void SetStrings(params string[] parameters) {
-            Debug.Log(_agentName == null ? "YIKES" : "SWEET");
-            
-            _agentName.text = parameters[0];
+            transform.GetChild(0).GetChild(1).GetChild(4).GetChild(1).GetComponent<TextMeshPro>().text = parameters[0];
         }
 
         public override void SetFloats(params float[] parameters) {
-            // nothing to be set here (yet)
+            _height = parameters[0];
         }
 
         public override void Activate() {

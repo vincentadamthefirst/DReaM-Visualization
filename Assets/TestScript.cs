@@ -63,6 +63,8 @@ public class TestScript : MonoBehaviour {
         sceneryImporter.StartImport();
         
         roadNetworkHolder.ShowSimpleGround(terrain);
+
+        visualizationMaster.UseScreenLabel = true;
         
         // IMPORT OF OPENPASS (OpenSpaaaaaaaß)
         

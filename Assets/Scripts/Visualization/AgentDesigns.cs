@@ -13,6 +13,7 @@ namespace Visualization {
         public PedestrianAgent pedestrianPrefab;
         public VehicleAgent vehiclePrefab;
         public VehicleSceneLabel labelPrefabScene;
+        public VehicleScreenLabel labelPrefabScreen;
         
         [Header("AgentModels")]
         public List<AgentModel> agentModels = new List<AgentModel>();

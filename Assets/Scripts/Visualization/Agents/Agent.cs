@@ -42,7 +42,7 @@ namespace Visualization.Agents {
         /// The assigned color for this agent
         /// </summary>
         public Material ColorMaterial { get; set; }
-        
+
         // if the agent is a target object
         private bool _isTarget;
 
@@ -155,6 +155,11 @@ namespace Visualization.Agents {
         protected abstract void UpdatePosition();
 
         protected abstract void UpdateRotation();
+        
+        /// <summary>
+        /// The anchor point for this agents label
+        /// </summary>
+        public abstract Vector3 GetAnchorPoint();
 
         /// <summary>
         /// Get called if the agent is a target. Update the Label of this Agent with the necessary data.
@@ -194,6 +199,10 @@ namespace Visualization.Agents {
         public void SetIsTarget(bool target) {
             Model.SetLayerRecursive(target ? 14 : 15);
             _isTarget = target;
+        }
+
+        public bool IsTarget() {
+            return _isTarget;
         }
     }
 }

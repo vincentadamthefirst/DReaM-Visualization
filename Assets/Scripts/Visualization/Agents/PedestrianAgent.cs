@@ -12,8 +12,8 @@ namespace Visualization.Agents {
             Model.transform.GetChild(1).localScale = new Vector3(ModelInformation.Length, ModelInformation.Width, 1);
 
             // preparing the label
-            //OwnLabel.SetStrings(gameObject.name);
-            //OwnLabel.SetFloats(1.8f + 0.5f); // TODO non static
+            OwnLabel.SetStrings(gameObject.name);
+            OwnLabel.SetFloats(3.2f);
         }
 
         protected override void UpdatePosition() {
@@ -28,10 +28,14 @@ namespace Visualization.Agents {
             // no implementation needed
         }
 
+        public override Vector3 GetAnchorPoint() {
+            var position = Model.transform.position;
+            return new Vector3(position.x, 2f, position.z);
+        }
+
         protected override void UpdateLabel() {
             var modelPosition = Model.transform.position;
             OwnLabel.UpdateFloats(modelPosition.x, modelPosition.z, previous.Velocity, previous.Acceleration);
-            OwnLabel.transform.position = modelPosition + new Vector3(0, 1.8f + 1.4f, 0); // TODO non static values
         }
     }
 }
