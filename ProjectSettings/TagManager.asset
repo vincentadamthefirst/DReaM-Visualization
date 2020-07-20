@@ -14,15 +14,15 @@ TagManager:
   - UI
   - 
   - 
-  - target
-  - targetSurround
-  - testLayer
+  - 
+  - 
+  - 
   - Terrain
   - 
+  - scenery_targets
+  - agent_targets
+  - agents_base
   - 
-  - targets
-  - agents_objects
-  - agents_labels
   - scenery_road
   - scenery_signs
   - scenery_objects

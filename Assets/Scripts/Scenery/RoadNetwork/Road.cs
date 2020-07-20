@@ -124,6 +124,15 @@ namespace Scenery.RoadNetwork {
             }
         }
 
+        public override void SetLayer(int layer) {
+            gameObject.layer = layer;
+            foreach (var laneSection in LaneSections) {
+                laneSection.LeftLanes.ForEach(l => l.gameObject.layer = layer);
+                laneSection.CenterLane.gameObject.layer = layer;
+                laneSection.RightLanes.ForEach(l => l.gameObject.layer = layer);
+            }
+        }
+
         public void PrepareLaneSectionsAndGeometries() {
             for (var i = 0; i < LaneSections.Count; i++) {
                 // preparing lane neighbors

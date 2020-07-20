@@ -20,6 +20,12 @@ namespace Scenery.RoadNetwork {
             Connections = new List<Connection>();
         }
 
+        public override void SetLayer(int layer) {
+            foreach (var road in Roads) {
+                road.Value.SetLayer(layer);
+            }
+        }
+
         public void AddRoad(Road road) {
             Roads.Add(road.OpenDriveId, road);
         }

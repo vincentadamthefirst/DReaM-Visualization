@@ -55,11 +55,8 @@ namespace Visualization.Labels {
             
             _labelHeight = (int) (rect.height * labelScale);
             _labelWidth = (int) (rect.width * labelScale);
-
-            //_placementRadius = (int) (MaxWidth / 2f - _labelWidth / 2f);
-            //_detectionRadius = (int) (MaxWidth / 2f - _labelWidth / 1.3f);
-
-            _detectionRadius = 550;
+            
+            _detectionRadius = 500;
 
             _maxLabelsPerSide = Convert.ToInt32(Math.Floor(MaxHeight / _labelHeight));
             
@@ -71,6 +68,8 @@ namespace Visualization.Labels {
         }
 
         private void OnGUI() {
+            //return; // TODO maybe reenable
+            
             GUI.depth = -100;
             
             foreach (var label in _activeRight) {
@@ -90,15 +89,16 @@ namespace Visualization.Labels {
         private void PickActiveLabels() {
             var frustumPlanes = GeometryUtility.CalculateFrustumPlanes(_mainCamera);
 
-            // 1. selecting all labels where the Agent is a target, the AnchorPoint is in the left half of the screen,
-            //    the AnchorPoint is inside the screen and the AnchorPoint is inside of the detection circle
+            // 1. selecting all labels where the Agent is a target, Agent is active, the AnchorPoint is in the left half
+            //    of the screen, the AnchorPoint is inside the screen and the AnchorPoint is inside of the detection
+            //    circle
             // 2. ordering the list based on distance from the center
             // 3. ordering the list based on absolute y-value (from center out on y-axis)
             // 4. taking the first _maxLabelsPerSide labels (these will be displayed)
             // 5. ordering those labels by their y-value (bottom to top of the screen)
             // 6. converting the enumerable to a list
             var leftLabelsActive = AllLabels
-                .Where(l => l.Agent.IsTarget() && l.AnchorScreenPosition.x < 0 &&
+                .Where(l => l.Agent.IsTarget() && l.AnchorScreenPosition.x < 0 && l.Agent.Model.activeSelf &&
                             GeometryUtility.TestPlanesAABB(frustumPlanes, new Bounds(l.Agent.GetAnchorPoint(), Vector3.one * .05f)) &&
                             Vector2.Distance(Vector2.zero, l.AnchorScreenPosition) <= _detectionRadius)
                 .OrderBy(l => Vector2.Distance(Vector2.zero, l.AnchorScreenPosition))
@@ -107,7 +107,7 @@ namespace Visualization.Labels {
 
             // see the left label ordering, done the same way
             var rightLabelsActive = AllLabels
-                .Where(l => l.Agent.IsTarget() && l.AnchorScreenPosition.x >= 0 &&
+                .Where(l => l.Agent.IsTarget() && l.AnchorScreenPosition.x >= 0 && l.Agent.Model.activeSelf &&
                             GeometryUtility.TestPlanesAABB(frustumPlanes, new Bounds(l.Agent.GetAnchorPoint(), Vector3.one * .05f)) &&
                             Vector2.Distance(Vector2.zero, l.AnchorScreenPosition) <= _detectionRadius)
                 .OrderBy(l => Vector2.Distance(Vector2.zero, l.AnchorScreenPosition))
@@ -152,8 +152,8 @@ namespace Visualization.Labels {
             }
 
             var shiftDown = 0f;
-            if (preferredY[preferredY.Length - 1] > MaxHeight / 2f) {
-                shiftDown = preferredY[preferredY.Length - 1] - MaxHeight / 2f;
+            if (preferredY[preferredY.Length - 1] + _labelHeight / 2f > MaxHeight / 2f) {
+                shiftDown = preferredY[preferredY.Length - 1] + _labelHeight / 2f - MaxHeight / 2f;
             }
             
             for (var i = 0; i < activeLabels.Count; i++) {

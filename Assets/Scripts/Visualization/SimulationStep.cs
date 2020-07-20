@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Scenery;
-using Scenery.RoadNetwork;
 using UnityEngine;
 
 namespace Visualization {
@@ -58,22 +57,12 @@ namespace Visualization {
         /// <summary>
         /// The element that the agent is on
         /// </summary>
-        public GameObject OnElement { get; set; }
+        public SceneryElement OnElement { get; set; }
         
         /// <summary>
         /// Whether the agent is currently on a junction
         /// </summary>
         public bool OnJunction { get; set; }
-        
-        /// <summary>
-        /// If the id of the road the agent is on is different from the next road
-        /// </summary>
-        public bool OnIdChangedTowardsNext { get; set; }
-        
-        /// <summary>
-        /// If the id of the road the agent is on is different from the previous road
-        /// </summary>
-        public bool OnIdChangedTowardsPrevious { get; set; }
     }
 
     public abstract class SensorInformation {

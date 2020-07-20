@@ -6,6 +6,7 @@ using UI;
 using UnityEngine;
 using Visualization.Agents;
 using Visualization.Labels;
+using Visualization.RoadOcclusion;
 
 namespace Visualization {
     public class VisualizationMaster : MonoBehaviour {
@@ -13,6 +14,8 @@ namespace Visualization {
         public PlaybackControl playbackControl;
 
         public LabelOcclusionManager labelOcclusionManager;
+
+        private RoadOcclusionManager _roadOcclusionManager;
 
         /// <summary>
         /// The catalog of possible vehicle models, populated by VehicleModelsXmlHandler
@@ -52,13 +55,17 @@ namespace Visualization {
         // all Agents of the current visualization run
         private readonly List<Agent> _agents = new List<Agent>();
 
+        private void Start() {
+            _roadOcclusionManager = FindObjectOfType<RoadOcclusionManager>();
+        }
+
         /// <summary>
         /// Prepares all the agents for the simulation run, also assigns colors
         /// </summary>
         public void PrepareAgents() {
             // setting a color for each agent
             for (var i = 0; i < _agents.Count; i++) {
-                var c = Color.HSVToRGB(i / (float) _agents.Count, 0.9f, .5f, false);
+                var c = Color.HSVToRGB(i / (float) _agents.Count, .9f, .7f, false);
                 var agentMaterial = new Material(agentDesigns.vehicleChassisBase) {color = c};
 
                 _agents[i].ColorMaterial = agentMaterial;
@@ -82,6 +89,7 @@ namespace Visualization {
             
             // adding the RoadNetworkHolder
             vehicleAgent.RoadNetworkHolder = FindObjectOfType<RoadNetworkHolder>();
+            vehicleAgent.RoadOcclusionManager = _roadOcclusionManager;
             
             // retrieving prefab for 3d model
             var model = Instantiate(agentDesigns.GetAgentModel(AgentType.Vehicle, modelType).model, vehicleAgent.transform, true);
@@ -93,6 +101,7 @@ namespace Visualization {
                 var label = Instantiate(agentDesigns.labelPrefabScreen, labelOcclusionManager.transform);
                 label.Agent = vehicleAgent;
                 label.LabelOcclusionManager = labelOcclusionManager;
+                label.AgentCamera = vehicleAgent.Model.transform.Find("Camera").GetComponent<Camera>();
                 labelOcclusionManager.AllLabels.Add(label);
                 vehicleAgent.OwnLabel = label;
             } else {
@@ -117,6 +126,7 @@ namespace Visualization {
             
             // adding the RoadNetworkHolder
             pedestrianAgent.RoadNetworkHolder = FindObjectOfType<RoadNetworkHolder>();
+            pedestrianAgent.RoadOcclusionManager = _roadOcclusionManager;
             
             // retrieving prefab for 3d model
             var model = Instantiate(agentDesigns.GetAgentModel(AgentType.Pedestrian, "pedestrian").model, pedestrianAgent.transform, true);
@@ -128,6 +138,7 @@ namespace Visualization {
                 var label = Instantiate(agentDesigns.labelPrefabScreen, labelOcclusionManager.transform);
                 label.Agent = pedestrianAgent;
                 label.LabelOcclusionManager = labelOcclusionManager;
+                label.AgentCamera = pedestrianAgent.Model.transform.Find("Camera").GetComponent<Camera>();
                 labelOcclusionManager.AllLabels.Add(label);
                 pedestrianAgent.OwnLabel = label;
             } else {
@@ -160,6 +171,7 @@ namespace Visualization {
                 agent.UpdateForTimeStep(CurrentTime, PlayBackwards);
             }
             
+            _roadOcclusionManager.ChangeRoadLayers();
             playbackControl.UpdateCurrentTime(CurrentTime);
         }
     }

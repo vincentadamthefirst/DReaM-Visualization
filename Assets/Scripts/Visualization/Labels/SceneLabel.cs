@@ -78,6 +78,10 @@ namespace Visualization.Labels {
             transform.position = new Vector3(posX, _height, posY);
         }
 
+        public override void UpdatePositions(params Tuple<Vector2, float>[] parameters) {
+            // TODO implement
+        }
+
         public override void SetColors(params Color[] parameters) {
             // TODO implement
         }

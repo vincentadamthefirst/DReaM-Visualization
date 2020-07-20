@@ -9,6 +9,11 @@ namespace Visualization.Agents {
         public override void Prepare() {
             base.Prepare();
             
+            // coloring the pedestrian
+            Model.transform.GetChild(0).GetComponent<MeshRenderer>().material = ColorMaterial;
+            Model.transform.GetChild(1).GetComponent<MeshRenderer>().material = ColorMaterial;
+            
+            // scaling to fit the width / length
             Model.transform.GetChild(1).localScale = new Vector3(ModelInformation.Length, ModelInformation.Width, 1);
 
             // preparing the label
@@ -25,7 +30,8 @@ namespace Visualization.Agents {
         }
 
         protected override void UpdateRotation() {
-            // no implementation needed
+            var currentHdg = deltaTMs * ((previous.Next.Rotation - previous.Rotation) / 100) + previous.Rotation;
+            Model.transform.rotation = Quaternion.Euler(0, -currentHdg * Mathf.Rad2Deg, 0);
         }
 
         public override Vector3 GetAnchorPoint() {
@@ -36,6 +42,8 @@ namespace Visualization.Agents {
         protected override void UpdateLabel() {
             var modelPosition = Model.transform.position;
             OwnLabel.UpdateFloats(modelPosition.x, modelPosition.z, previous.Velocity, previous.Acceleration);
+            OwnLabel.UpdateStrings(previous.AdditionalInformation.CrossingPhase, previous.AdditionalInformation.ScanAoI, previous.AdditionalInformation.GlanceType);
+            OwnLabel.UpdatePositions(previous.AdditionalInformation.OtherAgents);
         }
     }
 }

@@ -43,3 +43,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4b722c6cd70f430c9d32bc64e996b546, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  indicatorOffMaterial: {fileID: 2100000, guid: f301c494b81af5c41b169f9beb209a56, type: 2}
+  indicatorOnMaterial: {fileID: 2100000, guid: 099caca5d39839842aa4796acecfa58d, type: 2}
+  brakeOffMaterial: {fileID: 2100000, guid: 938efe945fca42443b5f3c56ef323ff4, type: 2}
+  brakeOnMaterial: {fileID: 2100000, guid: 2e178d10aeccfe94a9e446367909b8ca, type: 2}

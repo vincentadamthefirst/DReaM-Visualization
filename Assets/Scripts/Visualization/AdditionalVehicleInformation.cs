@@ -13,12 +13,7 @@ namespace Visualization {
         /// The current indicator light state
         /// </summary>
         public IndicatorState IndicatorState { get; set; }
-        
-        /// <summary>
-        /// Other Agents that his agent sees at this point in time
-        /// </summary>
-        public Tuple<Vector2, float, float>[] OtherAgents { get; set; }
-        
+
         /// <summary>
         /// The WheelRotation at this sample
         /// </summary>

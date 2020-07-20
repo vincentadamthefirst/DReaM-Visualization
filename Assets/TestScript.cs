@@ -69,7 +69,7 @@ public class TestScript : MonoBehaviour {
         // IMPORT OF OPENPASS (OpenSpaaaaaaaß)
         
         var outputImporter = new SimulationOutputXmlHandler();
-        outputImporter.SetFilePath("C:\\OpenPass\\bin - Kopie\\results\\simulationOutput.xml");
+        outputImporter.SetFilePath("C:\\OpenPass\\bin - Kopie\\results\\simulationOutput_before.xml");
         outputImporter.visualizationMaster = visualizationMaster;
         outputImporter.StartImport();
 

@@ -7,6 +7,7 @@ using System.Xml.Linq;
 using UnityEngine;
 using Visualization;
 using Visualization.Agents;
+using Visualization.SimulationEvents;
 
 namespace Importer.XMLHandlers {
     public class SimulationOutputXmlHandler : XmlHandler {
@@ -79,7 +80,6 @@ namespace Importer.XMLHandlers {
         }
 
         private void ParseVehicleSampleValues(SimulationStep step, XmlAgent agent, XElement sample) {
-            // TODO implement
             var info = new AdditionalVehicleInformation();
             step.AdditionalInformation = info;
             
@@ -102,14 +102,130 @@ namespace Importer.XMLHandlers {
                 // not the correct amount of values inside the fov
                 if (fovSplit.Length != 4) return;
                 
-                
                 info.GlanceType = fovSplit[2];
                 info.ScanAoI = fovSplit[3];
+            }
+
+            if (agent.ValuePositions.ContainsKey("OtherAgents") &&
+                agent.ValuePositions["OtherAgents"] <= sampleSplit.Length - 1) {
+
+                var otherAgentsClean = sampleSplit[agent.ValuePositions["OtherAgents"]].Replace("[", "")
+                    .Replace("]", "").Replace(" ", "");
+                var otherAgentsSplit = otherAgentsClean.Split(new[] {"|"}, StringSplitOptions.None);
+                
+                var otherAgents = new List<Tuple<Vector2, float>>();
+
+                foreach (var split in otherAgentsSplit) {
+                    var splitClean = split.Replace("{", "").Replace("}", "");
+                    var innerSplit = splitClean.Split(new[] {"+"}, StringSplitOptions.None);
+                    
+                    if (innerSplit.Length < 4) continue;
+                    if (innerSplit[1].ToLower() == "nan" || innerSplit[2].ToLower() == "nan" ||
+                        innerSplit[3].ToLower() == "nan") continue;
+
+                    var posX = float.Parse(innerSplit[1], CultureInfo.InvariantCulture.NumberFormat);
+                    var posY = float.Parse(innerSplit[2], CultureInfo.InvariantCulture.NumberFormat);
+                    var hdg = float.Parse(innerSplit[3], CultureInfo.InvariantCulture.NumberFormat);
+
+                    otherAgents.Add(new Tuple<Vector2, float>(new Vector2(posX, posY), hdg));
+                }
+
+                info.OtherAgents = otherAgents.ToArray();
+            }
+            
+            if (agent.ValuePositions.ContainsKey("BrakeLight") &&
+                agent.ValuePositions["BrakeLight"] <= sampleSplit.Length - 1) {
+
+                var brakeInfo = sampleSplit[agent.ValuePositions["BrakeLight"]];
+                info.Brake = brakeInfo.Replace(" ", "") == "1";
+            }
+
+            if (agent.ValuePositions.ContainsKey("IndicatorState") &&
+                agent.ValuePositions["IndicatorState"] <= sampleSplit.Length - 1) {
+
+                var indicatorInfo = sampleSplit[agent.ValuePositions["IndicatorState"]];
+                var indicatorState = IndicatorState.None;
+                
+                // ReSharper disable once ConvertSwitchStatementToSwitchExpression
+                switch (indicatorInfo.Replace(" ", "")) {
+                    case "0":
+                        indicatorState = IndicatorState.None;
+                        break;
+                    case "1":
+                        indicatorState = IndicatorState.Left;
+                        break;
+                    case "2":
+                        indicatorState = IndicatorState.Right;
+                        break;
+                    case "3":
+                        indicatorState = IndicatorState.Warn;
+                        break;
+                }
+
+                info.IndicatorState = indicatorState;
             }
         }
 
         private void ParsePedestrianSampleValues(SimulationStep step, XmlAgent agent, XElement sample) {
-            // TODO implement
+            var info = new AdditionalPedestrianInformation();
+            step.AdditionalInformation = info;
+            
+            var sampleString = string.Concat(sample.Nodes());
+            var sampleSplit = sampleString.Split(new[] {","}, StringSplitOptions.None);
+
+            if (agent.ValuePositions.ContainsKey("CrossingPhase") &&
+                agent.ValuePositions["CrossingPhase"] <= sampleSplit.Length - 1) {
+                
+                info.CrossingPhase = sampleSplit[agent.ValuePositions["CrossingPhase"]].Replace(" ", "");
+            }
+
+            if (agent.ValuePositions.ContainsKey("FieldOfView") &&
+                agent.ValuePositions["FieldOfView"] <= sampleSplit.Length - 1) {
+
+                var fovClean = sampleSplit[agent.ValuePositions["FieldOfView"]].Replace("[", "").Replace("]", "")
+                    .Replace(" ", "");
+                var fovSplit = fovClean.Split(new[] {"|"}, StringSplitOptions.None);
+
+                // not the correct amount of values inside the fov
+                if (fovSplit.Length != 4) return;
+                
+                info.GlanceType = fovSplit[2];
+                info.ScanAoI = fovSplit[3];
+            }
+
+            if (agent.ValuePositions.ContainsKey("OtherAgents") &&
+                agent.ValuePositions["OtherAgents"] <= sampleSplit.Length - 1) {
+
+                var otherAgentsClean = sampleSplit[agent.ValuePositions["OtherAgents"]].Replace("[", "")
+                    .Replace("]", "").Replace(" ", "");
+                var otherAgentsSplit = otherAgentsClean.Split(new[] {"|"}, StringSplitOptions.None);
+                
+                var otherAgents = new List<Tuple<Vector2, float>>();
+
+                foreach (var split in otherAgentsSplit) {
+                    var splitClean = split.Replace("{", "").Replace("}", "");
+                    var innerSplit = splitClean.Split(new[] {"+"}, StringSplitOptions.None);
+                    
+                    if (innerSplit.Length < 4) continue;
+                    if (innerSplit[1].ToLower() == "nan" || innerSplit[2].ToLower() == "nan" ||
+                        innerSplit[3].ToLower() == "nan") continue;
+
+                    var posX = float.Parse(innerSplit[1], CultureInfo.InvariantCulture.NumberFormat);
+                    var posY = float.Parse(innerSplit[2], CultureInfo.InvariantCulture.NumberFormat);
+                    var hdg = float.Parse(innerSplit[3], CultureInfo.InvariantCulture.NumberFormat);
+
+                    otherAgents.Add(new Tuple<Vector2, float>(new Vector2(posX, posY), hdg));
+                }
+
+                info.OtherAgents = otherAgents.ToArray();
+            }
+
+            if (agent.ValuePositions.ContainsKey("BrakeLight") &&
+                agent.ValuePositions["BrakeLight"] <= sampleSplit.Length - 1) {
+
+                var brakeInfo = sampleSplit[agent.ValuePositions["BrakeLight"]];
+                info.Stopping = brakeInfo == "1";
+            }
         }
 
         private void ParseXmlAgents() {

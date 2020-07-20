@@ -1,9 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Visualization.Labels {
     public abstract class Label : MonoBehaviour {
+        
+        /// <summary>
+        /// The camera that belongs to the agent of this label
+        /// </summary>
+        public Camera AgentCamera { get; set; }
 
         /// <summary>
         /// Updates the strings for this label. The parameters must be ordered correctly.
@@ -22,6 +26,12 @@ namespace Visualization.Labels {
         /// </summary>
         /// <param name="parameters">The parameters that should be displayed.</param>
         public abstract void UpdateFloats(params float[] parameters);
+        
+        /// <summary>
+        /// Updates the positions for this label. The parameters must be ordered correctly.
+        /// </summary>
+        /// <param name="parameters">The parameters that should be displayed.</param>
+        public abstract void UpdatePositions(params Tuple<Vector2, float>[] parameters);
 
         /// <summary>
         /// Sets the colors for this label. The parameters must be ordered correctly.

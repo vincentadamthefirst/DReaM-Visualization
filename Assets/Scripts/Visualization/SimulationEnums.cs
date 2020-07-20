@@ -29,7 +29,7 @@
     /// The different Indicator States
     /// </summary>
     public enum IndicatorState {
-        None, Warn, Left, Right
+        None, Left, Right, Warn
     }
     
 }

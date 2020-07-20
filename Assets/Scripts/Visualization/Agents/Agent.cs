@@ -7,6 +7,7 @@ using Scenery.RoadNetwork;
 using UnityEngine;
 using Utils;
 using Visualization.Labels;
+using Visualization.RoadOcclusion;
 
 namespace Visualization.Agents {
     public abstract class Agent : MonoBehaviour {
@@ -29,9 +30,14 @@ namespace Visualization.Agents {
         public ModelInformation ModelInformation { get; set; }
         
         /// <summary>
-        /// The RoadNetworkHolder to Perfom layer change for certain roads
+        /// The RoadNetworkHolder to Perform layer change for certain roads
         /// </summary>
         public RoadNetworkHolder RoadNetworkHolder { get; set; }
+        
+        /// <summary>
+        /// The occlusion controller for roads to perform layer change on roads
+        /// </summary>
+        public RoadOcclusionManager RoadOcclusionManager { get; set; }
 
         /// <summary>
         /// The label of this agent
@@ -86,21 +92,13 @@ namespace Visualization.Agents {
                 // setting the next simulation step
                 ordered[i].Next = ordered[i + 1];
                 ordered[i + 1].Previous = ordered[i];
-
-                // setting the bools to check if there was a road change
-                if (ordered[i].OnId == ordered[i + 1].OnId) continue;
-                ordered[i].OnIdChangedTowardsNext = true;
-                ordered[i + 1].OnIdChangedTowardsPrevious = true;
             }
-
-            ordered[0].OnIdChangedTowardsPrevious = true;
-            ordered[ordered.Length - 1].OnIdChangedTowardsNext = true;
 
             foreach (var simulationStep in SimulationSteps.Values) {
                 if (simulationStep.OnId != "" && RoadNetworkHolder.Roads.ContainsKey(simulationStep.OnId)) {
                     var road = RoadNetworkHolder.Roads[simulationStep.OnId];
 
-                    simulationStep.OnElement = road.OnJunction ? road.ParentJunction.gameObject : road.gameObject;
+                    simulationStep.OnElement = road.OnJunction ? road.ParentJunction : (SceneryElement) road;
                     simulationStep.OnJunction = road.OnJunction;
                 }
             }
@@ -148,7 +146,7 @@ namespace Visualization.Agents {
             UpdateRotation();
 
             if (!_isTarget) return;
-            UpdateRoadLayers(backwards);
+            RoadOcclusionManager.AddOnElement(previous.OnElement);
             UpdateLabel();
         }
 
@@ -165,26 +163,6 @@ namespace Visualization.Agents {
         /// Get called if the agent is a target. Update the Label of this Agent with the necessary data.
         /// </summary>
         protected abstract void UpdateLabel();
-
-        private void UpdateRoadLayers(bool backwards) {
-            if (backwards) {
-                if (!previous.OnIdChangedTowardsNext) return;
-                previous.OnElement.SetLayerRecursive(14);
-                try {
-                    previous.Next.OnElement.SetLayerRecursive(17);
-                } catch (Exception e) {
-                    // ignored
-                }
-            } else {
-                if (!previous.OnIdChangedTowardsPrevious) return;
-                previous.OnElement.SetLayerRecursive(14);
-                try {
-                    previous.Previous.OnElement.SetLayerRecursive(17);
-                } catch (Exception e) {
-                    // ignored
-                }
-            }
-        }
 
         private void Deactivate() {
             deactivated = true;
