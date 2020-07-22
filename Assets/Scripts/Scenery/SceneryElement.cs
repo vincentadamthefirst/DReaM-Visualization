@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 namespace Scenery {
-    public class SceneryElement : MonoBehaviour {
+    public abstract class SceneryElement : MonoBehaviour {
         public string OpenDriveId { get; set; }
         
         // tolerance for checking if floating point number is 0
@@ -12,9 +12,14 @@ namespace Scenery {
         protected static readonly int BaseMap = Shader.PropertyToID("_BaseMap");
         protected static readonly int OcclusionMap = Shader.PropertyToID("_OcclusionMap");
         protected static readonly int BaseColor = Shader.PropertyToID("_BaseColor");
+        protected static readonly int Color = Shader.PropertyToID("_Color");
 
         public virtual void SetLayer(int layer) {
             // implemented in junction and road
         }
+
+        public abstract void HandleHit();
+
+        public abstract void HandleNonHit();
     }
 }

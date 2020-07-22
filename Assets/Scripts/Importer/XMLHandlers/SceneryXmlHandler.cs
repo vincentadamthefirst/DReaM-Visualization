@@ -463,8 +463,8 @@ namespace Importer.XMLHandlers {
             laneObject.LaneDirection = laneDirection;
             laneObject.LaneType = laneType;
 
-            laneObject.name = RoadEnumStrings.laneDirectionToString[(int) laneDirection] + " Lane [" +
-                              RoadEnumStrings.laneTypeToString[(int) laneObject.LaneType] + "]";
+            laneObject.name = Enum.GetName(typeof(LaneDirection), laneDirection) + " Lane [" +
+                              Enum.GetName(typeof(LaneType), laneType) + "]";
 
             laneObject.SuccessorId = lane.Element("link")?.Element("successor")?.Attribute("id")?.Value ?? "x";
 

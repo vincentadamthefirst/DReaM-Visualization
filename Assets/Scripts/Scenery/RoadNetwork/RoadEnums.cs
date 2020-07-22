@@ -1,29 +1,25 @@
 ﻿namespace Scenery.RoadNetwork {
 
-    /**
-     * All supported lane types
-     */
+    /// <summary>
+    /// All supported LaneTypes.
+    /// </summary>
     public enum LaneType {
         None, Driving, Biking, Restricted, Sidewalk, Border, Shoulder
     }
 
+    /// <summary>
+    /// All RoadMarks, currently only Broken and Solid are supported.
+    /// TODO implement support
+    /// </summary>
     public enum RoadMarkType {
         None, Broken, Solid, SolidSolid, SolidBroken, BrokenSolid, BrokenBroken
     }
 
-    /**
-     * All supported element types (for links)
-     */
+    /// <summary>
+    /// All supported ElementTypes for links between roads or lanes.
+    /// </summary>
     public enum ElementType {
         None, Junction, Road
-    }
-
-    /// <summary>
-    /// All supported geometry types
-    /// TODO maybe remove
-    /// </summary>
-    public enum GeometryType {
-        Line, Arc, Spiral, Poly3, ParamPoly3
     }
 
     /// <summary>
@@ -33,17 +29,10 @@
         Left, Center, Right
     }
 
+    /// <summary>
+    /// The different contact points of roads or lanes.
+    /// </summary>
     public enum ContactPoint {
         Start, End
     }
-
-    public class RoadEnumStrings {
-        
-        public static string[] laneDirectionToString = {"Left", "Center", "Right"};
-
-        public static string[] laneTypeToString =
-            {"None", "Driving", "Biking", "Restricted", "Sidewalk", "Border", "Shoulder"};
-
-    }
-    
 }

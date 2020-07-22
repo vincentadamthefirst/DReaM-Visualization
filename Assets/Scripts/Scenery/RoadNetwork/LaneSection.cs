@@ -141,5 +141,19 @@ namespace Scenery.RoadNetwork {
         public float EvaluateHeading(float s) {
             return Parent.EvaluateHeading(S + s);
         }
+
+        /// <summary>
+        /// Scenery will not be handled on occlusion, ignore
+        /// </summary>
+        public override void HandleHit() {
+            // Ignore
+        }
+
+        /// <summary>
+        /// Scenery will not be handled on occlusion, ignore
+        /// </summary>
+        public override void HandleNonHit() {
+            // Ignore
+        }
     }
 }

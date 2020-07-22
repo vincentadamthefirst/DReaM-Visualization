@@ -45,5 +45,13 @@ namespace Visualization.Agents {
             OwnLabel.UpdateStrings(previous.AdditionalInformation.CrossingPhase, previous.AdditionalInformation.ScanAoI, previous.AdditionalInformation.GlanceType);
             OwnLabel.UpdatePositions(previous.AdditionalInformation.OtherAgents);
         }
+
+        public override void HandleHit() {
+            if (isTarget) return; // targets will not be handled on occlusion
+        }
+
+        public override void HandleNonHit() {
+            // TODO implement
+        }
     }
 }

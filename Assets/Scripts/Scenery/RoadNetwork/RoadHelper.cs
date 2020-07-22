@@ -5,8 +5,18 @@ using System.Linq;
 using UnityEngine;
 
 namespace Scenery.RoadNetwork {
+    
+    /// <summary>
+    /// Class containing helper methods for generating Road Meshes.
+    /// </summary>
     [SuppressMessage("ReSharper", "SwitchStatementHandlesSomeKnownEnumValuesWithDefault")]
     public static class RoadHelper {
+        
+        /// <summary>
+        /// Generates a Mesh for a given Lane.
+        /// </summary>
+        /// <param name="mesh">A reference to the Mesh that will be populated</param>
+        /// <param name="lane">The Lane for which to generate the Mesh for</param>
         public static void GenerateMeshForLane(ref Mesh mesh, Lane lane) {
             // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
             switch (lane.LaneType) {
@@ -23,6 +33,11 @@ namespace Scenery.RoadNetwork {
             mesh.RecalculateNormals();
         }
 
+        /// <summary>
+        /// Main method to generate a Mesh for a sidewalk.
+        /// </summary>
+        /// <param name="mesh">A reference to the Mesh that will be populated</param>
+        /// <param name="lane">The Lane for which to generate the Mesh for</param>
         private static void GenerateSidewalkMeshForLane(ref Mesh mesh, Lane lane) {
             if (lane.Parent.Parent.OnJunction && lane.RoadDesign.disableSidewalkOnJunction) return;
             if (lane.Parent.Parent.OnJunction && lane.RoadDesign.disableStraightSidewalkOnJunction &&
@@ -42,6 +57,11 @@ namespace Scenery.RoadNetwork {
             mesh.RecalculateNormals();
         }
 
+        /// <summary>
+        /// Generates a Mesh for a straight sidewalk (only 16 points for the entire Mesh).
+        /// </summary>
+        /// <param name="mesh">A reference to the Mesh that will be populated</param>
+        /// <param name="lane">The Lane for which to generate the Mesh for</param>
         private static void GenerateSidewalkMeshStraightForLane(ref Mesh mesh, Lane lane) {
             var rd = lane.RoadDesign; // road design
             var innerH = lane.InnerHeight; // height of sidewalk at inner edge
@@ -90,6 +110,11 @@ namespace Scenery.RoadNetwork {
             mesh.SetTriangles(ld == LaneDirection.Right ? ts[2] : TriangleDirectionChange(ts[2]), 2);
         }
 
+        /// <summary>
+        /// Generates a normal Mesh for a sidewalk by sampling the Lane width along the s coordinate in given steps.
+        /// </summary>
+        /// <param name="mesh">A reference to the Mesh that will be populated</param>
+        /// <param name="lane">The Lane for which to generate the Mesh for</param>
         private static void GenerateSidewalkMeshNormalForLane(ref Mesh mesh, Lane lane) {
             var ts0 = new List<int>();
             var ts1 = new List<int>();
@@ -105,8 +130,7 @@ namespace Scenery.RoadNetwork {
             var s = lane.Parent.Length; // distance to cover with mesh
             var ld = lane.LaneDirection; // direction of the lane
             var p = rd.samplePrecision;
-
-            //var upper = lane.RoadDesign.closeMeshToNextMesh ? s - s / (2 * p) : s;
+            
             var upper = s;
             for (var i = 0f; i <= upper; i += s / p) {
                 var w0 = m * lane.InnerNeighbor.EvaluateWidth(i);
@@ -144,6 +168,11 @@ namespace Scenery.RoadNetwork {
             mesh.SetTriangles(ld == LaneDirection.Right ? ts2.ToArray() : TriangleDirectionChange(ts2), 2);
         }
 
+        /// <summary>
+        /// Closes a sidewalk Mesh to the next Lane Mesh.
+        /// </summary>
+        /// <param name="mesh">A reference to the Mesh that will be populated</param>
+        /// <param name="lane">The Lane for which to generate the Mesh for</param>
         private static void CloseSidewalkMeshForLane(ref Mesh mesh, Lane lane) {
             if (lane.Successor == null) return;
 
@@ -208,6 +237,11 @@ namespace Scenery.RoadNetwork {
             mesh.SetTriangles(ts2, 2);
         }
 
+        /// <summary>
+        /// Main method to generate a Mesh for any Lane except sidewalks.
+        /// </summary>
+        /// <param name="mesh">A reference to the Mesh that will be populated</param>
+        /// <param name="lane">The Lane for which to generate the Mesh for</param>
         private static void GenerateDrivingMeshForLane(ref Mesh mesh, Lane lane) {
             if (lane.Parent.CompletelyOnLineSegment && lane.IsConstantWidth())
                 GenerateDrivingMeshStraightForLane(ref mesh, lane);
@@ -217,6 +251,11 @@ namespace Scenery.RoadNetwork {
             if (lane.RoadDesign.closeMeshToNextMesh) CloseDrivingMeshForLane(ref mesh, lane);
         }
         
+        /// <summary>
+        /// Generates a Mesh for a straight Lane (only 4 points for the entire Mesh).
+        /// </summary>
+        /// <param name="mesh">A reference to the Mesh that will be populated</param>
+        /// <param name="lane">The Lane for which to generate the Mesh for</param>
         private static void GenerateDrivingMeshStraightForLane(ref Mesh mesh, Lane lane) {
             var ls = lane.Parent; // lane section of the current lane
             var m = lane.Multiplier; // side multiplier
@@ -242,6 +281,11 @@ namespace Scenery.RoadNetwork {
             mesh.triangles = ld == LaneDirection.Right ? ts : TriangleDirectionChange(ts);
         }
         
+        /// <summary>
+        /// Generates a normal Mesh for a Lane by sampling the Lane width along the s coordinate in given steps.
+        /// </summary>
+        /// <param name="mesh">A reference to the Mesh that will be populated</param>
+        /// <param name="lane">The Lane for which to generate the Mesh for</param>
         private static void GenerateDrivingMeshNormalForLane(ref Mesh mesh, Lane lane) {
             var ps = new List<Vector3>();
             var uvs = new List<Vector2>();
@@ -279,6 +323,11 @@ namespace Scenery.RoadNetwork {
             mesh.triangles = ld == LaneDirection.Right ? ts.ToArray() : TriangleDirectionChange(ts);
         }
 
+        /// <summary>
+        /// Closes a Lane Mesh to the next Lane Mesh.
+        /// </summary>
+        /// <param name="mesh">A reference to the Mesh that will be populated</param>
+        /// <param name="lane">The Lane for which to generate the Mesh for</param>
         private static void CloseDrivingMeshForLane(ref Mesh mesh, Lane lane) {
             if (lane.Successor == null) return;
 
@@ -313,18 +362,12 @@ namespace Scenery.RoadNetwork {
             mesh.uv = uvs.ToArray();
             mesh.triangles = ts.ToArray();
         }
-        
-        private static int[] TriangleDirectionChange(IReadOnlyList<int> input) {
-            var changed = new int[input.Count];
-            for (var i = 0; i <= input.Count - 3; i += 3) {
-                changed[i] = input[i];
-                changed[i + 1] = input[i + 2];
-                changed[i + 2] = input[i + 1];
-            }
 
-            return changed;
-        }
-
+        /// <summary>
+        /// Main method to generate a Mesh for a RoadMark.
+        /// </summary>
+        /// <param name="mesh">A reference to the Mesh that will be populated</param>
+        /// <param name="roadMark">The RoadMark for which to generate the Mesh for</param>
         public static void GenerateMeshForRoadMark(ref Mesh mesh, RoadMark roadMark) {
             if (roadMark.ParentLane.Parent.Parent.OnJunction && roadMark.RoadDesign.disableRoadMarkOnJunction) 
                 return;
@@ -345,6 +388,11 @@ namespace Scenery.RoadNetwork {
             mesh.RecalculateNormals();
         }
 
+        /// <summary>
+        /// Generates a mesh for a straight RoadMark (only 4 points for the entire Mesh).
+        /// </summary>
+        /// <param name="mesh">A reference to the Mesh that will be populated</param>
+        /// <param name="roadMark">The RoadMark for which to generate the Mesh for</param>
         private static void GenerateSimpleStraightMeshForRoadMark(ref Mesh mesh, RoadMark roadMark) {
             var ls = roadMark.ParentLane.Parent; // lane section of the current lane
             var s = roadMark.ParentLane.Parent.Length; // distance to cover with mesh
@@ -354,13 +402,6 @@ namespace Scenery.RoadNetwork {
 
             var w0 = m * (l.EvaluateWidth(0) - roadMark.Width / 2f);
             var w1 = m * (l.EvaluateWidth(0) + roadMark.Width / 2f);
-
-            // if (l.LaneDirection == LaneDirection.Center) {
-            //     if (l.OuterNeighbor == null || l.OuterNeighbor.LaneType == LaneType.Sidewalk) w0 = 0;
-            //     if (l.InnerNeighbor == null || l.InnerNeighbor.LaneType == LaneType.Sidewalk) w1 = 0;
-            // } else if (l.OuterNeighbor == null || l.OuterNeighbor.LaneType == LaneType.Sidewalk) {
-            //     w1 = m * roadMark.ParentLane.EvaluateWidth(0);
-            // }
 
             var ps = new[] {
                 ls.EvaluatePoint(0, w0), ls.EvaluatePoint(0, w1),
@@ -378,6 +419,11 @@ namespace Scenery.RoadNetwork {
             mesh.triangles = ld == LaneDirection.Right || ld == LaneDirection.Center ? ts : TriangleDirectionChange(ts);
         }
 
+        /// <summary>
+        /// Generates a normal Mesh for a RoadMark by sampling the Lane width along the s coordinate in given steps. 
+        /// </summary>
+        /// <param name="mesh">A reference to the Mesh that will be populated</param>
+        /// <param name="roadMark">The RoadMark for which to generate the Mesh for</param>
         private static void GenerateSimpleNormalMeshForRoadMark(ref Mesh mesh, RoadMark roadMark) {
             var ps = new List<Vector3>();
             var uvs = new List<Vector2>();
@@ -397,13 +443,6 @@ namespace Scenery.RoadNetwork {
                 var w0 = m * (l.EvaluateWidth(i) - roadMark.Width / 2f);
                 var w1 = m * (l.EvaluateWidth(i) + roadMark.Width / 2f);
 
-                // if (l.LaneDirection == LaneDirection.Center) {
-                //     if (l.OuterNeighbor == null || l.OuterNeighbor.LaneType == LaneType.Sidewalk) w1 = 0;
-                //     if (l.InnerNeighbor == null || l.InnerNeighbor.LaneType == LaneType.Sidewalk) w0 = 0;
-                // } else if (l.OuterNeighbor == null || l.OuterNeighbor.LaneType == LaneType.Sidewalk) {
-                //     w1 = m * roadMark.ParentLane.EvaluateWidth(i);
-                // }
-
                 ps.AddRange(new[] {
                     ls.EvaluatePoint(i, w0), ls.EvaluatePoint(i, w1)
                 });
@@ -422,6 +461,11 @@ namespace Scenery.RoadNetwork {
             mesh.triangles = ld == LaneDirection.Right || ld == LaneDirection.Center ? ts.ToArray() : TriangleDirectionChange(ts);
         }
 
+        /// <summary>
+        /// Closes a RoadMark Mesh to the next RoadMark Mesh.
+        /// </summary>
+        /// <param name="mesh">A reference to the Mesh that will be populated</param>
+        /// <param name="roadMark">The RoadMark for which to generate the Mesh for</param>
         private static void CloseSimpleMeshForRoadMark(ref Mesh mesh, RoadMark roadMark) {
             if (roadMark.ParentLane.Successor == null) return;
 
@@ -440,12 +484,6 @@ namespace Scenery.RoadNetwork {
             
             var w0 = m * (sl.EvaluateWidth(s) - roadMark.Width / 2);
             var w1 = m * (sl.EvaluateWidth(s) + roadMark.Width / 2);
-            // if (sl.LaneDirection == LaneDirection.Center) {
-            //     if (sl.OuterNeighbor == null || sl.OuterNeighbor.LaneType == LaneType.Sidewalk) w1 = 0;
-            //     if (sl.InnerNeighbor == null || sl.InnerNeighbor.LaneType == LaneType.Sidewalk) w0 = 0;
-            // } else if (sl.OuterNeighbor == null || sl.OuterNeighbor.LaneType == LaneType.Sidewalk) {
-            //     w1 = m * sl.EvaluateWidth(s);
-            // }
 
             var i = ps.Count - 2;
 
@@ -460,6 +498,23 @@ namespace Scenery.RoadNetwork {
             mesh.vertices = ps.ToArray();
             mesh.uv = uvs.ToArray();
             mesh.triangles = ts.ToArray();
+        }
+        
+        /// <summary>
+        /// Changes the order of triangles in a given list of indices.
+        /// (a, b, c) --> (c, b, a)
+        /// </summary>
+        /// <param name="input">The input indices list</param>
+        /// <returns>The resulting list with flipped triangles</returns>
+        private static int[] TriangleDirectionChange(IReadOnlyList<int> input) {
+            var changed = new int[input.Count];
+            for (var i = 0; i <= input.Count - 3; i += 3) {
+                changed[i] = input[i];
+                changed[i + 1] = input[i + 2];
+                changed[i + 2] = input[i + 1];
+            }
+
+            return changed;
         }
     }
 }

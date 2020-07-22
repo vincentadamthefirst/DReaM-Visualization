@@ -3,7 +3,13 @@ using UnityEngine.Rendering.UI;
 using Utils;
 
 namespace Scenery.RoadNetwork.RoadGeometries {
+    
+    /// <summary>
+    /// Class representing a ArcGeometry from OpenDrive
+    /// </summary>
     public class ArcGeometry : RoadGeometry {
+        
+        // the parameter
         private readonly float _curvature;
         
         public ArcGeometry(float sStart, float x, float y, float hdg, float length, float curvature) : base(sStart, x,

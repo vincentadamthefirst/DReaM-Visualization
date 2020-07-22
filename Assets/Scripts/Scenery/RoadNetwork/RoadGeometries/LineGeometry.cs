@@ -2,6 +2,10 @@
 using Utils;
 
 namespace Scenery.RoadNetwork.RoadGeometries {
+    
+    /// <summary>
+    /// Class representing a LineGeometry from OpenDrive
+    /// </summary>
     public class LineGeometry : RoadGeometry {
         
         public LineGeometry(float sStart, float x, float y, float hdg, float length) : base(sStart, x,

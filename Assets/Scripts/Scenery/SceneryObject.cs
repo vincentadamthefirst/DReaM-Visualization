@@ -15,7 +15,7 @@ namespace Scenery {
             _boxCollider = GetComponent<BoxCollider>();
         }
 
-        public void HandleNonHit() {
+        public override void HandleNonHit() {
             try {
                 var c = _ownRenderer.material.color;
                 c.a = 1f;
@@ -24,7 +24,7 @@ namespace Scenery {
             } catch (Exception e) { }
         }
 
-        public void HandleHit() {
+        public override void HandleHit() {
             try {
                 var c = _ownRenderer.material.color;
                 c.a = 0.5f;

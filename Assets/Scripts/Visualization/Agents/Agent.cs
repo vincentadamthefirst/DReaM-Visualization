@@ -10,7 +10,7 @@ using Visualization.Labels;
 using Visualization.RoadOcclusion;
 
 namespace Visualization.Agents {
-    public abstract class Agent : MonoBehaviour {
+    public abstract class Agent : SceneryElement {
         /// <summary>
         /// The current SimulationStep Object
         /// </summary>
@@ -50,7 +50,7 @@ namespace Visualization.Agents {
         public Material ColorMaterial { get; set; }
 
         // if the agent is a target object
-        private bool _isTarget;
+        protected bool isTarget;
 
         // if the agent is deactivated
         protected bool deactivated;
@@ -145,7 +145,7 @@ namespace Visualization.Agents {
             UpdatePosition();
             UpdateRotation();
 
-            if (!_isTarget) return;
+            if (!isTarget) return;
             RoadOcclusionManager.AddOnElement(previous.OnElement);
             UpdateLabel();
         }
@@ -176,11 +176,11 @@ namespace Visualization.Agents {
 
         public void SetIsTarget(bool target) {
             Model.SetLayerRecursive(target ? 14 : 15);
-            _isTarget = target;
+            isTarget = target;
         }
 
         public bool IsTarget() {
-            return _isTarget;
+            return isTarget;
         }
     }
 }

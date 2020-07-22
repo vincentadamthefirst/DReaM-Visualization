@@ -7,7 +7,7 @@ namespace Scenery.RoadNetwork.RoadObjects {
         
         public float Width { get; set; }
 
-        protected override void Repeat() {
+        private void Repeat() {
             if (RepeatParameters == null) return;
 
             var start = RepeatParameters.SStart;
@@ -40,9 +40,7 @@ namespace Scenery.RoadNetwork.RoadObjects {
         public override void Show() {
             Repeat();
             if (markedForDelete) return;
-            
-            var rop = RoadDesign.GetRoadObjectPrefab(RoadObjectType, SubType);
-            
+
             // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
             switch (RoadObjectType) {
                 case RoadObjectType.Building:
@@ -62,6 +60,8 @@ namespace Scenery.RoadNetwork.RoadObjects {
             }
 
             transform.parent = Parent.transform;
+            
+            MaybeDelete();
         }
 
         private void ShowPlane(Material material) {
@@ -98,6 +98,20 @@ namespace Scenery.RoadNetwork.RoadObjects {
             
             var completeHdg = Parent.EvaluateHeading(S) + Heading;
             buildingBase.transform.Rotate(Vector3.up, Mathf.Rad2Deg * completeHdg);
+        }
+        
+        public override bool MaybeDelete() {
+            if (!markedForDelete) return false;
+            Destroy(this);
+            return true;
+        }
+
+        public override void HandleHit() {
+            throw new System.NotImplementedException();
+        }
+
+        public override void HandleNonHit() {
+            throw new System.NotImplementedException();
         }
     }
 }

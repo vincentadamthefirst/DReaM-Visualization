@@ -169,5 +169,13 @@ namespace Visualization.Agents {
                 avi.IndicatorState == IndicatorState.Left || avi.IndicatorState == IndicatorState.Warn ? 1 : 0,
                 avi.IndicatorState == IndicatorState.Right || avi.IndicatorState == IndicatorState.Warn ? 1 : 0);
         }
+
+        public override void HandleHit() {
+            if (isTarget) return; // targets will not be handled on occlusion
+        }
+
+        public override void HandleNonHit() {
+            // TODO implement
+        }
     }
 }

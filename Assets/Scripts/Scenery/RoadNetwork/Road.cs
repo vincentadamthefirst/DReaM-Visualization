@@ -1,46 +1,80 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using Meta.Numerics.Functions;
 using Scenery.RoadNetwork.RoadGeometries;
 using Scenery.RoadNetwork.RoadObjects;
 using UnityEngine;
-using UnityEngine.Analytics;
 
 namespace Scenery.RoadNetwork {
+    
+    /// <summary>
+    /// Class representing an OpenDrive road
+    /// </summary>
     public class Road : SceneryElement {
-        private List<RoadGeometry> _roadGeometries;
-
+        
+        /// <summary>
+        /// List of all RoadGeometries for this Road
+        /// </summary>
+        public List<RoadGeometry> RoadGeometries { get; private set; } = new List<RoadGeometry>();
+        
+        /// <summary>
+        /// Length of this Road
+        /// </summary>
         public float Length { get; set; }
         
+        /// <summary>
+        /// If this Road is on a Junction
+        /// </summary>
         public bool OnJunction { get; set; }
         
+        /// <summary>
+        /// This Roads parent Junction, might be null
+        /// </summary>
         public Junction ParentJunction { get; set; }
         
+        /// <summary>
+        /// The type of this Roads successor (if it has one)
+        /// </summary>
         public ElementType SuccessorElementType { get; set; }
         
+        /// <summary>
+        /// The id of this Roads successor (if it has one)
+        /// </summary>
         public string SuccessorOdId { get; set; }
         
+        /// <summary>
+        /// This Roads successor, might be null
+        /// </summary>
         public SceneryElement Successor { get; set; }
         
+        /// <summary>
+        /// The Contact Point of this Roads successor (if is has one)
+        /// </summary>
         public ContactPoint SuccessorContactPoint { get; set; }
 
-        public List<LaneSection> LaneSections { get; private set; }
+        /// <summary>
+        /// All LaneSections on this Road
+        /// </summary>
+        public List<LaneSection> LaneSections { get; private set; } = new List<LaneSection>();
         
-        public List<RoadObject> RoadObjects { get; private set; }
+        /// <summary>
+        /// All RoadObjects along this Road
+        /// </summary>
+        public List<RoadObject> RoadObjects { get; }  = new List<RoadObject>();
 
-        public Road() {
-            _roadGeometries = new List<RoadGeometry>();
-            LaneSections = new List<LaneSection>();
-            RoadObjects = new List<RoadObject>();
-        }
-
+        /// <summary>
+        /// Adds a new RoadGeometry to this Road and sorts the list based on s value.
+        /// </summary>
+        /// <param name="geometry">The RoadGeometry to be added</param>
         public void AddRoadGeometry(RoadGeometry geometry) {
-            _roadGeometries.Add(geometry);
-            var ordered = _roadGeometries.AsEnumerable().OrderBy(r => r.SStart);
-            _roadGeometries = ordered.ToList();
+            RoadGeometries.Add(geometry);
+            var ordered = RoadGeometries.AsEnumerable().OrderBy(r => r.SStart);
+            RoadGeometries = ordered.ToList();
         }
 
+        /// <summary>
+        /// Adds a new LaneSection to this Road and sorts the list based on s value.
+        /// </summary>
+        /// <param name="laneSection">The LaneSection to be added</param>
         public void AddLaneSection(LaneSection laneSection) {
             LaneSections.Add(laneSection);
             var ordered = LaneSections.AsEnumerable().OrderBy(l => l.S);
@@ -124,6 +158,10 @@ namespace Scenery.RoadNetwork {
             }
         }
 
+        /// <summary>
+        /// Sets the layer for all Lanes that belong to this Road, does NOT set the layer of any RoadObjects.
+        /// </summary>
+        /// <param name="layer">The new layer</param>
         public override void SetLayer(int layer) {
             gameObject.layer = layer;
             foreach (var laneSection in LaneSections) {
@@ -133,6 +171,23 @@ namespace Scenery.RoadNetwork {
             }
         }
 
+        /// <summary>
+        /// Scenery will not be handled on occlusion, ignore
+        /// </summary>
+        public override void HandleHit() {
+            // Ignore
+        }
+
+        /// <summary>
+        /// Scenery will not be handled on occlusion, ignore
+        /// </summary>
+        public override void HandleNonHit() {
+            // Ignore
+        }
+
+        /// <summary>
+        /// Prepares all LaneSections and Geometries of this Road by setting internal parameters.
+        /// </summary>
         public void PrepareLaneSectionsAndGeometries() {
             for (var i = 0; i < LaneSections.Count; i++) {
                 // preparing lane neighbors
@@ -150,7 +205,7 @@ namespace Scenery.RoadNetwork {
                 }
 
                 // checking if the LaneSection is completely within a LineGeometry
-                foreach (var geometry in _roadGeometries) {
+                foreach (var geometry in RoadGeometries) {
                     if (geometry.GetType() != typeof(LineGeometry)) continue;
                     if (!(LaneSections[i].S >= geometry.SStart - 0.0001f) ||
                         !(LaneSections[i].S + LaneSections[i].Length < geometry.SStart + geometry.Length + 0.0001f))
@@ -168,21 +223,39 @@ namespace Scenery.RoadNetwork {
             }
         }
 
+        /// <summary>
+        /// Starts the Mesh generation procedure in all LaneSections.
+        /// </summary>
         public void StartMeshGeneration() {
             LaneSections.ForEach(l => l.StartMeshGeneration());
             
             RoadObjects.ForEach(ro => ro.Show());
+
+            var tmp = new List<RoadObject>();
+
+            foreach (var ro in RoadObjects) {
+                if (ro.MaybeDelete()) tmp.Add(ro);
+            }
+
+            RoadObjects.RemoveAll(ro => tmp.Contains(ro));
         }
 
+        /// <summary>
+        /// Evaluates a point along the reference line of this Road.
+        /// </summary>
+        /// <param name="globalS">The road-global s coordinate</param>
+        /// <param name="t">The t coordinate</param>
+        /// <param name="h">The height of the point, will be defaulted to 0</param>
+        /// <returns>The resulting point</returns>
         public Vector3 EvaluatePoint(float globalS, float t, float h = 0f) {
-            var geometry = _roadGeometries[0];
-            for (var i = 0; i < _roadGeometries.Count; i++) {
-                if (i == _roadGeometries.Count) geometry = _roadGeometries[i];
-                var upper = i == _roadGeometries.Count - 1
+            var geometry = RoadGeometries[0];
+            for (var i = 0; i < RoadGeometries.Count; i++) {
+                if (i == RoadGeometries.Count) geometry = RoadGeometries[i];
+                var upper = i == RoadGeometries.Count - 1
                     ? Length
-                    : _roadGeometries[i].SStart + _roadGeometries[i].Length;
-                if (globalS >= _roadGeometries[i].SStart && globalS <= upper) {
-                    geometry = _roadGeometries[i];
+                    : RoadGeometries[i].SStart + RoadGeometries[i].Length;
+                if (globalS >= RoadGeometries[i].SStart && globalS <= upper) {
+                    geometry = RoadGeometries[i];
                 }
             }
             
@@ -190,27 +263,24 @@ namespace Scenery.RoadNetwork {
             return new Vector3(result.x, h, result.y);
         }
 
+        /// <summary>
+        /// Evaluates the heading along the reference line of this Road.
+        /// </summary>
+        /// <param name="globalS">The road-global s coordinate</param>
+        /// <returns>The resulting heading</returns>
         public float EvaluateHeading(float globalS) {
-            var geometry = _roadGeometries[0];
-            for (var i = 0; i < _roadGeometries.Count; i++) {
-                if (i == _roadGeometries.Count) geometry = _roadGeometries[i];
-                var upper = i == _roadGeometries.Count - 1
+            var geometry = RoadGeometries[0];
+            for (var i = 0; i < RoadGeometries.Count; i++) {
+                if (i == RoadGeometries.Count) geometry = RoadGeometries[i];
+                var upper = i == RoadGeometries.Count - 1
                     ? Length
-                    : _roadGeometries[i].SStart + _roadGeometries[i].Length;
-                if (globalS >= _roadGeometries[i].SStart && globalS <= upper) {
-                    geometry = _roadGeometries[i];
+                    : RoadGeometries[i].SStart + RoadGeometries[i].Length;
+                if (globalS >= RoadGeometries[i].SStart && globalS <= upper) {
+                    geometry = RoadGeometries[i];
                 }
             }
             
             return geometry.EvaluateHeading(globalS - geometry.SStart);
         }
-
-        public List<RoadGeometry> RoadGeometries => _roadGeometries;
-
-        // TODO
-        // Referenz auf alle Lane Sections
-        // Methode um das Mesh Generieren zu starten --> kaskadiert an die lane sections
-        // Methode um an einer s & t - Coordinate die Geometry auszuwerten (public)
-
     }
 }

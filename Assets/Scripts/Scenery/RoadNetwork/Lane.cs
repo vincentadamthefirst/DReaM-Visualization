@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using UnityEngine;
 
 namespace Scenery.RoadNetwork {
     
+    /// <summary>
+    /// Class Representing a Lane from OpenDrive
+    /// </summary>
     [RequireComponent(typeof(Lane))]
     [RequireComponent(typeof(MeshFilter))]
     [RequireComponent(typeof(MeshRenderer))]
@@ -95,6 +97,9 @@ namespace Scenery.RoadNetwork {
         /// </summary>
         private List<LaneWidth> Widths { get; set; } = new List<LaneWidth>();
 
+        /// <summary>
+        /// Adds a new width entry for this lane
+        /// </summary>
         public void AddWidthEntry(float sOffset, float a, float b, float c, float d) {
             var newEntry = new LaneWidth(sOffset, a, b, c, d);
             Widths.Add(newEntry);
@@ -102,6 +107,11 @@ namespace Scenery.RoadNetwork {
             Widths = ordered.ToList();
         }
 
+        /// <summary>
+        /// Evaluates the width at a given s ONLY by evaluating the width function of this Lane.
+        /// </summary>
+        /// <param name="s">The s value to evaluate the width at</param>
+        /// <returns>The width of ONLY this Lane</returns>
         private float EvaluateWidthSelf(float s) {
             if (LaneDirection == LaneDirection.Center) return 0f;
 
@@ -114,12 +124,22 @@ namespace Scenery.RoadNetwork {
             return Widths[Widths.Count - 1].Evaluate(s);
         }
 
+        /// <summary>
+        /// Evaluates the width at a given s and taking the width of neighboring Lanes towards the Toad center into
+        /// account.
+        /// </summary>
+        /// <param name="s">The s value to evaluate the width at</param>
+        /// <returns>The width of the Lane from the center Lane</returns>
         public float EvaluateWidth(float s) {
             if (LaneDirection == LaneDirection.Center) return 0f;
 
             return EvaluateWidthSelf(s) + InnerNeighbor.EvaluateWidth(s);
         }
 
+        /// <summary>
+        /// Checks if this Lane has a constant width (all width entries b, c, d = 0).
+        /// </summary>
+        /// <returns>If the lane has a constant width</returns>
         public bool IsConstantWidth() {
             if (LaneDirection == LaneDirection.Center) return true;
             
@@ -133,6 +153,11 @@ namespace Scenery.RoadNetwork {
             return resultSelf && InnerNeighbor.IsConstantWidth();
         }
 
+        /// <summary>
+        /// Returns the maximum width of this Lane without taking neighboring Lanes into account.
+        /// </summary>
+        /// <param name="stepSize">The stepsize for testing the width functions</param>
+        /// <returns>If the Lane has a constant width</returns>
         public float GetMaxWidthSelf(int stepSize) {
             var maxWidth = float.NegativeInfinity;
             for (var i = 0f; i < Parent.Length; i += Parent.Length / stepSize) {
@@ -143,6 +168,9 @@ namespace Scenery.RoadNetwork {
             return maxWidth;
         }
 
+        /// <summary>
+        /// Starts the Mesh generation for this Lane.
+        /// </summary>
         public void GenerateMesh() {
             Multiplier = LaneDirection == LaneDirection.Right || LaneDirection == LaneDirection.Center ? -1 : 1;
             if (LaneDirection == LaneDirection.Center) return;
@@ -158,6 +186,9 @@ namespace Scenery.RoadNetwork {
             RoadMark.GenerateMesh();
         }
 
+        /// <summary>
+        /// Adds Materials to the MeshRenderer of this Lane based on the type of the Lane.
+        /// </summary>
         private void AddMaterials() {
             var meshRenderer = GetComponent<MeshRenderer>();
 
@@ -200,9 +231,28 @@ namespace Scenery.RoadNetwork {
                 meshRenderer.material = material;
             }
         }
+
+        /// <summary>
+        /// Scenery will not be handled on occlusion, ignore
+        /// </summary>
+        public override void HandleHit() {
+            // Ignore
+        }
+
+        /// <summary>
+        /// Scenery will not be handled on occlusion, ignore
+        /// </summary>
+        public override void HandleNonHit() {
+            // Ignore
+        }
     }
 
+    /// <summary>
+    /// A width entry of this Lane
+    /// </summary>
     public class LaneWidth {
+        
+        // width parameters
         public float SOffset { get; }
         private float A { get; }
         public float B { get; }
@@ -217,6 +267,11 @@ namespace Scenery.RoadNetwork {
             D = d;
         }
         
+        /// <summary>
+        /// Evaluates the width function with a given (local) s.
+        /// </summary>
+        /// <param name="s">The s value to evaluate</param>
+        /// <returns>The result of the width function</returns>
         public float Evaluate(float s) {
             return A + B * s + C * s * s + D * s * s * s;
         }

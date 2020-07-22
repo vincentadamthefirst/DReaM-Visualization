@@ -13,7 +13,7 @@ namespace Scenery.RoadNetwork.RoadObjects {
     public class RoadObjectRound : RoadObject {
         public float Radius { get; set; }
 
-        protected override void Repeat() {
+        private void Repeat() {
             if (RepeatParameters == null) return;
 
             var start = RepeatParameters.SStart;
@@ -70,6 +70,12 @@ namespace Scenery.RoadNetwork.RoadObjects {
             }
 
             transform.parent = Parent.transform;
+        }
+
+        public override bool MaybeDelete() {
+            if (!markedForDelete) return false;
+            Destroy(this);
+            return true;
         }
 
         private void ShowStreetLamp(RoadObjectPrefab rop) {
@@ -133,6 +139,14 @@ namespace Scenery.RoadNetwork.RoadObjects {
             
             var m = Orientation == RoadObjectOrientation.Negative ? -1 : 1;
             buildingBase.transform.position = Parent.EvaluatePoint(S, m * T, ZOffset + Height / 2f);
+        }
+
+        public override void HandleHit() {
+            throw new NotImplementedException();
+        }
+
+        public override void HandleNonHit() {
+            throw new NotImplementedException();
         }
     }
 }

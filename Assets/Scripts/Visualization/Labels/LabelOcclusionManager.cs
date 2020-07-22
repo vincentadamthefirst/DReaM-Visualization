@@ -38,13 +38,13 @@ namespace Visualization.Labels {
         private int _maxLabelsPerSide;
         
         // main camera
-        private Camera _mainCamera;
+        private ExtendedCamera _mainCamera;
 
         private ScreenLabel[] _activeRight = new ScreenLabel[0];
         private ScreenLabel[] _activeLeft = new ScreenLabel[0];
 
         private void Start() {
-            _mainCamera = Camera.main;
+            _mainCamera = FindObjectOfType<ExtendedCamera>();
             
             RecalculateParameters();
         }
@@ -87,7 +87,7 @@ namespace Visualization.Labels {
 
         [SuppressMessage("ReSharper", "PossibleMultipleEnumeration")]
         private void PickActiveLabels() {
-            var frustumPlanes = GeometryUtility.CalculateFrustumPlanes(_mainCamera);
+            var frustumPlanes = _mainCamera.CurrentFrustumPlanes;
 
             // 1. selecting all labels where the Agent is a target, Agent is active, the AnchorPoint is in the left half
             //    of the screen, the AnchorPoint is inside the screen and the AnchorPoint is inside of the detection
@@ -178,7 +178,7 @@ namespace Visualization.Labels {
         }
 
         public Vector2 WorldToScreenPoint(Vector3 point) {
-            var wts = _mainCamera.WorldToScreenPoint(point);
+            var wts = _mainCamera.Camera.WorldToScreenPoint(point);
             
             return new Vector2(Mathf.Lerp(-MaxWidth / 2f, MaxWidth / 2f, wts.x / Screen.width),
                 Mathf.Lerp(-MaxHeight / 2f, MaxHeight / 2f, wts.y / Screen.height));

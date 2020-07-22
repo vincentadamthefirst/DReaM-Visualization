@@ -3,12 +3,17 @@ using UnityEngine;
 using Utils;
 
 namespace Scenery.RoadNetwork.RoadGeometries {
+    
+    /// <summary>
+    /// Class representing a ParamPoly3Geometry from OpenDrive
+    /// </summary>
     public class ParamPoly3Geometry : RoadGeometry {
 
-        private float _aV, _aU;
-        private float _bV, _bU;
-        private float _cV, _cU;
-        private float _dV, _dU;
+        // the parameters
+        private readonly float _aV, _aU;
+        private readonly float _bV, _bU;
+        private readonly float _cV, _cU;
+        private readonly float _dV, _dU;
 
         public ParamPoly3Geometry(float sStart, float x, float y, float hdg, float length, float aV, float aU, float bV,
             float bU, float cV, float cU, float dV, float dU) : base(sStart, x, y, hdg, length) {
@@ -41,7 +46,7 @@ namespace Scenery.RoadNetwork.RoadGeometries {
 
             while (k < s) {
                 lastPosition = position;
-                p += 1 / length;
+                p += 1 / Length;
 
                 position.x = _aU + _bU * p + _cU * p * p + _dU * p * p * p;
                 position.y = _aV + _bV * p + _cV * p * p + _dV * p * p * p;
@@ -83,16 +88,14 @@ namespace Scenery.RoadNetwork.RoadGeometries {
                 return hdg;
             }
             
-            
             var k = 0f;
-            var lastPosition = new Vector2();
             var delta = new Vector2();
             var p = 0f;
             var position = new Vector2(_aU, _aV);
 
             while (k < s) {
-                lastPosition = position;
-                p += 1 / length;
+                var lastPosition = position;
+                p += 1 / Length;
 
                 position.x = _aU + _bU * p + _cU * p * p + _dU * p * p * p;
                 position.y = _aV + _bV * p + _cV * p * p + _dV * p * p * p;

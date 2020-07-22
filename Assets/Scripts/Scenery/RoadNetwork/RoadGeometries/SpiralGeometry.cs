@@ -6,7 +6,13 @@ using Utils;
 using Debug = UnityEngine.Debug;
 
 namespace Scenery.RoadNetwork.RoadGeometries {
+    
+    /// <summary>
+    /// Class representing a SpiralGeometry from OpenDrive
+    /// </summary>
     public class SpiralGeometry : RoadGeometry {
+        
+        // the parameters
         private readonly float _curvatureStart;
         private readonly float _curvatureEnd;
         
@@ -32,14 +38,14 @@ namespace Scenery.RoadNetwork.RoadGeometries {
                 throw new ArgumentException("Curvatures must both have the same sign!");
             }
 
-            if (s > length) {
-                s = length;
+            if (s > Length) {
+                s = Length;
             }
 
             if (curvatureStart >= 0f && curvatureEnd >= 0f) {
                 return curvatureStart < curvatureEnd
                     ? SpiralPartA(s, t, curvatureStart, curvatureEnd)
-                    : SpiralPartB(length - s, t, curvatureEnd, curvatureStart);
+                    : SpiralPartB(Length - s, t, curvatureEnd, curvatureStart);
             } else {
                 // curvatureStart < 0 && curvatureEnd <= 0
                 curvatureStart *= -1;
@@ -47,7 +53,7 @@ namespace Scenery.RoadNetwork.RoadGeometries {
 
                 return curvatureStart < curvatureEnd
                     ? SpiralPartC(s, t, curvatureStart, curvatureEnd)
-                    : SpiralPartD(length - s, t, curvatureEnd, curvatureStart);
+                    : SpiralPartD(Length - s, t, curvatureEnd, curvatureStart);
             }
         }
 
@@ -74,11 +80,11 @@ namespace Scenery.RoadNetwork.RoadGeometries {
                 throw new ArgumentException("End curvature cannot be 0!");
 
             var radiusEnd = 1f / curvatureEnd;
-            var distanceEnd = length / (1f - radiusEnd * curvatureStart);
+            var distanceEnd = Length / (1f - radiusEnd * curvatureStart);
                     
-            if (length > distanceEnd) throw new ArgumentException();
+            if (Length > distanceEnd) throw new ArgumentException();
 
-            var distanceStart = distanceEnd - length;
+            var distanceStart = distanceEnd - Length;
             var a = Mathf.Sqrt(2f * radiusEnd * distanceEnd);
 
             // TODO maybe change Re and Im Part for x and y
@@ -120,11 +126,11 @@ namespace Scenery.RoadNetwork.RoadGeometries {
                 throw new ArgumentException("End curvature cannot be 0!");
 
             var radiusEnd = 1f / curvatureEnd;
-            var distanceEnd = length / (1f - radiusEnd * curvatureStart);
+            var distanceEnd = Length / (1f - radiusEnd * curvatureStart);
                     
-            if (length > distanceEnd) throw new ArgumentException();
+            if (Length > distanceEnd) throw new ArgumentException();
 
-            var distanceStart = distanceEnd - length;
+            var distanceStart = distanceEnd - Length;
             var a = Mathf.Sqrt(2f * radiusEnd * distanceEnd);
 
             // TODO maybe change Re and Im Part for x and y
@@ -181,11 +187,11 @@ namespace Scenery.RoadNetwork.RoadGeometries {
                 throw new ArgumentException("End curvature cannot be 0!");
 
             var radiusEnd = 1f / curvatureEnd;
-            var distanceEnd = length / (1f - radiusEnd * curvatureStart);
+            var distanceEnd = Length / (1f - radiusEnd * curvatureStart);
                     
-            if (length > distanceEnd) throw new ArgumentException();
+            if (Length > distanceEnd) throw new ArgumentException();
 
-            var distanceStart = distanceEnd - length;
+            var distanceStart = distanceEnd - Length;
             var a = Mathf.Sqrt(2f * radiusEnd * distanceEnd);
 
             // TODO maybe change Re and Im Part for x and y
@@ -228,11 +234,11 @@ namespace Scenery.RoadNetwork.RoadGeometries {
                 throw new ArgumentException("End curvature cannot be 0!");
 
             var radiusEnd = 1f / curvatureEnd;
-            var distanceEnd = length / (1f - radiusEnd * curvatureStart);
+            var distanceEnd = Length / (1f - radiusEnd * curvatureStart);
                     
-            if (length > distanceEnd) throw new ArgumentException();
+            if (Length > distanceEnd) throw new ArgumentException();
 
-            var distanceStart = distanceEnd - length;
+            var distanceStart = distanceEnd - Length;
             var a = Mathf.Sqrt(2f * radiusEnd * distanceEnd);
 
             // TODO maybe change Re and Im Part for x and y
