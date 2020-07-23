@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0f41c3e770f84c7382783aff04e186d8, type: 3}
-  m_Name: TestRoadDesign
+  m_Name: RoadDesign
   m_EditorClassIdentifier: 
   roadPrefab: {fileID: 30504008684144915, guid: 8e0eebc53ed28fd4692f294821aa9bdc, type: 3}
   lanePrefab: {fileID: 6720255902914634455, guid: aed3a6119c214c3498466efa6c06bb75, type: 3}
@@ -18,7 +18,6 @@ MonoBehaviour:
   junctionPrefab: {fileID: 8144626824674827851, guid: 85e4b06cd66cf354ba117ecfcd37cb1e, type: 3}
   roadMarkPrefab: {fileID: 3689535253008410456, guid: 3245dccf41f655d4b97a8b74d74de4d2, type: 3}
   samplePrecision: 100
-  sidewalkHeight: 0.2
   sidewalkCurbWidth: 0.15
   offsetHeight: 0.0001
   laneMaterials:

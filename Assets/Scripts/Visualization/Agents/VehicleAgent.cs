@@ -1,6 +1,8 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Assertions;
+using UnityEngine.UI;
 using Utils;
 
 namespace Visualization.Agents {
@@ -24,22 +26,23 @@ namespace Visualization.Agents {
         private int _indicatorTimer;
         private bool _wasIndicatorOn;
 
+        private Transform _chassis;
+
         public override void Prepare() {
             base.Prepare();
             
             // coloring the chassis
             _modelMeshRenderer = Model.transform.GetChild(0).GetComponent<MeshRenderer>();
             _modelMeshRenderer.material = ColorMaterial;
-            
-            // offsetting the agent model inside its parent
-            Model.transform.GetChild(0).transform.localPosition -=
-                new Vector3(ModelInformation.Center.x, 0, ModelInformation.Center.y);
 
             // scaling up the model
-            var chassis = Model.transform.GetChild(0);
+            _chassis = Model.transform.Find("chassis");
             //chassis.SetSize(ModelInformation.Length, ModelInformation.Height, ModelInformation.Width);
             
-            chassis.SetTotalSize(ModelInformation.Width, ModelInformation.Height, ModelInformation.Length);
+            // offsetting the agent model inside its parent
+            _chassis.transform.localPosition -= ModelInformation.Center;
+
+            _chassis.SetTotalSize(ModelInformation.Width, ModelInformation.Height, ModelInformation.Length);
 
             // getting all wheel information
             _wheelFrontLeft = Model.transform.GetChild(1).GetChild(0);
@@ -176,6 +179,50 @@ namespace Visualization.Agents {
 
         public override void HandleNonHit() {
             // TODO implement
+        }
+        
+        public override Vector3[] GetReferencePointsRenderer() {
+            var points = new List<Vector3>();
+            
+            if (renderers.Length == 0) return points.ToArray();
+            
+            var completeBounds = new Bounds();
+            foreach (var r in renderers) {
+                completeBounds.Encapsulate(r.bounds);
+            }
+
+            var ext = completeBounds.extents;
+            var tr = Model.transform.localToWorldMatrix;
+                
+            // adding global points to the list, first the lower 4 points of the box, then the upper 4 points,
+            // ordered counter clockwise
+
+            points.Add(tr.MultiplyPoint3x4(new Vector3(-ext.x / 2f, -ext.y / 2f, ext.z / 2f)));
+            points.Add(tr.MultiplyPoint3x4(new Vector3(ext.x / 2f, -ext.y / 2f, ext.z / 2f)));
+            points.Add(tr.MultiplyPoint3x4(new Vector3(ext.x / 2f, -ext.y / 2f, -ext.z / 2f)));
+            points.Add(tr.MultiplyPoint3x4(new Vector3(-ext.x / 2f, -ext.y / 2f, -ext.z / 2f)));
+                
+            points.Add(tr.MultiplyPoint3x4(new Vector3(-ext.x / 2f, ext.y / 2f, ext.z / 2f)));
+            points.Add(tr.MultiplyPoint3x4(new Vector3(ext.x / 2f, ext.y / 2f, ext.z / 2f)));
+            points.Add(tr.MultiplyPoint3x4(new Vector3(ext.x / 2f, ext.y / 2f, -ext.z / 2f)));
+            points.Add(tr.MultiplyPoint3x4(new Vector3(-ext.x / 2f, ext.y / 2f, -ext.z / 2f)));
+            
+            return points.ToArray();
+        }
+        
+        public override Vector3[] GetReferencePointsCustom() {
+            var toReturn = new Vector3[customPoints.customPoints.Count];
+            var tr2 = Model.transform.localToWorldMatrix;
+            for (var i = 0; i < toReturn.Length; i++) {
+                var tmp = customPoints.customPoints[i];
+                toReturn[i] =
+                    tr2.MultiplyPoint3x4(
+                        new Vector3(tmp.x * _chassis.lossyScale.x, tmp.y * _chassis.lossyScale.y,
+                            tmp.z * _chassis.lossyScale.z) - ModelInformation.Center);
+
+            }
+
+            return toReturn;
         }
     }
 }

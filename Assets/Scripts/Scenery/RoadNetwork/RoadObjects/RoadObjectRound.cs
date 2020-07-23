@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using UnityEditor.ShaderGraph.Internal;
 using UnityEngine;
+using UnityEngine.ProBuilder;
 using Utils;
 
 namespace Scenery.RoadNetwork.RoadObjects {
@@ -70,6 +73,8 @@ namespace Scenery.RoadNetwork.RoadObjects {
             }
 
             transform.parent = Parent.transform;
+            
+            AddCollider();
         }
 
         public override bool MaybeDelete() {
@@ -82,6 +87,7 @@ namespace Scenery.RoadNetwork.RoadObjects {
             if (rop == null) return;
             
             var streetLamp = Instantiate(rop.prefab, transform, true);
+            streetLamp.layer = 19;
             Height -= 1;
 
             var middleLocalScale = streetLamp.transform.GetChild(1).localScale;
@@ -100,6 +106,7 @@ namespace Scenery.RoadNetwork.RoadObjects {
             if (rop == null) return;
             
             var pole = Instantiate(rop.prefab, transform, true);
+            pole.layer = 19;
 
             var middleLocalScale = pole.transform.GetChild(0).localScale;
             pole.transform.GetChild(0).localScale =
@@ -118,6 +125,8 @@ namespace Scenery.RoadNetwork.RoadObjects {
             if (rop == null) return;
             
             var tree = Instantiate(rop.prefab, transform, true);
+            tree.layer = 19;
+            
             var scaleA = 2 * Radius / rop.baseRadius;
             var scaleB = Height / rop.baseHeight;
                     
@@ -132,6 +141,9 @@ namespace Scenery.RoadNetwork.RoadObjects {
 
         private void ShowBuilding() {
             var buildingBase = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            Destroy(buildingBase.GetComponent<CapsuleCollider>()); // remove the standard collider for cylinders
+            buildingBase.layer = 19;
+            
             buildingBase.transform.SetGlobalScale(new Vector3(Radius * 2, Height / 2, Radius * 2));
             buildingBase.GetComponent<MeshRenderer>().material =
                 RoadDesign.GetRoadObjectMaterial(RoadObjectType, SubType).material;
@@ -141,12 +153,54 @@ namespace Scenery.RoadNetwork.RoadObjects {
             buildingBase.transform.position = Parent.EvaluatePoint(S, m * T, ZOffset + Height / 2f);
         }
 
+        private void AddCollider() {
+            var mesh = new Mesh();
+
+            var vertices = new List<Vector3>();
+            var triangles = new List<int>();
+
+            var firstPointer = new Vector2(Radius, 0);
+            var position = transform.GetChild(0).position;
+            position.y = 0;
+
+            for (var i = 0; i < 6; i++) {
+                firstPointer.RotateRadians((2 * Mathf.PI) / 6);
+                vertices.Add(position + new Vector3(firstPointer.x, ZOffset, firstPointer.y));
+            }
+            
+            for (var i = 0; i < 6; i++) {
+                firstPointer.RotateRadians((2 * Mathf.PI) / 6);
+                vertices.Add(position + new Vector3(firstPointer.x, ZOffset + Height, firstPointer.y));
+            }
+
+            triangles.AddRange(new [] {
+                3, 0, 1, 3, 1, 2, 3, 4, 0, 4, 5, 0,   // bottom
+                0, 6, 7, 0, 7, 1,                     // sides...
+                1, 7, 8, 1, 8, 2, 
+                2, 8, 9, 2, 9, 3,
+                3, 9, 10, 3, 10, 4,
+                4, 10, 11, 4, 11, 5,
+                5, 11, 6, 5, 6, 0,
+                6, 9, 8, 6, 8, 7, 6, 10, 9, 6, 11, 10 // top
+            });
+
+            mesh.vertices = vertices.ToArray();
+            mesh.triangles = triangles.ToArray();
+            mesh.RecalculateNormals();
+            mesh.Optimize();
+
+            var coll = gameObject.AddComponent<MeshCollider>();
+            coll.convex = true;
+            coll.cookingOptions = MeshColliderCookingOptions.CookForFasterSimulation;
+            coll.sharedMesh = mesh;
+        }
+
         public override void HandleHit() {
-            throw new NotImplementedException();
+            Debug.Log("ROUND OBJ " + name +  " IS HANDLING A HIT");
         }
 
         public override void HandleNonHit() {
-            throw new NotImplementedException();
+            Debug.Log("ROUND OBJ " + name +  " IS NO LONGER HANDLING A HIT");
         }
     }
 }

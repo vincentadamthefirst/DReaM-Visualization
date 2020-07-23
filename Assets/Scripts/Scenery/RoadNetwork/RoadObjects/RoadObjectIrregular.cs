@@ -1,4 +1,6 @@
-﻿namespace Scenery.RoadNetwork.RoadObjects {
+﻿using UnityEngine;
+
+namespace Scenery.RoadNetwork.RoadObjects {
     
     /// <summary>
     /// Not yet implemented class for irregular OpenDrive objects.

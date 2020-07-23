@@ -9,12 +9,15 @@ using Scenery.RoadNetwork.RoadGeometries;
 using UnityEngine;
 using Utils.VersionSystem;
 using Visualization;
+using Visualization.OcclusionManagement;
 
 public class TestScript : MonoBehaviour {
 
     public RoadNetworkHolder roadNetworkHolder;
 
     public VisualizationMaster visualizationMaster;
+
+    public OcclusionManagementOptions occlusionManagementOptions;
 
     public Terrain terrain;
 
@@ -57,21 +60,32 @@ public class TestScript : MonoBehaviour {
                 sceneryImporter.SetFilePath("C:\\OpenPass\\bin\\configs\\SceneryConfiguration.xodr");
                 break;
         }
+
+        visualizationMaster.OcclusionManagementOptions = occlusionManagementOptions;
+        roadNetworkHolder.OcclusionManagementOptions = occlusionManagementOptions;
         
+        var vmxh = new VehicleModelsXmlHandler();
+        vmxh.SetFilePath("C:\\OpenPass\\bin\\configs\\VehicleModelsCatalog.xosc");
+        vmxh.VisualizationMaster = visualizationMaster;
+        vmxh.StartImport();
+
+        var agentOccManager = FindObjectOfType<AgentOcclusionManager>();
+        agentOccManager.OcclusionManagementOptions = occlusionManagementOptions;
+
         sceneryImporter.roadNetworkHolder = roadNetworkHolder;
         
         sceneryImporter.StartImport();
-        
+
         roadNetworkHolder.ShowSimpleGround(terrain);
 
-        visualizationMaster.UseScreenLabel = true;
-        
         // IMPORT OF OPENPASS (OpenSpaaaaaaaß)
         
         var outputImporter = new SimulationOutputXmlHandler();
         outputImporter.SetFilePath("C:\\OpenPass\\bin - Kopie\\results\\simulationOutput_before.xml");
         outputImporter.visualizationMaster = visualizationMaster;
         outputImporter.StartImport();
+        
+        agentOccManager.Prepare();
 
         // TODO implement parsing of ModelsCatalog
         

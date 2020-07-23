@@ -43,9 +43,11 @@ namespace Importer.XMLHandlers {
                 switch (xmlAgent.AgentType) {
                     case AgentType.Pedestrian:
                         xmlAgent.ActualAgent = visualizationMaster.InstantiatePedestrian(xmlAgent.ModelType);
+                        xmlAgent.ActualAgent.name = "Ped #" + xmlAgent.Id + " [" + xmlAgent.ModelType + "]";
                         break;
                     default:
                         xmlAgent.ActualAgent = visualizationMaster.InstantiateVehicleAgent(xmlAgent.ModelType);
+                        xmlAgent.ActualAgent.name = "Car #" + xmlAgent.Id + " [" + xmlAgent.ModelType + "]";
                         break;
                 }
             }

@@ -7,14 +7,15 @@ using Scenery.RoadNetwork;
 using UnityEngine;
 using Utils;
 using Visualization.Labels;
+using Visualization.OcclusionManagement;
 using Visualization.RoadOcclusion;
 
 namespace Visualization.Agents {
-    public abstract class Agent : SceneryElement {
+    public abstract class Agent : VisualizationElement {
         /// <summary>
         /// The current SimulationStep Object
         /// </summary>
-        public Dictionary<int, SimulationStep> SimulationSteps { get; private set; }
+        public Dictionary<int, SimulationStep> SimulationSteps { get; } = new Dictionary<int, SimulationStep>();
 
         /// <summary>
         /// The model of this agent, this is the object that gets moved.
@@ -49,9 +50,6 @@ namespace Visualization.Agents {
         /// </summary>
         public Material ColorMaterial { get; set; }
 
-        // if the agent is a target object
-        protected bool isTarget;
-
         // if the agent is deactivated
         protected bool deactivated;
         
@@ -76,8 +74,20 @@ namespace Visualization.Agents {
         // the previous simulation step for this agent
         protected SimulationStep previous;
 
-        protected Agent() {
-            SimulationSteps = new Dictionary<int, SimulationStep>();
+        // array of all renderers for this GameObject (all Renderers in children)
+        protected Renderer[] renderers;
+
+        // custom points that are defined for this GameObject
+        protected CustomPoints customPoints;
+
+        public override Vector3 WorldAnchor => Model.transform.position;
+
+        /// <summary>
+        /// Finds necessary components.
+        /// </summary>
+        private void Start() {
+            renderers = GetComponentsInChildren<Renderer>();
+            customPoints = GetComponentInChildren<CustomPoints>();
         }
 
         /// <summary>
@@ -98,7 +108,7 @@ namespace Visualization.Agents {
                 if (simulationStep.OnId != "" && RoadNetworkHolder.Roads.ContainsKey(simulationStep.OnId)) {
                     var road = RoadNetworkHolder.Roads[simulationStep.OnId];
 
-                    simulationStep.OnElement = road.OnJunction ? road.ParentJunction : (SceneryElement) road;
+                    simulationStep.OnElement = road.OnJunction ? road.ParentJunction : (VisualizationElement) road;
                     simulationStep.OnJunction = road.OnJunction;
                 }
             }
@@ -174,13 +184,9 @@ namespace Visualization.Agents {
             Model.SetActive(true);
         }
 
-        public void SetIsTarget(bool target) {
+        public override void SetIsTarget(bool target) {
+            base.SetIsTarget(target);
             Model.SetLayerRecursive(target ? 14 : 15);
-            isTarget = target;
-        }
-
-        public bool IsTarget() {
-            return isTarget;
         }
     }
 }

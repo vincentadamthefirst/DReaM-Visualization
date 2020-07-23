@@ -123,17 +123,6 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!114 &120059505 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 7254659084603275562, guid: 7bd0c6e90c7534445b52cb140859a0b8, type: 3}
-  m_PrefabInstance: {fileID: 1291602978}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6e99096450594ee39c2d97e598302bd4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &215354116
 GameObject:
   m_ObjectHideFlags: 0
@@ -1960,7 +1949,7 @@ GameObject:
   - component: {fileID: 890108869}
   - component: {fileID: 890108868}
   - component: {fileID: 890108867}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: Terrain
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3506,6 +3495,66 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!1 &1573677346
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1573677348}
+  - component: {fileID: 1573677347}
+  m_Layer: 0
+  m_Name: AgentOccManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1573677347
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1573677346}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fdf9234566054c1688be79984388cd12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  focusObjectMaterial: {fileID: 0}
+  disable: 0
+  targetObjects: []
+  detectionMethod: 2
+  checkEveryFrame: 0
+  preCheckViewFrustum: 1
+  nearClipAsStart: 0
+  usePrecision: 0
+  fixedPrecision: 2
+  adaptivePrecision: 0
+  minPrecision: 2
+  maxPrecision: 5
+  precisionNearDistance: 5
+  precisionFarDistance: 50
+  showRayCastEnd: 1
+  distanceCheck: 1
+  showPolygons: 1
+--- !u!4 &1573677348
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1573677346}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 21
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1600181375
 GameObject:
   m_ObjectHideFlags: 0
@@ -3812,8 +3861,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   roadNetworkHolder: {fileID: 308247174}
   visualizationMaster: {fileID: 891641986}
+  occlusionManagementOptions: {fileID: 11400000, guid: 2108e11cc4550ae4eb416ebda5ddc8f5, type: 2}
   terrain: {fileID: 890108868}
-  debugTestFile: 3
+  debugTestFile: 0
 --- !u!1 &1687258581
 GameObject:
   m_ObjectHideFlags: 0
@@ -3827,7 +3877,6 @@ GameObject:
   - component: {fileID: 1687258582}
   - component: {fileID: 1687258583}
   - component: {fileID: 1687258586}
-  - component: {fileID: 1687258587}
   - component: {fileID: 1687258588}
   m_Layer: 0
   m_Name: Main Camera
@@ -3978,37 +4027,6 @@ MonoBehaviour:
   m_RequiresDepthTexture: 0
   m_RequiresColorTexture: 0
   m_Version: 2
---- !u!114 &1687258587
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1687258581}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fdf9234566054c1688be79984388cd12, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  focusObjectMaterial: {fileID: 2100000, guid: 424cd94744af2be4fa0eeed778a4f154, type: 2}
-  disable: 1
-  targetObjects:
-  - {fileID: 728719655}
-  - {fileID: 120059505}
-  detectionMethod: 0
-  checkEveryFrame: 1
-  preCheckViewFrustum: 1
-  nearClipAsStart: 1
-  usePrecision: 1
-  fixedPrecision: 3
-  adaptivePrecision: 0
-  minPrecision: 2
-  maxPrecision: 5
-  precisionNearDistance: 5
-  precisionFarDistance: 50
-  showRayCastEnd: 0
-  distanceCheck: 0
-  showPolygons: 0
 --- !u!114 &1687258588
 MonoBehaviour:
   m_ObjectHideFlags: 0

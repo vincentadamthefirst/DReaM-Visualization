@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 
 namespace Visualization.OcclusionManagement {
+    
+    [CreateAssetMenu(menuName = "OcclusionManagementOptions")]
     public class OcclusionManagementOptions : ScriptableObject {
         // LABEL OPTIONS
         public LabelLocation labelLocation;
@@ -21,15 +23,16 @@ namespace Visualization.OcclusionManagement {
         // ADDITIONAL RAYCAST OPTIONS
 
         /// <summary>
-        /// The points to be used for casting out rays if OcclusionHandlingMethod.RayCast is selected
-        /// </summary>
-        public PointSource rayCastPointSource;
-
-        /// <summary>
         /// A given amount of points will be sampled to perform the RayCast.
         /// The amount is specified in randomPointAmount.
         /// </summary>
         public bool sampleRandomPoints;
+
+        /// <summary>
+        /// If this option is set to true the rays will originate from the near clip plane of the Camera, not the
+        /// position of the Camera.
+        /// </summary>
+        public bool nearClipPlaneAsStart = true;
 
         /// <summary>
         /// Each line of the collider box will receive rayCastPrecision additional points
@@ -41,17 +44,28 @@ namespace Visualization.OcclusionManagement {
         /// </summary>
         public int randomPointAmount = 15;
         
-        // ADDITIONAL POLYGON OPTIONS
+        // ADDITIONAL GENERAL OPTIONS
         
         /// <summary>
-        /// The points to be used for constructing polygons if OcclusionHandlingMethod.Polygon is selected
+        /// The points to be used for constructing polygons or sending out rays based on OcclusionHandlingMethod
         /// </summary>
-        public PointSource polygonPointSource;
+        public PointSource pointSource;
+
+        /// <summary>
+        /// If the algorithm for occlusion detection checks for a combined BoundingBox of an object or handles
+        /// each BoundingBox by itself. Setting this to false will result in decreased performance.
+        /// </summary>
+        public bool useCombinedBoundingBox = true;
 
         /// <summary>
         /// Objects that are not in the view frustum of the camera will be ignored in occlusion detection.
         /// </summary>
         public bool preCheckViewFrustum = true;
+
+        /// <summary>
+        /// The alpha value to be used for Transparency. If decreaseAlpha = false this will be used for every object.
+        /// </summary>
+        public float transparencyValue = 0.2f;
 
         /// <summary>
         /// Only check one target each frame. Will go through n targets in n frames.
@@ -90,6 +104,6 @@ namespace Visualization.OcclusionManagement {
     /// The source of points to be used in RayCasts and Polygon Construction
     /// </summary>
     public enum PointSource {
-        BoxCollider, RendererBounds, Other
+        Custom, RendererBounds, Other
     }
 }

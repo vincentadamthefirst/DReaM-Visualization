@@ -8,6 +8,6 @@ namespace Visualization.Agents {
         
         public float Height { get; set; }
         
-        public Vector2 Center { get; set; }
+        public Vector3 Center { get; set; }
     }
 }

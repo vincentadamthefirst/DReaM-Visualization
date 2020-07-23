@@ -15,9 +15,9 @@ namespace Visualization.RoadOcclusion {
     /// </summary>
     public class RoadOcclusionManager : MonoBehaviour {
 
-        private HashSet<SceneryElement> _activeRoadIds = new HashSet<SceneryElement>();
+        private HashSet<VisualizationElement> _activeRoadIds = new HashSet<VisualizationElement>();
         
-        private readonly HashSet<SceneryElement> _currentRoadIds = new HashSet<SceneryElement>();
+        private readonly HashSet<VisualizationElement> _currentRoadIds = new HashSet<VisualizationElement>();
 
         private const int RoadBaseLayer = 17;
         private const int RoadTargetLayer = 13;
@@ -26,21 +26,29 @@ namespace Visualization.RoadOcclusion {
         /// Finds roads and junctions that need to be moved and moves them into the necessary layer.
         /// </summary>
         public void ChangeRoadLayers() {
-            var toBaseLayer = new HashSet<SceneryElement>(_activeRoadIds);
+            var toBaseLayer = new HashSet<VisualizationElement>(_activeRoadIds);
             toBaseLayer.ExceptWith(_currentRoadIds);
             
             foreach (var sceneryElement in toBaseLayer) {
-                sceneryElement.SetLayer(RoadBaseLayer);
+                try {
+                    sceneryElement.SetLayer(RoadBaseLayer);
+                } catch (Exception e) {
+                    // ignore roads that can not be found because of errors in the output
+                }
             }
             
-            var toTargetLayer = new HashSet<SceneryElement>(_currentRoadIds);
+            var toTargetLayer = new HashSet<VisualizationElement>(_currentRoadIds);
             toTargetLayer.ExceptWith(_activeRoadIds);
 
             foreach (var sceneryElement in toTargetLayer) {
-                sceneryElement.SetLayer(RoadTargetLayer);
+                try {
+                    sceneryElement.SetLayer(RoadTargetLayer);
+                } catch (Exception e) {
+                    // ignore roads that can not be found because of errors in the output
+                }
             }
 
-            _activeRoadIds = new HashSet<SceneryElement>(_currentRoadIds);
+            _activeRoadIds = new HashSet<VisualizationElement>(_currentRoadIds);
             _currentRoadIds.Clear();
         }
 
@@ -48,7 +56,7 @@ namespace Visualization.RoadOcclusion {
         /// Adds a road Id to the set containing all active roads for the current point in time.
         /// </summary>
         /// <param name="elementId">The currently active element</param>
-        public void AddOnElement(SceneryElement element) {
+        public void AddOnElement(VisualizationElement element) {
             _currentRoadIds.Add(element);
         }
     }

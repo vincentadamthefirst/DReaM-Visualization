@@ -8,7 +8,7 @@ namespace Scenery.RoadNetwork {
     /// Class representing a LaneSection from OpenDrive. Provides access methods for Lanes and parameters as well as
     /// function methods to communicate with its children Lanes or with its parent Road.
     /// </summary>
-    public class LaneSection : SceneryElement {
+    public class LaneSection : VisualizationElement {
         
         /// <summary>
         /// Left (in road direction) Lane-Objects for this section
@@ -154,6 +154,14 @@ namespace Scenery.RoadNetwork {
         /// </summary>
         public override void HandleNonHit() {
             // Ignore
+        }
+        
+        public override Vector3[] GetReferencePointsRenderer() {
+            return new Vector3[0]; // assume scenery is never target, Ignore
+        }
+        
+        public override Vector3[] GetReferencePointsCustom() {
+            return new Vector3[0]; // assume scenery is never target, Ignore
         }
     }
 }

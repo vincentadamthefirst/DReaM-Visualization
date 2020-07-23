@@ -6,6 +6,7 @@ using UI;
 using UnityEngine;
 using Visualization.Agents;
 using Visualization.Labels;
+using Visualization.OcclusionManagement;
 using Visualization.RoadOcclusion;
 
 namespace Visualization {
@@ -16,6 +17,10 @@ namespace Visualization {
         public LabelOcclusionManager labelOcclusionManager;
 
         private RoadOcclusionManager _roadOcclusionManager;
+        
+        private AgentOcclusionManager _agentOcclusionManager;
+
+        public OcclusionManagementOptions OcclusionManagementOptions { get; set; }
 
         /// <summary>
         /// The catalog of possible vehicle models, populated by VehicleModelsXmlHandler
@@ -33,7 +38,7 @@ namespace Visualization {
         /// The models that this simulation run can use
         /// </summary>
         public AgentDesigns agentDesigns;
-        
+
         public int MaxSampleTime { get; set; }
         
         public int CurrentTime { get; set; }
@@ -41,22 +46,21 @@ namespace Visualization {
         public bool PlayBackwards { get; set; }
 
         public bool Pause { get; set; } = true;
-        
-        public bool UseScreenLabel { get; set; }
-        
+
         // fallback vehicle model
         private readonly VehicleModelInformation _basicVehicle = new VehicleModelInformation
-            {Width = 2f, Length = 5f, Height = 1.8f, Center = Vector2.zero, WheelDiameter = 0.65f};
+            {Width = 2f, Length = 5f, Height = 1.8f, Center = Vector3.zero, WheelDiameter = 0.65f};
         
         // fallback pedestrian model
         private readonly PedestrianModelInformation _basicPedestrian = new PedestrianModelInformation
-            {Width = 0.7f, Length = 0.7f, Height = 1.8f, Center = Vector2.zero};
+            {Width = 0.7f, Length = 0.7f, Height = 1.8f, Center = Vector3.zero};
         
         // all Agents of the current visualization run
         private readonly List<Agent> _agents = new List<Agent>();
 
         private void Start() {
             _roadOcclusionManager = FindObjectOfType<RoadOcclusionManager>();
+            _agentOcclusionManager = FindObjectOfType<AgentOcclusionManager>();
         }
 
         /// <summary>
@@ -77,6 +81,7 @@ namespace Visualization {
 
             // TODO remove (only for debugging)
             _agents.ForEach(a => a.SetIsTarget(true));
+            _agents.ForEach(a => _agentOcclusionManager.AddTarget(a));
         }
 
         /// <summary>
@@ -90,6 +95,7 @@ namespace Visualization {
             // adding the RoadNetworkHolder
             vehicleAgent.RoadNetworkHolder = FindObjectOfType<RoadNetworkHolder>();
             vehicleAgent.RoadOcclusionManager = _roadOcclusionManager;
+            vehicleAgent.OcclusionManagementOptions = OcclusionManagementOptions;
             
             // retrieving prefab for 3d model
             var model = Instantiate(agentDesigns.GetAgentModel(AgentType.Vehicle, modelType).model, vehicleAgent.transform, true);
@@ -97,7 +103,7 @@ namespace Visualization {
             vehicleAgent.Model = model;
 
             // adding label
-            if (UseScreenLabel) {
+            if (OcclusionManagementOptions.labelLocation == LabelLocation.Screen) {
                 var label = Instantiate(agentDesigns.labelPrefabScreen, labelOcclusionManager.transform);
                 label.Agent = vehicleAgent;
                 label.LabelOcclusionManager = labelOcclusionManager;
@@ -127,6 +133,7 @@ namespace Visualization {
             // adding the RoadNetworkHolder
             pedestrianAgent.RoadNetworkHolder = FindObjectOfType<RoadNetworkHolder>();
             pedestrianAgent.RoadOcclusionManager = _roadOcclusionManager;
+            pedestrianAgent.OcclusionManagementOptions = OcclusionManagementOptions;
             
             // retrieving prefab for 3d model
             var model = Instantiate(agentDesigns.GetAgentModel(AgentType.Pedestrian, "pedestrian").model, pedestrianAgent.transform, true);
@@ -134,7 +141,7 @@ namespace Visualization {
             pedestrianAgent.Model = model;
             
             // adding label TODO use other Label then vehicle!
-            if (UseScreenLabel) {
+            if (OcclusionManagementOptions.labelLocation == LabelLocation.Screen) {
                 var label = Instantiate(agentDesigns.labelPrefabScreen, labelOcclusionManager.transform);
                 label.Agent = pedestrianAgent;
                 label.LabelOcclusionManager = labelOcclusionManager;

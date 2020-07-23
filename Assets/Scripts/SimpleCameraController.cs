@@ -70,7 +70,7 @@ public class SimpleCameraController : MonoBehaviour {
     public bool invertY = false;
 
     [Header("Occlusion Detection Parameters")] [Tooltip("Object that will be checked if it is occluded.")]
-    public SceneryObject focusedObject;
+    public VisualizationObject focusedObject;
 
     [Tooltip("Precision Value gets changed automatically.")]
     public bool adaptivePrecision = false;
@@ -327,7 +327,7 @@ public class SimpleCameraController : MonoBehaviour {
             foreach (var hit in currentHits) newHits.Add(hit);
         }
 
-        foreach (var so in newHits.Select(hit => hit.collider.GetComponent<SceneryObject>())) {
+        foreach (var so in newHits.Select(hit => hit.collider.GetComponent<VisualizationObject>())) {
             if (so == null) return;
             if (so == focusedObject) continue;
             so.HandleHit();

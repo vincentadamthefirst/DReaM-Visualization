@@ -1,11 +1,11 @@
-﻿using System;
+﻿using UnityEngine;
 
 namespace Scenery.RoadNetwork.RoadObjects {
     
     /// <summary>
     /// Abstract class representing an object along a road in OpenDrive.
     /// </summary>
-    public abstract class RoadObject : SceneryElement {
+    public abstract class RoadObject : VisualizationElement {
         
         /// <summary>
         /// The type of object
@@ -62,14 +62,26 @@ namespace Scenery.RoadNetwork.RoadObjects {
         /// </summary>
         public RoadDesign RoadDesign { get; set; }
 
-        // internal bool, an object with a repeat will be deleted after all its "children" have been generated
-        protected bool markedForDelete;
-
         /// <summary>
         /// Repeats the object if necessary and generates its Mesh.
         /// </summary>
         public abstract void Show();
 
+        /// <summary>
+        /// Method to delete this object but only if markedForDelete is internally set to true.
+        /// </summary>
+        /// <returns>If the object was deleted.</returns>
         public abstract bool MaybeDelete();
+        
+        // internal bool, an object with a repeat will be deleted after all its "children" have been generated
+        protected bool markedForDelete;
+
+        public override Vector3[] GetReferencePointsRenderer() {
+            return new Vector3[0]; // assume objects along the road are never targets
+        }
+        
+        public override Vector3[] GetReferencePointsCustom() {
+            return new Vector3[0]; // assume objects along the road are never targets
+        }
     }
 }

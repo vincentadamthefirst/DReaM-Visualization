@@ -7,7 +7,7 @@ namespace Scenery.RoadNetwork {
     /// </summary>
     [RequireComponent(typeof(MeshRenderer))]
     [RequireComponent(typeof(MeshFilter))]
-    public class RoadMark : SceneryElement {
+    public class RoadMark : VisualizationElement {
         
         /// <summary>
         /// The type of this RoadMark
@@ -76,6 +76,14 @@ namespace Scenery.RoadNetwork {
         /// </summary>
         public override void HandleNonHit() {
             // Ignore
+        }
+        
+        public override Vector3[] GetReferencePointsRenderer() {
+            return new Vector3[0]; // assume scenery is never target, Ignore
+        }
+        
+        public override Vector3[] GetReferencePointsCustom() {
+            return new Vector3[0]; // assume scenery is never target, Ignore
         }
     }
 }

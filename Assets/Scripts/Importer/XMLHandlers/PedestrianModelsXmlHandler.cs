@@ -31,9 +31,10 @@ namespace Importer.XMLHandlers {
                 var dimension = boundingBox?.Element("Dimension");
 
                 var centerPoint =
-                    new Vector2(
+                    new Vector3(
                         float.Parse(center?.Attribute("x")?.Value ?? "0",
                             CultureInfo.InvariantCulture.NumberFormat),
+                        0,
                         float.Parse(center?.Attribute("y")?.Value ?? "0",
                             CultureInfo.InvariantCulture.NumberFormat));
 

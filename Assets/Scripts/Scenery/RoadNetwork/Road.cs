@@ -9,7 +9,7 @@ namespace Scenery.RoadNetwork {
     /// <summary>
     /// Class representing an OpenDrive road
     /// </summary>
-    public class Road : SceneryElement {
+    public class Road : VisualizationElement {
         
         /// <summary>
         /// List of all RoadGeometries for this Road
@@ -44,7 +44,7 @@ namespace Scenery.RoadNetwork {
         /// <summary>
         /// This Roads successor, might be null
         /// </summary>
-        public SceneryElement Successor { get; set; }
+        public VisualizationElement Successor { get; set; }
         
         /// <summary>
         /// The Contact Point of this Roads successor (if is has one)
@@ -183,6 +183,14 @@ namespace Scenery.RoadNetwork {
         /// </summary>
         public override void HandleNonHit() {
             // Ignore
+        }
+        
+        public override Vector3[] GetReferencePointsRenderer() {
+            return new Vector3[0]; // assume scenery is never target, Ignore
+        }
+        
+        public override Vector3[] GetReferencePointsCustom() {
+            return new Vector3[0]; // assume scenery is never target, Ignore
         }
 
         /// <summary>

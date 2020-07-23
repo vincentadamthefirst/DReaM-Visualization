@@ -2,11 +2,16 @@
 using UnityEngine;
 
 namespace Scenery {
-    public class SceneryObject : SceneryElement {
+    public class VisualizationObject : VisualizationElement {
         private Renderer _ownRenderer;
         private BoxCollider _boxCollider;
         private Renderer[] _renderers;
         private MeshFilter[] _meshFilters;
+        
+        /// <summary>
+        /// Not needed for scenery, Ingore
+        /// </summary>
+        public override Vector3 WorldAnchor => Vector3.zero;
 
         private void Start() {
             _ownRenderer = GetComponent<Renderer>();
@@ -22,6 +27,14 @@ namespace Scenery {
                 _ownRenderer.material.color = c;
                 _ownRenderer.material.SetFloat("_Surface", 0f);
             } catch (Exception e) { }
+        }
+
+        public override Vector3[] GetReferencePointsRenderer() {
+            throw new NotImplementedException();
+        }
+
+        public override Vector3[] GetReferencePointsCustom() {
+            throw new NotImplementedException();
         }
 
         public override void HandleHit() {

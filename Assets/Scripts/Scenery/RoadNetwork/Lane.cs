@@ -11,7 +11,7 @@ namespace Scenery.RoadNetwork {
     [RequireComponent(typeof(Lane))]
     [RequireComponent(typeof(MeshFilter))]
     [RequireComponent(typeof(MeshRenderer))]
-    public class Lane : SceneryElement {
+    public class Lane : VisualizationElement {
         
         /// <summary>
         /// The OpenDrive id of this lane as string
@@ -244,6 +244,14 @@ namespace Scenery.RoadNetwork {
         /// </summary>
         public override void HandleNonHit() {
             // Ignore
+        }
+        
+        public override Vector3[] GetReferencePointsRenderer() {
+            return new Vector3[0]; // assume scenery is never target, Ignore
+        }
+        
+        public override Vector3[] GetReferencePointsCustom() {
+            return new Vector3[0]; // assume scenery is never target, Ignore
         }
     }
 

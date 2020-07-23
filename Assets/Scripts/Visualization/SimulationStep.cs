@@ -57,7 +57,7 @@ namespace Visualization {
         /// <summary>
         /// The element that the agent is on
         /// </summary>
-        public SceneryElement OnElement { get; set; }
+        public VisualizationElement OnElement { get; set; }
         
         /// <summary>
         /// Whether the agent is currently on a junction

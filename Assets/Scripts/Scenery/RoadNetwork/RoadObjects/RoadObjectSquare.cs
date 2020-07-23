@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using Utils;
 
 namespace Scenery.RoadNetwork.RoadObjects {
@@ -6,6 +7,8 @@ namespace Scenery.RoadNetwork.RoadObjects {
         public float Length { get; set; }
         
         public float Width { get; set; }
+
+        private GameObject _model;
 
         private void Repeat() {
             if (RepeatParameters == null) return;
@@ -61,13 +64,16 @@ namespace Scenery.RoadNetwork.RoadObjects {
 
             transform.parent = Parent.transform;
             
+            Destroy(_model.GetComponent<Collider>());
+            
             MaybeDelete();
         }
 
         private void ShowPlane(Material material) {
-            var basePlane = GameObject.CreatePrimitive(PrimitiveType.Plane);
+            _model = GameObject.CreatePrimitive(PrimitiveType.Plane);
+            _model.layer = 19;
             // divide by 10 since base plane has size 10x10
-            basePlane.transform.SetGlobalScale(new Vector3(Length / 10f, Height, Width / 10f));
+            _model.transform.SetGlobalScale(new Vector3(Length / 10f, Height, Width / 10f));
             
             var mat = new Material(material);
             var p = material.GetTextureScale(BaseMap);
@@ -76,28 +82,30 @@ namespace Scenery.RoadNetwork.RoadObjects {
             mat.SetTextureScale(BaseMap, v);
             mat.SetTextureScale(OcclusionMap, v);
 
-            basePlane.GetComponent<MeshRenderer>().material = mat;
-            basePlane.transform.parent = transform;
+            _model.GetComponent<MeshRenderer>().material = mat;
+            _model.transform.parent = transform;
             
             var m = Orientation == RoadObjectOrientation.Negative ? -1 : 1;
-            basePlane.transform.position = Parent.EvaluatePoint(S, m * T, ZOffset);
+            _model.transform.position = Parent.EvaluatePoint(S, m * T, ZOffset);
             
             var completeHdg = Mathf.PI - Parent.EvaluateHeading(S) + Heading;
-            basePlane.transform.Rotate(Vector3.up, Mathf.Rad2Deg * completeHdg);
+            _model.transform.Rotate(Vector3.up, Mathf.Rad2Deg * completeHdg);
         }
 
         private void ShowBuilding() {
-            var buildingBase = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            buildingBase.transform.SetGlobalScale(new Vector3(Length, Height, Width));
-            buildingBase.GetComponent<MeshRenderer>().material =
+            _model = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            _model.layer = 19;
+            
+            _model.transform.SetGlobalScale(new Vector3(Length, Height, Width));
+            _model.GetComponent<MeshRenderer>().material =
                 RoadDesign.GetRoadObjectMaterial(RoadObjectType, SubType).material;
-            buildingBase.transform.parent = transform;
+            _model.transform.parent = transform;
             
             var m = Orientation == RoadObjectOrientation.Negative ? -1 : 1;
-            buildingBase.transform.position = Parent.EvaluatePoint(S, m * T, ZOffset + Height / 2f);
+            _model.transform.position = Parent.EvaluatePoint(S, m * T, ZOffset + Height / 2f);
             
             var completeHdg = Parent.EvaluateHeading(S) + Heading;
-            buildingBase.transform.Rotate(Vector3.up, Mathf.Rad2Deg * completeHdg);
+            _model.transform.Rotate(Vector3.up, Mathf.Rad2Deg * completeHdg);
         }
         
         public override bool MaybeDelete() {
@@ -106,12 +114,21 @@ namespace Scenery.RoadNetwork.RoadObjects {
             return true;
         }
 
+        private void AddCollider() {
+            var mesh = new Mesh();
+
+            var vertices = new List<Vector3>();
+            var triangles = new List<int>();
+            
+            
+        }
+
         public override void HandleHit() {
-            throw new System.NotImplementedException();
+            Debug.Log("SQUARE OBJ " + name +  " IS HANDLING A HIT");
         }
 
         public override void HandleNonHit() {
-            throw new System.NotImplementedException();
+            Debug.Log("SQUARE OBJ " + name +  " IS NO LONGER HANDLING A HIT");
         }
     }
 }

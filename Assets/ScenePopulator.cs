@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Scenery;
 using UnityEngine;
+using Visualization.OcclusionManagement;
 using Debug = System.Diagnostics.Debug;
 
 public class ScenePopulator : MonoBehaviour {
@@ -20,7 +21,7 @@ public class ScenePopulator : MonoBehaviour {
     private void Start() {
         var count = 0;
         Debug.Assert(Camera.main != null, "Camera.main != null");
-        var cameraScript = Camera.main.GetComponent<OcclusionController>();
+        var cameraScript = Camera.main.GetComponent<AgentOcclusionManager>();
 
         while (count < randomObjectCount - 1) {
             var newRandom = Instantiate(randomObjectPrefab);
@@ -28,7 +29,7 @@ public class ScenePopulator : MonoBehaviour {
             newRandom.transform.position = new Vector3(Random.Range(-areaWidth / 2, areaWidth / 2), Random.Range(0, areaHeight), Random.Range(-areaLength / 2, areaLength / 2));
             newRandom.GetComponent<MeshRenderer>().material.renderQueue = 5000;
             if (randomRotation) newRandom.transform.rotation = Random.rotation;
-            cameraScript.AddPossibleOccludingObject(newRandom.GetComponent<SceneryObject>());
+            cameraScript.AddPossibleOccludingObject(newRandom.GetComponent<VisualizationObject>());
             
             count++;
         }
@@ -37,7 +38,7 @@ public class ScenePopulator : MonoBehaviour {
         for (var i = 0; i < 10; i++) {
             var newCube = Instantiate(randomObjectPrefab);
             newCube.transform.position = new Vector3(3f - (float) i * 1.5f, 1, -30f);
-            cameraScript.AddPossibleOccludingObject(newCube.GetComponent<SceneryObject>());
+            cameraScript.AddPossibleOccludingObject(newCube.GetComponent<VisualizationObject>());
             newCube.GetComponent<MeshRenderer>().material.renderQueue = 5000;
         }
     }
