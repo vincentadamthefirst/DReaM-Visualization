@@ -82,6 +82,10 @@ namespace Visualization.Agents {
 
         public override Vector3 WorldAnchor => Model.transform.position;
 
+        public override bool IsActive => !deactivated;
+
+        private MeshRenderer[] _modelRenderers;
+
         /// <summary>
         /// Finds necessary components.
         /// </summary>
@@ -114,6 +118,8 @@ namespace Visualization.Agents {
             }
 
             timeStepSize = SimulationSteps.Values.ToArray()[1].Time - SimulationSteps.Values.ToArray()[0].Time;
+
+            _modelRenderers = GetComponentsInChildren<MeshRenderer>();
         }
 
         /// <summary>
@@ -187,6 +193,25 @@ namespace Visualization.Agents {
         public override void SetIsTarget(bool target) {
             base.SetIsTarget(target);
             Model.SetLayerRecursive(target ? 14 : 15);
+        }
+        
+        public override void HandleHit() {
+            foreach (var modelRenderer in _modelRenderers) {
+                var color = modelRenderer.material.color;
+                // lower the transparency further for trees
+                color.a = OcclusionManagementOptions.agentTransparencyValue; 
+                modelRenderer.material.SetFloat(Surface, 1f);
+                modelRenderer.material.SetColor(BaseColor, color);
+            }
+        }
+
+        public override void HandleNonHit() {
+            foreach (var modelRenderer in _modelRenderers) {
+                var color = modelRenderer.material.color;
+                color.a = 1f;
+                modelRenderer.material.SetFloat(Surface, 0f);
+                modelRenderer.material.SetColor(BaseColor, color);
+            }
         }
     }
 }

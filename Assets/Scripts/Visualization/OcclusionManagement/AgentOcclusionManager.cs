@@ -86,28 +86,18 @@ namespace Visualization.OcclusionManagement {
 
             var colls = FindObjectsOfType<Collider>();
             foreach (var coll in colls) {
-                var test1 = coll.GetComponent<VisualizationElement>();
+                var tmp = coll.GetComponentInParent<VisualizationElement>();
 
-                if (test1 != null) {
-                    _colliderMapping[coll] = test1;
-                    continue;
-                }
-
-                if (coll.transform.parent != null) {
-                    var test2 = coll.transform.parent.GetComponent<VisualizationElement>() ?? null;
-                    if (test2 != null) {
-                        _colliderMapping[coll] = test2;
-                        continue;
-                    }
-                }
-
-                if (coll.transform.parent == null || coll.transform.parent.parent == null) continue;
-                var test3 = coll.transform.parent.parent.GetComponent<VisualizationElement>();
-                if (test3 == null) continue;
-                _colliderMapping[coll] = test3;
+                if (tmp == null) continue;
+                _colliderMapping[coll] = tmp;
             }
 
             _occlusionDetector.ColliderMapping = _colliderMapping;
+
+            var allElements = FindObjectsOfType<VisualizationElement>();
+            foreach (var visualizationElement in allElements) {
+                _occlusionDetector.Distractors[visualizationElement] = 0;
+            }
         }
 
         public void AddTarget(VisualizationElement target) {

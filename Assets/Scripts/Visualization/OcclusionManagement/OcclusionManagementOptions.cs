@@ -63,9 +63,14 @@ namespace Visualization.OcclusionManagement {
         public bool preCheckViewFrustum = true;
 
         /// <summary>
-        /// The alpha value to be used for Transparency. If decreaseAlpha = false this will be used for every object.
+        /// The alpha value to be used for Transparency (on scenery objects)
         /// </summary>
-        public float transparencyValue = 0.2f;
+        public float objectTransparencyValue = 0.2f;
+
+        /// <summary>
+        /// The alpha value to be used for Transparency (on other agents)
+        /// </summary>
+        public float agentTransparencyValue = 0.4f;
 
         /// <summary>
         /// Only check one target each frame. Will go through n targets in n frames.
@@ -77,6 +82,13 @@ namespace Visualization.OcclusionManagement {
         /// and 60 targets each target will only be tested once per second!
         /// </summary>
         public bool staggeredCheck = true;
+        
+        // MATERIAL OPTIONS
+
+        /// <summary>
+        /// Material to be used when OcclusionHandlingMethod.WireFrame is selected
+        /// </summary>
+        public Material wireFrameMaterial;
     }
 
     /// <summary>

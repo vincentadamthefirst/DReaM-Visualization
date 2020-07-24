@@ -29,11 +29,11 @@ namespace Scenery {
             } catch (Exception e) { }
         }
 
-        public override Vector3[] GetReferencePointsRenderer() {
+        protected override Vector3[] GetReferencePointsRenderer() {
             throw new NotImplementedException();
         }
 
-        public override Vector3[] GetReferencePointsCustom() {
+        protected override Vector3[] GetReferencePointsCustom() {
             throw new NotImplementedException();
         }
 

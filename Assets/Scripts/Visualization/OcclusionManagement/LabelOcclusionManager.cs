@@ -64,6 +64,8 @@ namespace Visualization.Labels {
         }
 
         private void LateUpdate() {
+            if (Time.frameCount % 5 != 0) return; // reduce the load by only updating every 5 frames
+            
             PickActiveLabels();
         }
 

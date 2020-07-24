@@ -10,6 +10,11 @@ namespace Scenery.RoadNetwork.RoadObjects {
 
         private GameObject _model;
 
+        private MeshRenderer _modelRenderer;
+
+        private Material _nonOccludedMaterial;
+        private Material _occludedMaterial;
+
         private void Repeat() {
             if (RepeatParameters == null) return;
 
@@ -34,6 +39,7 @@ namespace Scenery.RoadNetwork.RoadObjects {
                 newChild.name = name;
                 newChild.Width = Width;
                 newChild.Length = Length;
+                newChild.OcclusionManagementOptions = OcclusionManagementOptions;
                 newChild.Show();
             }
 
@@ -63,8 +69,22 @@ namespace Scenery.RoadNetwork.RoadObjects {
             }
 
             transform.parent = Parent.transform;
+
+            _modelRenderer = _model.GetComponent<MeshRenderer>();
             
-            Destroy(_model.GetComponent<Collider>());
+            _occludedMaterial = new Material(_nonOccludedMaterial);
+            var col = _occludedMaterial.color;
+            col.a = OcclusionManagementOptions.objectTransparencyValue;
+            _occludedMaterial.color = col;
+            _occludedMaterial.SetFloat(Surface, 1f);
+            _occludedMaterial.SetFloat("_Blend", 0);
+            _occludedMaterial.SetOverrideTag("RenderType", "Transparent");
+            _occludedMaterial.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+            _occludedMaterial.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+            _occludedMaterial.SetInt("_ZWrite", 0);
+            _occludedMaterial.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+            _occludedMaterial.renderQueue = (int) UnityEngine.Rendering.RenderQueue.Transparent;
+            _occludedMaterial.SetShaderPassEnabled("ShadowCaster", false);
             
             MaybeDelete();
         }
@@ -75,14 +95,14 @@ namespace Scenery.RoadNetwork.RoadObjects {
             // divide by 10 since base plane has size 10x10
             _model.transform.SetGlobalScale(new Vector3(Length / 10f, Height, Width / 10f));
             
-            var mat = new Material(material);
+            _nonOccludedMaterial = new Material(material);
             var p = material.GetTextureScale(BaseMap);
             var v = new Vector2(Length * p.y, Width * p.x);
-            mat.SetTextureScale(BumpMap, v);
-            mat.SetTextureScale(BaseMap, v);
-            mat.SetTextureScale(OcclusionMap, v);
+            _nonOccludedMaterial.SetTextureScale(BumpMap, v);
+            _nonOccludedMaterial.SetTextureScale(BaseMap, v);
+            _nonOccludedMaterial.SetTextureScale(OcclusionMap, v);
 
-            _model.GetComponent<MeshRenderer>().material = mat;
+            _model.GetComponent<MeshRenderer>().material = _nonOccludedMaterial;
             _model.transform.parent = transform;
             
             var m = Orientation == RoadObjectOrientation.Negative ? -1 : 1;
@@ -97,8 +117,8 @@ namespace Scenery.RoadNetwork.RoadObjects {
             _model.layer = 19;
             
             _model.transform.SetGlobalScale(new Vector3(Length, Height, Width));
-            _model.GetComponent<MeshRenderer>().material =
-                RoadDesign.GetRoadObjectMaterial(RoadObjectType, SubType).material;
+            _nonOccludedMaterial = RoadDesign.GetRoadObjectMaterial(RoadObjectType, SubType).material;
+            _model.GetComponent<MeshRenderer>().material = _nonOccludedMaterial;
             _model.transform.parent = transform;
             
             var m = Orientation == RoadObjectOrientation.Negative ? -1 : 1;
@@ -114,21 +134,24 @@ namespace Scenery.RoadNetwork.RoadObjects {
             return true;
         }
 
-        private void AddCollider() {
-            var mesh = new Mesh();
-
-            var vertices = new List<Vector3>();
-            var triangles = new List<int>();
-            
-            
-        }
-
         public override void HandleHit() {
-            Debug.Log("SQUARE OBJ " + name +  " IS HANDLING A HIT");
+            _modelRenderer.material = _occludedMaterial;
+            return;
+            
+            var color = _modelRenderer.material.color;
+            color.a = OcclusionManagementOptions.objectTransparencyValue;
+            _modelRenderer.material.SetFloat(Surface, 1f);
+            _modelRenderer.material.SetColor(BaseColor, color);
         }
 
         public override void HandleNonHit() {
-            Debug.Log("SQUARE OBJ " + name +  " IS NO LONGER HANDLING A HIT");
+            _modelRenderer.material = _nonOccludedMaterial;
+            return;
+            
+            var color = _modelRenderer.material.color;
+            color.a = 1f;
+            _modelRenderer.material.SetFloat(Surface, 0f);
+            _modelRenderer.material.SetColor(BaseColor, color);
         }
     }
 }

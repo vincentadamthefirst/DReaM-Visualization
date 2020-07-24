@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Meta.Numerics.Functions;
 using Scenery;
 using UnityEditor;
 using UnityEngine;
@@ -16,7 +17,7 @@ namespace Visualization.OcclusionManagement.DetectionMethods {
         /// The list containing all current targets
         /// </summary>
         public List<VisualizationElement> Targets { get; } = new List<VisualizationElement>();
-        
+
         /// <summary>
         /// The ExtendedCamera script for accessing the Camera view frustum
         /// </summary>
@@ -36,5 +37,16 @@ namespace Visualization.OcclusionManagement.DetectionMethods {
             new Dictionary<VisualizationElement, HashSet<VisualizationElement>>();
 
         public Dictionary<VisualizationElement, int> Distractors { get; } = new Dictionary<VisualizationElement, int>();
+
+        public void SetTarget(VisualizationElement element, bool isTarget) {
+            if (isTarget) {
+                Targets.Add(element);
+                element.HandleNonHit();
+                if (Distractors.ContainsKey(element)) Distractors[element] = 0;
+                return;
+            }
+
+            Targets.Remove(element);
+        }
     }
 }

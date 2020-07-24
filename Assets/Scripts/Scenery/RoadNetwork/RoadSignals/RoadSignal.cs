@@ -9,12 +9,12 @@ namespace Scenery.RoadNetwork.RoadSignals {
         public override void HandleNonHit() {
             throw new System.NotImplementedException();
         }
-        
-        public override Vector3[] GetReferencePointsRenderer() {
+
+        protected override Vector3[] GetReferencePointsRenderer() {
             return new Vector3[0]; // assume scenery is never target, Ignore
         }
-        
-        public override Vector3[] GetReferencePointsCustom() {
+
+        protected override Vector3[] GetReferencePointsCustom() {
             return new Vector3[0]; // assume scenery is never target, Ignore
         }
     }

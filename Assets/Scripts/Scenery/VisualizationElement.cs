@@ -29,12 +29,15 @@ namespace Scenery {
         // if the element is a target object
         protected bool isTarget = false;
 
+        public virtual bool IsActive => true;
+
         // Properties for materials
         protected static readonly int BumpMap = Shader.PropertyToID("_BumpMap");
         protected static readonly int BaseMap = Shader.PropertyToID("_BaseMap");
         protected static readonly int OcclusionMap = Shader.PropertyToID("_OcclusionMap");
         protected static readonly int BaseColor = Shader.PropertyToID("_BaseColor");
         protected static readonly int Color = Shader.PropertyToID("_Color");
+        protected static readonly int Surface = Shader.PropertyToID("_Surface");
 
         public virtual void SetLayer(int layer) {
             // implemented in junction and road
@@ -79,8 +82,12 @@ namespace Scenery {
             return isTarget;
         }
 
-        public abstract Vector3[] GetReferencePointsRenderer();
+        /// <summary>
+        /// Returns the reference points based on the Renderer(s) of this object and its children.
+        /// </summary>
+        /// <returns>Bounding Points of the Renderers</returns>
+        protected abstract Vector3[] GetReferencePointsRenderer();
 
-        public abstract Vector3[] GetReferencePointsCustom();
+        protected abstract Vector3[] GetReferencePointsCustom();
     }
 }

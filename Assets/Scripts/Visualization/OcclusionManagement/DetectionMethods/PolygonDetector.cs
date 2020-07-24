@@ -1,5 +1,10 @@
-﻿namespace Visualization.OcclusionManagement {
-    public class PolygonDetector {
+﻿using System.Collections.Generic;
+using Scenery;
+
+namespace Visualization.OcclusionManagement.DetectionMethods {
+    public abstract class PolygonDetector : OcclusionDetector {
+        
+        
         
     }
 }

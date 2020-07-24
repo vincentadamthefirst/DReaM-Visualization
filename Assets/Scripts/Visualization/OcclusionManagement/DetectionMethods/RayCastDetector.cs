@@ -12,7 +12,7 @@ namespace Visualization.OcclusionManagement.DetectionMethods {
         private readonly Random _random = new Random(Environment.TickCount);
 
         protected void CastRay(VisualizationElement target) {
-            if (!GeometryUtility.TestPlanesAABB(ExtendedCamera.CurrentFrustumPlanes,
+            if (!target.IsActive || !GeometryUtility.TestPlanesAABB(ExtendedCamera.CurrentFrustumPlanes,
                 new Bounds(target.WorldAnchor, Vector3.zero))) {
                 
                 if (!LastHits.ContainsKey(target)) return;
@@ -31,7 +31,7 @@ namespace Visualization.OcclusionManagement.DetectionMethods {
             var startPoints = GetStartPoints(endPoints);
             
             var newHits = new HashSet<VisualizationElement>();
-            
+
             for (var i = 0; i < startPoints.Length; i++) {
                 var directionVector = endPoints[i] - startPoints[i];
                 var distance = Vector3.Distance(startPoints[i], endPoints[i]);
@@ -40,22 +40,30 @@ namespace Visualization.OcclusionManagement.DetectionMethods {
                 //     ? Physics.RaycastAll(ExtendedCamera.Camera.ScreenPointToRay(startPoints[i]), distance, LayerMask)
                 //     : Physics.RaycastAll(ExtendedCamera.Camera.transform.position, endPoints[i], distance, LayerMask);
 
+                
+                
                 var currentHits = Physics.RaycastAll(startPoints[i], directionVector, distance);
 
-                //Debug.DrawLine(startPoints[i], endPoints[i]);
+                Debug.DrawLine(startPoints[i], endPoints[i]);
 
                 foreach (var hit in currentHits) {
-                    var hitObject = hit.collider.GetComponent<VisualizationElement>(); //ColliderMapping[hit.collider];
+                    var hitObject = ColliderMapping[hit.collider]; //hit.collider.GetComponent<VisualizationElement>(); 
                     if (hitObject == null || hitObject.IsTarget()) return;
-                    //Debug.Log(hit.collider.name);
                     
                     newHits.Add(hitObject);
                 }
+
+                // foreach (var hit in currentHits) {
+                //     var hitObject = ColliderMapping[hit.collider]; //hit.collider.GetComponent<VisualizationElement>(); 
+                //     if (hitObject == null || hitObject.IsTarget()) return;
+                //
+                //     newHits.Add(hitObject);
+                // }
             }
             
             //Debug.Log("Found " + newHits.Count + " objects");
 
-            var lastHits = LastHits[target];
+            var lastHits = new HashSet<VisualizationElement>(LastHits[target]);
 
             var actualNewHits = new HashSet<VisualizationElement>(newHits);
             actualNewHits.ExceptWith(lastHits);
@@ -80,13 +88,10 @@ namespace Visualization.OcclusionManagement.DetectionMethods {
         /// <param name="element">The element to decrease the occurence of</param>
         /// <returns>Whether the value for this element was 1.</returns>
         private bool DecreaseDistractorEntry(VisualizationElement element) {
-            if (Distractors[element] == 1) {
-                Distractors[element] = 0;
-                return true;
-            }
-
-            Distractors[element] = Distractors[element] > 1 ? Distractors[element]-- : 0;
-            return false;
+            Distractors[element]--;
+            if (Distractors[element] > 0) return false;
+            Distractors[element] = 0;
+            return true;
         }
 
         /// <summary>
@@ -96,11 +101,6 @@ namespace Visualization.OcclusionManagement.DetectionMethods {
         /// <param name="element">The element to increase the occurence of</param>
         /// <returns>Whether the value for this element was 0.</returns>
         private bool IncreaseDistractorEntry(VisualizationElement element) {
-            if (!Distractors.ContainsKey(element)) {
-                Distractors.Add(element, 1);
-                return true;
-            }
-            
             var toReturn = Distractors[element] == 0;
             Distractors[element]++;
             return toReturn;
@@ -123,7 +123,7 @@ namespace Visualization.OcclusionManagement.DetectionMethods {
                 result.y = Screen.height - result.y;
                 toReturn[i] = OcclusionManagementOptions.nearClipPlaneAsStart
                     ? ExtendedCamera.Camera.ScreenToWorldPoint(new Vector3(result.x, result.y,
-                        ExtendedCamera.Camera.nearClipPlane))
+                        OcclusionManagementOptions.nearClipPlaneAsStart ? ExtendedCamera.Camera.nearClipPlane : 0))
                     : new Vector3(result.x, result.y, 0);
             }
             return toReturn;

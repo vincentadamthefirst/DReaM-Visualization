@@ -72,15 +72,15 @@ namespace Scenery.RoadNetwork.RoadObjects {
         /// </summary>
         /// <returns>If the object was deleted.</returns>
         public abstract bool MaybeDelete();
-        
+
         // internal bool, an object with a repeat will be deleted after all its "children" have been generated
         protected bool markedForDelete;
 
-        public override Vector3[] GetReferencePointsRenderer() {
+        protected override Vector3[] GetReferencePointsRenderer() {
             return new Vector3[0]; // assume objects along the road are never targets
         }
-        
-        public override Vector3[] GetReferencePointsCustom() {
+
+        protected override Vector3[] GetReferencePointsCustom() {
             return new Vector3[0]; // assume objects along the road are never targets
         }
     }

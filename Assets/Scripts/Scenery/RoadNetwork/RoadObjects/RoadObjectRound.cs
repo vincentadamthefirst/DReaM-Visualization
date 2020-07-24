@@ -16,6 +16,13 @@ namespace Scenery.RoadNetwork.RoadObjects {
     public class RoadObjectRound : RoadObject {
         public float Radius { get; set; }
 
+        private MeshRenderer[] _modelRenderers;
+
+        private Material[][] _nonOccludedMaterials;
+        private Material[][] _occludedMaterials;
+
+        private float _additionalMultiplier = 1f;
+
         private void Repeat() {
             if (RepeatParameters == null) return;
 
@@ -39,6 +46,7 @@ namespace Scenery.RoadNetwork.RoadObjects {
                 newChild.RoadDesign = RoadDesign;
                 newChild.name = name;
                 newChild.Radius = Radius;
+                newChild.OcclusionManagementOptions = OcclusionManagementOptions;
                 newChild.Show();
             }
 
@@ -73,7 +81,34 @@ namespace Scenery.RoadNetwork.RoadObjects {
             }
 
             transform.parent = Parent.transform;
-            
+
+            _modelRenderers = transform.GetComponentsInChildren<MeshRenderer>();
+            _occludedMaterials = new Material[_modelRenderers.Length][];
+            _nonOccludedMaterials = new Material[_modelRenderers.Length][];
+
+            for (var i = 0; i < _modelRenderers.Length; i++) {
+                _nonOccludedMaterials[i] = _modelRenderers[i].materials;
+                var tmp = new Material[_modelRenderers[i].materials.Length];
+                for (var j = 0; j < _modelRenderers[i].materials.Length; j++) {
+                    tmp[j] = new Material(_modelRenderers[i].materials[j]);
+                    var col = tmp[j].color;
+                    col.a = OcclusionManagementOptions.objectTransparencyValue *
+                            (RoadObjectType == RoadObjectType.Tree ? .5f : 1f);
+                    tmp[j].color = col;
+                    tmp[j].SetFloat(Surface, 1f);
+                    tmp[j].SetFloat("_Blend", 0);
+                    tmp[j].SetOverrideTag("RenderType", "Transparent");
+                    tmp[j].SetInt("_SrcBlend", (int) UnityEngine.Rendering.BlendMode.SrcAlpha);
+                    tmp[j].SetInt("_DstBlend", (int) UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                    tmp[j].SetInt("_ZWrite", 0);
+                    tmp[j].DisableKeyword("_ALPHAPREMULTIPLY_ON");
+                    tmp[j].renderQueue = (int) UnityEngine.Rendering.RenderQueue.Transparent;
+                    tmp[j].SetShaderPassEnabled("ShadowCaster", false);
+                }
+
+                _occludedMaterials[i] = tmp;
+            }
+
             AddCollider();
         }
 
@@ -196,11 +231,37 @@ namespace Scenery.RoadNetwork.RoadObjects {
         }
 
         public override void HandleHit() {
-            Debug.Log("ROUND OBJ " + name +  " IS HANDLING A HIT");
+            for (var i = 0; i < _modelRenderers.Length; i++) {
+                _modelRenderers[i].materials = _occludedMaterials[i];
+            }
+
+            return;
+            
+            foreach (var modelRenderer in _modelRenderers) {
+                var color = modelRenderer.material.color;
+                // lower the transparency further for trees
+                color.a = OcclusionManagementOptions.objectTransparencyValue * _additionalMultiplier; 
+                modelRenderer.material.SetFloat(Surface, 1f);
+                modelRenderer.material.SetColor(BaseColor, color);
+            }
         }
 
         public override void HandleNonHit() {
-            Debug.Log("ROUND OBJ " + name +  " IS NO LONGER HANDLING A HIT");
+
+            for (var i = 0; i < _modelRenderers.Length; i++) {
+                _modelRenderers[i].materials = _nonOccludedMaterials[i];
+            }
+
+            return;
+
+            foreach (var modelRenderer in _modelRenderers) {
+                
+                
+                var color = modelRenderer.material.color;
+                color.a = 1f;
+                modelRenderer.material.SetFloat(Surface, 0f);
+                modelRenderer.material.SetColor(BaseColor, color);
+            }
         }
     }
 }

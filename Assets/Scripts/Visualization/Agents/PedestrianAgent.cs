@@ -42,21 +42,15 @@ namespace Visualization.Agents {
         }
 
         protected override void UpdateLabel() {
+            if (Time.frameCount % 10 != 0) return; // reduce the load by only updating every 10 frames
+            
             var modelPosition = Model.transform.position;
             OwnLabel.UpdateFloats(modelPosition.x, modelPosition.z, previous.Velocity, previous.Acceleration);
             OwnLabel.UpdateStrings(previous.AdditionalInformation.CrossingPhase, previous.AdditionalInformation.ScanAoI, previous.AdditionalInformation.GlanceType);
             OwnLabel.UpdatePositions(previous.AdditionalInformation.OtherAgents);
         }
 
-        public override void HandleHit() {
-            if (isTarget) return; // targets will not be handled on occlusion
-        }
-
-        public override void HandleNonHit() {
-            // TODO implement
-        }
-        
-        public override Vector3[] GetReferencePointsRenderer() {
+        protected override Vector3[] GetReferencePointsRenderer() {
             var points = new List<Vector3>();
             
             if (renderers.Length == 0) return points.ToArray();
@@ -68,8 +62,7 @@ namespace Visualization.Agents {
 
             var ext = completeBounds.extents;
             var tr = Model.transform.localToWorldMatrix;
-           
-                
+            
             // adding global points to the list, first the lower 4 points of the box, then the upper 4 points,
             // ordered counter clockwise
 
@@ -85,8 +78,8 @@ namespace Visualization.Agents {
             
             return points.ToArray();
         }
-        
-        public override Vector3[] GetReferencePointsCustom() {
+
+        protected override Vector3[] GetReferencePointsCustom() {
             var toReturn = new Vector3[customPoints.customPoints.Count];
             var tr2 = Model.transform.localToWorldMatrix;
             for (var i = 0; i < toReturn.Length; i++) {
