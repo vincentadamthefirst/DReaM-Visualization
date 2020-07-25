@@ -1524,7 +1524,6 @@ GameObject:
   - component: {fileID: 728719658}
   - component: {fileID: 728719657}
   - component: {fileID: 728719656}
-  - component: {fileID: 728719655}
   m_Layer: 0
   m_Name: MultiOcclusionCube
   m_TagString: Untagged
@@ -1532,18 +1531,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &728719655
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 728719654}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6e99096450594ee39c2d97e598302bd4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!65 &728719656
 BoxCollider:
   m_ObjectHideFlags: 0

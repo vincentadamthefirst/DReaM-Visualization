@@ -6,6 +6,9 @@ namespace Scenery.RoadNetwork.RoadObjects {
     /// Not yet implemented class for irregular OpenDrive objects.
     /// </summary>
     public class RoadObjectIrregular : RoadObject {
+        
+        public override bool IsDistractor => true;
+        
         private void Repeat() {
             throw new System.NotImplementedException();
         }

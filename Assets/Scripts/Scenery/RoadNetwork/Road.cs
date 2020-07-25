@@ -60,6 +60,8 @@ namespace Scenery.RoadNetwork {
         /// All RoadObjects along this Road
         /// </summary>
         public List<RoadObject> RoadObjects { get; }  = new List<RoadObject>();
+        
+        public override bool IsDistractor => false;
 
         /// <summary>
         /// Adds a new RoadGeometry to this Road and sorts the list based on s value.

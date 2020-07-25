@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using Utils;
+using Visualization.OcclusionManagement;
 
 namespace Scenery.RoadNetwork.RoadObjects {
     public class RoadObjectSquare : RoadObject {
@@ -14,7 +16,13 @@ namespace Scenery.RoadNetwork.RoadObjects {
 
         private Material _nonOccludedMaterial;
         private Material _occludedMaterial;
+        
+        public override bool IsDistractor => true;
 
+        public override Bounds AxisAlignedBoundingBox => _modelRenderer.bounds;
+
+        private Vector3[] _referencePoints;
+        
         private void Repeat() {
             if (RepeatParameters == null) return;
 
@@ -71,21 +79,35 @@ namespace Scenery.RoadNetwork.RoadObjects {
             transform.parent = Parent.transform;
 
             _modelRenderer = _model.GetComponent<MeshRenderer>();
+
+            if (OcclusionManagementOptions.occlusionHandlingMethod == OcclusionHandlingMethod.Transparency) {
+                _occludedMaterial = new Material(_nonOccludedMaterial);
+                _occludedMaterial.ChangeToTransparent(OcclusionManagementOptions.objectTransparencyValue *
+                                                      (RoadObjectType == RoadObjectType.Tree ? .5f : 1f));
+            } else {
+                _occludedMaterial = OcclusionManagementOptions.wireFrameMaterial;
+            }
+
+            var mesh = _model.GetComponent<MeshFilter>().mesh;
             
-            _occludedMaterial = new Material(_nonOccludedMaterial);
-            var col = _occludedMaterial.color;
-            col.a = OcclusionManagementOptions.objectTransparencyValue;
-            _occludedMaterial.color = col;
-            _occludedMaterial.SetFloat(Surface, 1f);
-            _occludedMaterial.SetFloat("_Blend", 0);
-            _occludedMaterial.SetOverrideTag("RenderType", "Transparent");
-            _occludedMaterial.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
-            _occludedMaterial.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-            _occludedMaterial.SetInt("_ZWrite", 0);
-            _occludedMaterial.DisableKeyword("_ALPHAPREMULTIPLY_ON");
-            _occludedMaterial.renderQueue = (int) UnityEngine.Rendering.RenderQueue.Transparent;
-            _occludedMaterial.SetShaderPassEnabled("ShadowCaster", false);
-            
+            Debug.Log(mesh.vertices.Length);
+
+            _referencePoints = new[] {
+                new Vector3(-.5f, -.5f, -.5f), 
+                new Vector3(-.5f, -.5f, .5f), 
+                new Vector3(.5f, -.5f, .5f), 
+                new Vector3(.5f, -.5f, -.5f), 
+                
+                new Vector3(-.5f, .5f, -.5f), 
+                new Vector3(-.5f, .5f, .5f), 
+                new Vector3(.5f, .5f, .5f), 
+                new Vector3(.5f, .5f, -.5f), 
+            };
+
+            for (var i = 0; i < 8; i++) {
+                _referencePoints[i] = _model.transform.localToWorldMatrix.MultiplyPoint3x4(_referencePoints[i]);
+            }
+
             MaybeDelete();
         }
 
@@ -106,7 +128,7 @@ namespace Scenery.RoadNetwork.RoadObjects {
             _model.transform.parent = transform;
             
             var m = Orientation == RoadObjectOrientation.Negative ? -1 : 1;
-            _model.transform.position = Parent.EvaluatePoint(S, m * T, ZOffset);
+            _model.transform.position = Parent.EvaluatePoint(S, m * Mathf.Abs(T), ZOffset);
             
             var completeHdg = Mathf.PI - Parent.EvaluateHeading(S) + Heading;
             _model.transform.Rotate(Vector3.up, Mathf.Rad2Deg * completeHdg);
@@ -122,7 +144,7 @@ namespace Scenery.RoadNetwork.RoadObjects {
             _model.transform.parent = transform;
             
             var m = Orientation == RoadObjectOrientation.Negative ? -1 : 1;
-            _model.transform.position = Parent.EvaluatePoint(S, m * T, ZOffset + Height / 2f);
+            _model.transform.position = Parent.EvaluatePoint(S, m * Mathf.Abs(T), ZOffset + Height / 2f);
             
             var completeHdg = Parent.EvaluateHeading(S) + Heading;
             _model.transform.Rotate(Vector3.up, Mathf.Rad2Deg * completeHdg);
@@ -136,22 +158,14 @@ namespace Scenery.RoadNetwork.RoadObjects {
 
         public override void HandleHit() {
             _modelRenderer.material = _occludedMaterial;
-            return;
-            
-            var color = _modelRenderer.material.color;
-            color.a = OcclusionManagementOptions.objectTransparencyValue;
-            _modelRenderer.material.SetFloat(Surface, 1f);
-            _modelRenderer.material.SetColor(BaseColor, color);
         }
 
         public override void HandleNonHit() {
             _modelRenderer.material = _nonOccludedMaterial;
-            return;
-            
-            var color = _modelRenderer.material.color;
-            color.a = 1f;
-            _modelRenderer.material.SetFloat(Surface, 0f);
-            _modelRenderer.material.SetColor(BaseColor, color);
+        }
+
+        public override Vector3[] GetReferencePoints() {
+            return _referencePoints;
         }
     }
 }

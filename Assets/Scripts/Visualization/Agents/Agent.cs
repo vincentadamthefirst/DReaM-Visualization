@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Scenery;
 using Scenery.RoadNetwork;
+using Scenery.RoadNetwork.RoadObjects;
 using UnityEngine;
 using Utils;
 using Visualization.Labels;
@@ -80,11 +81,21 @@ namespace Visualization.Agents {
         // custom points that are defined for this GameObject
         protected CustomPoints customPoints;
 
+        protected Bounds boundingBox;
+
         public override Vector3 WorldAnchor => Model.transform.position;
 
         public override bool IsActive => !deactivated;
 
         private MeshRenderer[] _modelRenderers;
+        
+        public override bool IsDistractor => true;
+
+        public override Bounds AxisAlignedBoundingBox => boundingBox;
+        
+        // the materials for this agents meshes
+        private Material[][] _nonOccludedMaterials;
+        private Material[][] _occludedMaterials;
 
         /// <summary>
         /// Finds necessary components.
@@ -120,6 +131,29 @@ namespace Visualization.Agents {
             timeStepSize = SimulationSteps.Values.ToArray()[1].Time - SimulationSteps.Values.ToArray()[0].Time;
 
             _modelRenderers = GetComponentsInChildren<MeshRenderer>();
+            
+            _occludedMaterials = new Material[_modelRenderers.Length][];
+            _nonOccludedMaterials = new Material[_modelRenderers.Length][];
+
+            for (var i = 0; i < _modelRenderers.Length; i++) {
+                _nonOccludedMaterials[i] = _modelRenderers[i].materials;
+                Material[] tmp;
+
+                if (OcclusionManagementOptions.occlusionHandlingMethod == OcclusionHandlingMethod.Transparency) {
+                    tmp = new Material[_modelRenderers[i].materials.Length];
+                    for (var j = 0; j < _modelRenderers[i].materials.Length; j++) {
+                        tmp[j] = new Material(_modelRenderers[i].materials[j]);
+                        tmp[j].ChangeToTransparent(OcclusionManagementOptions.agentTransparencyValue);
+                    }
+                } else {
+                    tmp = new Material[_modelRenderers[i].materials.Length];
+                    for (var j = 0; j < _modelRenderers[i].materials.Length; j++) {
+                        tmp[j] = OcclusionManagementOptions.wireFrameMaterial;
+                    }
+                }
+                
+                _occludedMaterials[i] = tmp;
+            }
         }
 
         /// <summary>
@@ -196,21 +230,14 @@ namespace Visualization.Agents {
         }
         
         public override void HandleHit() {
-            foreach (var modelRenderer in _modelRenderers) {
-                var color = modelRenderer.material.color;
-                // lower the transparency further for trees
-                color.a = OcclusionManagementOptions.agentTransparencyValue; 
-                modelRenderer.material.SetFloat(Surface, 1f);
-                modelRenderer.material.SetColor(BaseColor, color);
+            for (var i = 0; i < _modelRenderers.Length; i++) {
+                _modelRenderers[i].materials = _occludedMaterials[i];
             }
         }
 
         public override void HandleNonHit() {
-            foreach (var modelRenderer in _modelRenderers) {
-                var color = modelRenderer.material.color;
-                color.a = 1f;
-                modelRenderer.material.SetFloat(Surface, 0f);
-                modelRenderer.material.SetColor(BaseColor, color);
+            for (var i = 0; i < _modelRenderers.Length; i++) {
+                _modelRenderers[i].materials = _nonOccludedMaterials[i];
             }
         }
     }

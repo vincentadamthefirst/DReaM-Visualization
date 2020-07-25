@@ -6,6 +6,11 @@ using UnityEngine;
 
 namespace Utils.AdditionalMath {
     public static class ConvexHull {
+
+        public static Vector2[] GrahamScanCompute(Vector2[] initialPoints) {
+            return GrahamScanCompute(initialPoints.ToList()).ToArray();
+        }
+        
         public static List<Vector2> GrahamScanCompute(List<Vector2> initialPoints) {
             if (initialPoints.Count < 2) 
                 return initialPoints;

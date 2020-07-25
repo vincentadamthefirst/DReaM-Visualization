@@ -9,7 +9,6 @@ namespace Visualization.OcclusionManagement.DetectionMethods {
 
         public override void Trigger() {
             if (Targets.Count == 0) return;
-            
             if (_lastTarget > Targets.Count - 1) _lastTarget = 0;
 
             CastRay(Targets[_lastTarget]);

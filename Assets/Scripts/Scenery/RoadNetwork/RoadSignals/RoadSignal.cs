@@ -2,6 +2,9 @@
 
 namespace Scenery.RoadNetwork.RoadSignals {
     public class RoadSignal : VisualizationElement {
+        
+        public override bool IsDistractor => true;
+        
         public override void HandleHit() {
             throw new System.NotImplementedException();
         }

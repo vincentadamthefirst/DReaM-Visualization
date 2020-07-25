@@ -4,6 +4,7 @@ using UnityEditor.ShaderGraph.Internal;
 using UnityEngine;
 using UnityEngine.ProBuilder;
 using Utils;
+using Visualization.OcclusionManagement;
 
 namespace Scenery.RoadNetwork.RoadObjects {
     
@@ -22,6 +23,12 @@ namespace Scenery.RoadNetwork.RoadObjects {
         private Material[][] _occludedMaterials;
 
         private float _additionalMultiplier = 1f;
+
+        private Mesh _colliderMesh;
+        
+        public override bool IsDistractor => true;
+        
+        public override Bounds AxisAlignedBoundingBox => _colliderMesh.bounds;
 
         private void Repeat() {
             if (RepeatParameters == null) return;
@@ -88,24 +95,22 @@ namespace Scenery.RoadNetwork.RoadObjects {
 
             for (var i = 0; i < _modelRenderers.Length; i++) {
                 _nonOccludedMaterials[i] = _modelRenderers[i].materials;
-                var tmp = new Material[_modelRenderers[i].materials.Length];
-                for (var j = 0; j < _modelRenderers[i].materials.Length; j++) {
-                    tmp[j] = new Material(_modelRenderers[i].materials[j]);
-                    var col = tmp[j].color;
-                    col.a = OcclusionManagementOptions.objectTransparencyValue *
-                            (RoadObjectType == RoadObjectType.Tree ? .5f : 1f);
-                    tmp[j].color = col;
-                    tmp[j].SetFloat(Surface, 1f);
-                    tmp[j].SetFloat("_Blend", 0);
-                    tmp[j].SetOverrideTag("RenderType", "Transparent");
-                    tmp[j].SetInt("_SrcBlend", (int) UnityEngine.Rendering.BlendMode.SrcAlpha);
-                    tmp[j].SetInt("_DstBlend", (int) UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-                    tmp[j].SetInt("_ZWrite", 0);
-                    tmp[j].DisableKeyword("_ALPHAPREMULTIPLY_ON");
-                    tmp[j].renderQueue = (int) UnityEngine.Rendering.RenderQueue.Transparent;
-                    tmp[j].SetShaderPassEnabled("ShadowCaster", false);
-                }
+                Material[] tmp;
 
+                if (OcclusionManagementOptions.occlusionHandlingMethod == OcclusionHandlingMethod.Transparency) {
+                    tmp = new Material[_modelRenderers[i].materials.Length];
+                    for (var j = 0; j < _modelRenderers[i].materials.Length; j++) {
+                        tmp[j] = new Material(_modelRenderers[i].materials[j]);
+                        tmp[j].ChangeToTransparent(OcclusionManagementOptions.objectTransparencyValue *
+                                                   (RoadObjectType == RoadObjectType.Tree ? .5f : 1f));
+                    }
+                } else {
+                    tmp = new Material[_modelRenderers[i].materials.Length];
+                    for (var j = 0; j < _modelRenderers[i].materials.Length; j++) {
+                        tmp[j] = OcclusionManagementOptions.wireFrameMaterial;
+                    }
+                }
+                
                 _occludedMaterials[i] = tmp;
             }
 
@@ -134,7 +139,7 @@ namespace Scenery.RoadNetwork.RoadObjects {
             transform.GetChild(0).SetGlobalScale(new Vector3(scale, 1, scale));
             
             var m = Orientation == RoadObjectOrientation.Negative ? -1 : 1;
-            streetLamp.transform.position = Parent.EvaluatePoint(S, m * T, ZOffset);
+            streetLamp.transform.position = Parent.EvaluatePoint(S, m * Mathf.Abs(T), ZOffset);
         }
 
         private void ShowPole(RoadObjectPrefab rop) {
@@ -153,7 +158,7 @@ namespace Scenery.RoadNetwork.RoadObjects {
             transform.GetChild(0).SetGlobalScale(new Vector3(scale, 1, scale));
             
             var m = Orientation == RoadObjectOrientation.Negative ? -1 : 1;
-            pole.transform.position = Parent.EvaluatePoint(S, m * T, ZOffset);
+            pole.transform.position = Parent.EvaluatePoint(S, m * Mathf.Abs(T), ZOffset);
         }
 
         private void ShowTree(RoadObjectPrefab rop) {
@@ -168,7 +173,7 @@ namespace Scenery.RoadNetwork.RoadObjects {
             tree.transform.SetGlobalScale(new Vector3(scaleA, scaleB, scaleA));
             
             var m = Orientation == RoadObjectOrientation.Negative ? -1 : 1;
-            tree.transform.position = Parent.EvaluatePoint(S, m * T, ZOffset);
+            tree.transform.position = Parent.EvaluatePoint(S, m * Mathf.Abs(T), ZOffset);
             
             var completeHdg = Parent.EvaluateHeading(S) + Heading;
             tree.transform.Rotate(Vector3.up, Mathf.Rad2Deg * completeHdg);
@@ -185,11 +190,11 @@ namespace Scenery.RoadNetwork.RoadObjects {
             buildingBase.transform.parent = transform;
             
             var m = Orientation == RoadObjectOrientation.Negative ? -1 : 1;
-            buildingBase.transform.position = Parent.EvaluatePoint(S, m * T, ZOffset + Height / 2f);
+            buildingBase.transform.position = Parent.EvaluatePoint(S, m * Mathf.Abs(T), ZOffset + Height / 2f);
         }
 
         private void AddCollider() {
-            var mesh = new Mesh();
+            _colliderMesh = new Mesh();
 
             var vertices = new List<Vector3>();
             var triangles = new List<int>();
@@ -219,49 +224,31 @@ namespace Scenery.RoadNetwork.RoadObjects {
                 6, 9, 8, 6, 8, 7, 6, 10, 9, 6, 11, 10 // top
             });
 
-            mesh.vertices = vertices.ToArray();
-            mesh.triangles = triangles.ToArray();
-            mesh.RecalculateNormals();
-            mesh.Optimize();
+            _colliderMesh.vertices = vertices.ToArray();
+            _colliderMesh.triangles = triangles.ToArray();
+            _colliderMesh.RecalculateNormals();
+            _colliderMesh.Optimize();
 
             var coll = gameObject.AddComponent<MeshCollider>();
             coll.convex = true;
             coll.cookingOptions = MeshColliderCookingOptions.CookForFasterSimulation;
-            coll.sharedMesh = mesh;
+            coll.sharedMesh = _colliderMesh;
         }
 
         public override void HandleHit() {
             for (var i = 0; i < _modelRenderers.Length; i++) {
                 _modelRenderers[i].materials = _occludedMaterials[i];
             }
-
-            return;
-            
-            foreach (var modelRenderer in _modelRenderers) {
-                var color = modelRenderer.material.color;
-                // lower the transparency further for trees
-                color.a = OcclusionManagementOptions.objectTransparencyValue * _additionalMultiplier; 
-                modelRenderer.material.SetFloat(Surface, 1f);
-                modelRenderer.material.SetColor(BaseColor, color);
-            }
         }
 
         public override void HandleNonHit() {
-
             for (var i = 0; i < _modelRenderers.Length; i++) {
                 _modelRenderers[i].materials = _nonOccludedMaterials[i];
             }
+        }
 
-            return;
-
-            foreach (var modelRenderer in _modelRenderers) {
-                
-                
-                var color = modelRenderer.material.color;
-                color.a = 1f;
-                modelRenderer.material.SetFloat(Surface, 0f);
-                modelRenderer.material.SetColor(BaseColor, color);
-            }
+        public override Vector3[] GetReferencePoints() {
+            return _colliderMesh.vertices;
         }
     }
 }

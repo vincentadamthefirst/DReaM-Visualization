@@ -12,6 +12,8 @@ namespace Scenery {
         /// Not needed for scenery, Ingore
         /// </summary>
         public override Vector3 WorldAnchor => Vector3.zero;
+        
+        public override bool IsDistractor => true;
 
         private void Start() {
             _ownRenderer = GetComponent<Renderer>();

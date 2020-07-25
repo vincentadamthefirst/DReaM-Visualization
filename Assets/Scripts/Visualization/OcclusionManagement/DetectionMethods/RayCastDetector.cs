@@ -12,8 +12,8 @@ namespace Visualization.OcclusionManagement.DetectionMethods {
         private readonly Random _random = new Random(Environment.TickCount);
 
         protected void CastRay(VisualizationElement target) {
-            if (!target.IsActive || !GeometryUtility.TestPlanesAABB(ExtendedCamera.CurrentFrustumPlanes,
-                new Bounds(target.WorldAnchor, Vector3.zero))) {
+            if (!target.IsActive || !GeometryUtility.TestPlanesAABB(
+                    ExtendedCamera.CurrentFrustumPlanes, target.AxisAlignedBoundingBox)) {
                 
                 if (!LastHits.ContainsKey(target)) return;
                 
@@ -36,32 +36,18 @@ namespace Visualization.OcclusionManagement.DetectionMethods {
                 var directionVector = endPoints[i] - startPoints[i];
                 var distance = Vector3.Distance(startPoints[i], endPoints[i]);
 
-                // var currentHits = OcclusionManagementOptions.nearClipPlaneAsStart
-                //     ? Physics.RaycastAll(ExtendedCamera.Camera.ScreenPointToRay(startPoints[i]), distance, LayerMask)
-                //     : Physics.RaycastAll(ExtendedCamera.Camera.transform.position, endPoints[i], distance, LayerMask);
-
-                
-                
+                // ReSharper disable once Unity.PreferNonAllocApi
                 var currentHits = Physics.RaycastAll(startPoints[i], directionVector, distance);
 
                 Debug.DrawLine(startPoints[i], endPoints[i]);
 
                 foreach (var hit in currentHits) {
-                    var hitObject = ColliderMapping[hit.collider]; //hit.collider.GetComponent<VisualizationElement>(); 
-                    if (hitObject == null || hitObject.IsTarget()) return;
+                    var hitObject = ColliderMapping[hit.collider];
+                    if (hitObject == null || hitObject.IsTarget()) continue;
                     
                     newHits.Add(hitObject);
                 }
-
-                // foreach (var hit in currentHits) {
-                //     var hitObject = ColliderMapping[hit.collider]; //hit.collider.GetComponent<VisualizationElement>(); 
-                //     if (hitObject == null || hitObject.IsTarget()) return;
-                //
-                //     newHits.Add(hitObject);
-                // }
             }
-            
-            //Debug.Log("Found " + newHits.Count + " objects");
 
             var lastHits = new HashSet<VisualizationElement>(LastHits[target]);
 
@@ -79,31 +65,6 @@ namespace Visualization.OcclusionManagement.DetectionMethods {
             }
 
             LastHits[target] = newHits;
-        }
-
-        /// <summary>
-        /// Decreases the occurence for a given element in the Dictionary for distractors. If the value changed from 1
-        /// to 0 this method will return true.
-        /// </summary>
-        /// <param name="element">The element to decrease the occurence of</param>
-        /// <returns>Whether the value for this element was 1.</returns>
-        private bool DecreaseDistractorEntry(VisualizationElement element) {
-            Distractors[element]--;
-            if (Distractors[element] > 0) return false;
-            Distractors[element] = 0;
-            return true;
-        }
-
-        /// <summary>
-        /// Increases the amount of targets an object occludes and returns, whether the counter was 0 before. If the
-        /// element is not yet present in the dictionary, it will add the element with value 1.
-        /// </summary>
-        /// <param name="element">The element to increase the occurence of</param>
-        /// <returns>Whether the value for this element was 0.</returns>
-        private bool IncreaseDistractorEntry(VisualizationElement element) {
-            var toReturn = Distractors[element] == 0;
-            Distractors[element]++;
-            return toReturn;
         }
 
         private Vector3[] SelectRandom(IEnumerable<Vector3> input) {

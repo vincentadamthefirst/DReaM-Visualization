@@ -50,6 +50,8 @@ namespace Scenery.RoadNetwork {
         /// Lanes. Gets set in parent Road.
         /// </summary>
         public bool CompletelyOnLineSegment { get; set; }
+        
+        public override bool IsDistractor => false;
 
         public LaneSection() {
             LeftLanes = new List<Lane>();

@@ -29,6 +29,8 @@ namespace Scenery.RoadNetwork {
         /// </summary>
         public List<Connection> Connections { get; } = new List<Connection>();
 
+        public override bool IsDistractor => false;
+
         /// <summary>
         /// Sets the layer for this Junction by setting the layer for all Roads belonging to this Junction.
         /// </summary>

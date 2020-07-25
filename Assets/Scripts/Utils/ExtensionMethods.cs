@@ -114,6 +114,21 @@ namespace Utils {
 
             transform.parent = oldParent;
         }
+
+        public static void ChangeToTransparent(this Material material, float alpha) {
+            var color = material.color;
+            color.a = alpha;
+            material.color = color;
+            material.SetFloat("_Surface", 1f);
+            material.SetFloat("_Blend", 0);
+            material.SetOverrideTag("RenderType", "Transparent");
+            material.SetInt("_SrcBlend", (int) UnityEngine.Rendering.BlendMode.SrcAlpha);
+            material.SetInt("_DstBlend", (int) UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+            material.SetInt("_ZWrite", 0);
+            material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+            material.renderQueue = (int) UnityEngine.Rendering.RenderQueue.Transparent;
+            material.SetShaderPassEnabled("ShadowCaster", false);
+        }
         
         public static void SetLayerRecursive(this GameObject obj, int layer) {
             obj.layer = layer;

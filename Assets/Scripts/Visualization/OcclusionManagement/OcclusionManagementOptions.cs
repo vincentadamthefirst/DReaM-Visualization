@@ -102,7 +102,7 @@ namespace Visualization.OcclusionManagement {
     /// Enum describing the general Occlusion Detection method.
     /// </summary>
     public enum OcclusionDetectionMethod {
-        Shader, RayCast, Polygon
+        RayCast, Polygon, Shader
     }
 
     /// <summary>

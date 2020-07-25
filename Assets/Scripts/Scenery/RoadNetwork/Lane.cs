@@ -96,6 +96,8 @@ namespace Scenery.RoadNetwork {
         /// The widths of this Lane segment, ordered by sOffset (low to high)
         /// </summary>
         private List<LaneWidth> Widths { get; set; } = new List<LaneWidth>();
+        
+        public override bool IsDistractor => false;
 
         /// <summary>
         /// Adds a new width entry for this lane

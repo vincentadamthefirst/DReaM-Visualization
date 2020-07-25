@@ -85,11 +85,12 @@ public class TestScript : MonoBehaviour {
         outputImporter.visualizationMaster = visualizationMaster;
         outputImporter.StartImport();
         
-        agentOccManager.Prepare();
+       
 
         // TODO implement parsing of ModelsCatalog
         
-        visualizationMaster.PrepareAgents();
+        agentOccManager.Prepare();
         
+        visualizationMaster.PrepareAgents();
     }
 }

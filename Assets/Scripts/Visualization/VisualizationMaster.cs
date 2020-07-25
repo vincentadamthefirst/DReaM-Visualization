@@ -80,8 +80,12 @@ namespace Visualization {
             playbackControl.SetTotalTime(MaxSampleTime);
 
             // TODO remove (only for debugging)
-            _agents.ForEach(a => a.SetIsTarget(true));
-            _agents.ForEach(a => _agentOcclusionManager.AddTarget(a));
+
+            foreach (var agent in _agents) {
+                if (agent.name.Contains("#0")) continue;
+                agent.SetIsTarget(true);
+                _agentOcclusionManager.AddTarget(agent);
+            }
         }
 
         /// <summary>

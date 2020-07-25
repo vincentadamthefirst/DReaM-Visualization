@@ -16,13 +16,15 @@ namespace Scenery {
         /// The currently applied options for managing occlusions.
         /// </summary>
         public OcclusionManagementOptions OcclusionManagementOptions { get; set; }
-        
+
         /// <summary>
         /// The actual world anchor of the object. This might differ from the anchor of the object the script is on
         /// (e.g. for any Agent this would be the position of its Model)
         /// </summary>
         public virtual Vector3 WorldAnchor { get; }
-        
+
+        public abstract bool IsDistractor { get; }
+
         // tolerance for checking if floating point number is 0
         protected const float Tolerance = 0.00001f;
         
@@ -30,6 +32,8 @@ namespace Scenery {
         protected bool isTarget = false;
 
         public virtual bool IsActive => true;
+
+        public virtual Bounds AxisAlignedBoundingBox => new Bounds();
 
         // Properties for materials
         protected static readonly int BumpMap = Shader.PropertyToID("_BumpMap");
@@ -58,11 +62,7 @@ namespace Scenery {
         /// specified in 
         /// </summary>
         /// <returns></returns>
-        public Vector3[] GetReferencePoints() {
-            if (OcclusionManagementOptions == null) {
-                Debug.Log(name);
-            }
-            
+        public virtual Vector3[] GetReferencePoints() {
             switch (OcclusionManagementOptions.pointSource) {
                 case PointSource.Custom:
                     return GetReferencePointsCustom();

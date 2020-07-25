@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Transactions;
+using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 using UnityEngine.UI;
 using Utils;
@@ -8,6 +9,8 @@ using Utils;
 namespace Visualization.Agents {
     public class PedestrianAgent : Agent {
 
+        private Vector3 _heightOffset;
+        
         public override void Prepare() {
             base.Prepare();
             
@@ -21,6 +24,10 @@ namespace Visualization.Agents {
             // preparing the label
             OwnLabel.SetStrings(gameObject.name);
             OwnLabel.SetFloats(3.2f);
+            
+            boundingBox = new Bounds(new Vector3(0, ModelInformation.Height / 2f, 0), new Vector3(ModelInformation.Length, ModelInformation.Height, ModelInformation.Width));
+            
+            _heightOffset = new Vector3(0, ModelInformation.Height / 2f, 0);
         }
 
         protected override void UpdatePosition() {
@@ -29,6 +36,12 @@ namespace Visualization.Agents {
 
             Model.transform.position = new Vector3(previous.Position.x + nextPositionPointer.x, 0, 
                 previous.Position.y + nextPositionPointer.y);
+
+            boundingBox.center = Model.transform.position + _heightOffset;
+        }
+
+        private void OnDrawGizmos() {
+            Gizmos.DrawWireCube(boundingBox.center, boundingBox.size);
         }
 
         protected override void UpdateRotation() {

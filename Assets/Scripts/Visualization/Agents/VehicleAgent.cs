@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Assertions;
+using UnityEngine.PlayerLoop;
 using UnityEngine.UI;
 using Utils;
 
@@ -27,6 +29,8 @@ namespace Visualization.Agents {
         private bool _wasIndicatorOn;
 
         private Transform _chassis;
+        
+        private Vector3 _centerHeightOffset; // TODO maybe remove
 
         public override void Prepare() {
             base.Prepare();
@@ -75,6 +79,11 @@ namespace Visualization.Agents {
             // preparing the label
             OwnLabel.SetStrings(gameObject.name);
             OwnLabel.SetFloats(ModelInformation.Height + 1.4f);
+
+            boundingBox = new Bounds(new Vector3(0, ModelInformation.Height / 2f, 0),
+                new Vector3(ModelInformation.Width, ModelInformation.Height, ModelInformation.Length));
+            
+            _centerHeightOffset = new Vector3(0, ModelInformation.Height / 2f, 0);
         }
 
         protected override void UpdatePosition() {
@@ -87,6 +96,8 @@ namespace Visualization.Agents {
             UpdateWheelRotation();
             UpdateIndicators();
             UpdateBrakes();
+            
+            boundingBox.center = Model.transform.GetChild(1).position + _centerHeightOffset;
         }
 
         private void UpdateWheelRotation() {
@@ -202,6 +213,13 @@ namespace Visualization.Agents {
             points.Add(tr.MultiplyPoint3x4(new Vector3(-ext.x / 2f, ext.y / 2f, -ext.z / 2f)));
             
             return points.ToArray();
+        }
+
+        private void OnDrawGizmos() {
+            Gizmos.color = ColorMaterial.color;
+            foreach (var point in GetReferencePointsCustom()) {
+                Gizmos.DrawSphere(point, .1f);
+            }
         }
 
         protected override Vector3[] GetReferencePointsCustom() {

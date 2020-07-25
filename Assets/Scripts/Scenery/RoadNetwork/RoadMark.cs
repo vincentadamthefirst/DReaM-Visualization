@@ -33,6 +33,8 @@ namespace Scenery.RoadNetwork {
         /// The width of this RoadMark
         /// </summary>
         public float Width { get; set; }
+        
+        public override bool IsDistractor => false;
 
         /// <summary>
         /// Starts the generation of the Mesh for this RoadMark.

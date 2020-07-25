@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Scenery;
+using UnityEditor;
 using UnityEngine;
 using Utils;
 using Utils.AdditionalMath;
@@ -58,8 +59,6 @@ namespace Visualization.OcclusionManagement {
         // for raycast
         private Dictionary<VisualizationObject, HashSet<VisualizationObject>> _lastRayCastDict;
         
-        
-        
         // NEW STUFF
 
         private OcclusionDetector _occlusionDetector;
@@ -67,6 +66,13 @@ namespace Visualization.OcclusionManagement {
         public OcclusionManagementOptions OcclusionManagementOptions { get; set; }
 
         private Dictionary<Collider, VisualizationElement> _colliderMapping;
+
+        private VisualizationElement[] _allElements = new VisualizationElement[0];
+
+        private static readonly Type[][] OcclusionDetectors = {
+            new [] {typeof(RayCastDetectorNormal), typeof(RayCastDetectorStaggered)}, 
+            new [] {typeof(PolygonDetectorNormal), typeof(PolygonDetectorStaggered)}
+        };
 
         private void Start() {
             cam = Camera.main;
@@ -78,25 +84,38 @@ namespace Visualization.OcclusionManagement {
         }
 
         public void Prepare() {
-            _occlusionDetector = new RayCastDetectorStaggered();
+            if (OcclusionManagementOptions.occlusionDetectionMethod == OcclusionDetectionMethod.Shader) {
+                
+            } else {
+                _occlusionDetector = (OcclusionDetector) Activator.CreateInstance(
+                    OcclusionDetectors[(int) OcclusionManagementOptions.occlusionHandlingMethod][
+                        OcclusionManagementOptions.staggeredCheck ? 1 : 0]);
+            }
+
+            // setting the base parameters
             _occlusionDetector.ExtendedCamera = FindObjectOfType<ExtendedCamera>();
-            _occlusionDetector.LayerMask =
-                LayerMask.GetMask("agents_base", "scenery_objects", "scenery_signs", "scenery_targets");
+            _occlusionDetector.LayerMask = LayerMask.GetMask("agents_base", "scenery_objects", "scenery_signs", "scenery_targets", "agent_targets");
             _occlusionDetector.OcclusionManagementOptions = OcclusionManagementOptions;
 
-            var colls = FindObjectsOfType<Collider>();
-            foreach (var coll in colls) {
+            // finding all colliders in scene
+            var colliders = FindObjectsOfType<Collider>();
+            foreach (var coll in colliders) {
                 var tmp = coll.GetComponentInParent<VisualizationElement>();
 
                 if (tmp == null) continue;
                 _colliderMapping[coll] = tmp;
             }
-
+            
             _occlusionDetector.ColliderMapping = _colliderMapping;
 
-            var allElements = FindObjectsOfType<VisualizationElement>();
-            foreach (var visualizationElement in allElements) {
-                _occlusionDetector.Distractors[visualizationElement] = 0;
+            // finding all VisualizationElements
+            _allElements = FindObjectsOfType<VisualizationElement>();
+
+            foreach (var visualizationElement in _allElements) { // adding all VisualizationElements
+                if (!visualizationElement.IsDistractor) continue;
+
+                _occlusionDetector.DistractorCounts[visualizationElement] = 0;
+                _occlusionDetector.OnlyDistractors.Add(visualizationElement);
             }
         }
 
@@ -158,35 +177,6 @@ namespace Visualization.OcclusionManagement {
                 detectionMethod == DetectionMethod.POLYGON_RendererAABBB ||
                 detectionMethod == DetectionMethod.POLYGON_Mesh) {
                 PolygonDetection(targetObject);
-            }
-        }
-
-        private void OnGUI() {
-            const float rectSize = 0.1f;
-        
-            // ReSharper disable once InvertIf
-            if (showRayCastEnd) {
-                foreach (var vertex in _rayCastPositions) {
-                    GUI.Box(new Rect(vertex.x, vertex.y, rectSize, rectSize), "");
-                }   
-            }
-
-            if (showPolygons) {
-                if (_distractorPolygons.Count == 0) return;
-
-                foreach (var entry in _distractorPolygons) {
-                    if (entry.Value == null) continue;
-                    foreach (var vertex in entry.Value.Points()) {
-                        GUI.Box(new Rect(vertex.x, vertex.y, rectSize, rectSize), "");
-                    }
-                }
-
-                if (_targetPolygons.Count == 0) return;
-                foreach (var polygon in _targetPolygons) {
-                    foreach (var vertex in polygon.Points()) {
-                        GUI.Box(new Rect(vertex.x, vertex.y, rectSize, rectSize), "");
-                    }
-                }
             }
         }
 
