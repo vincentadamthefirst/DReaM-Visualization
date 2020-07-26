@@ -166,7 +166,7 @@ namespace Visualization.Agents {
             _currentHdg = deltaTMs * ((previous.Next.Rotation - previous.Rotation) / 100) + previous.Rotation;
             Model.transform.rotation = Quaternion.Euler(0, -_currentHdg * Mathf.Rad2Deg, 0);
 
-            CurrentRotation = -_currentHdg;
+            CurrentRotation = _currentHdg;
         }
 
         public override Vector3 GetAnchorPoint() {

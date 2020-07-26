@@ -4,11 +4,13 @@ using System.Collections.Generic;
 using System.Linq;
 using Scenery;
 using UnityEngine;
+using Utils;
 using Utils.AdditionalMath;
+using Visualization.Agents;
 using Random = UnityEngine.Random;
 
 public class SimpleCameraController : MonoBehaviour {
-    private class CameraState {
+    public class CameraState {
         public float yaw;
         public float pitch;
         public float roll;
@@ -49,8 +51,8 @@ public class SimpleCameraController : MonoBehaviour {
         }
     }
 
-    CameraState m_TargetCameraState = new CameraState();
-    CameraState m_InterpolatingCameraState = new CameraState();
+    public CameraState m_TargetCameraState = new CameraState();
+    public CameraState m_InterpolatingCameraState = new CameraState();
 
     [Header("Movement Settings")] [Tooltip("Exponential boost factor on translation, controllable by mouse wheel.")]
     public float boost = 3.5f;
@@ -70,6 +72,10 @@ public class SimpleCameraController : MonoBehaviour {
     public bool invertY;
 
     private bool _settingsOpen;
+    
+    public Agent LockedOnAgent { get; set; }
+    
+    public bool LockedOnAgentIsSet { get; set; }
 
     public void SetSettingsOpen(bool value) {
         _settingsOpen = value;
@@ -113,16 +119,30 @@ public class SimpleCameraController : MonoBehaviour {
 
     private void Update() {
         if (_settingsOpen) return;
-    
+        
+
         // Hide and lock cursor when right mouse button pressed
         if (Input.GetMouseButtonDown(1)) {
             Cursor.lockState = CursorLockMode.Locked;
+            LockedOnAgentIsSet = false;
         }
 
         // Unlock and show cursor when right mouse button released
         if (Input.GetMouseButtonUp(1)) {
             Cursor.visible = true;
             Cursor.lockState = CursorLockMode.None;
+        }
+
+        if (LockedOnAgentIsSet) {
+            var offsetVector2 = new Vector2(20, 0);
+            offsetVector2.RotateRadians(LockedOnAgent.CurrentRotation + Mathf.PI);
+
+            var modelPosition = LockedOnAgent.Model.transform.position;
+            transform.position = new Vector3(offsetVector2.x, 30, offsetVector2.y) +
+                                 modelPosition;
+            transform.LookAt(modelPosition);
+            
+            return;
         }
 
         // Rotation

@@ -6,6 +6,8 @@ using Scenery.RoadNetwork.RoadObjects;
 using UI;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 using Utils;
 using Utils.AdditionalMath;
 using Visualization.OcclusionManagement.DetectionMethods;
@@ -64,6 +66,10 @@ namespace Visualization.OcclusionManagement {
         // NEW STUFF
 
         private OcclusionDetector _occlusionDetector;
+
+        public UniversalRenderPipelineAsset normalPipelineAsset;
+
+        public UniversalRenderPipelineAsset aotPipelineAsset;
         
         public OcclusionManagementOptions OcclusionManagementOptions { get; set; }
 
@@ -107,8 +113,17 @@ namespace Visualization.OcclusionManagement {
             }
             
             if (OcclusionManagementOptions.occlusionDetectionMethod == OcclusionDetectionMethod.Shader) {
+                //GraphicsSettings.renderPipelineAsset = aotPipelineAsset;
+                //GraphicsSettings.defaultRenderPipeline = aotPipelineAsset;
+                
+                _extendedCamera.cameraData.SetRenderer(0);
                 
             } else {
+                //GraphicsSettings.renderPipelineAsset = normalPipelineAsset;
+                //GraphicsSettings.defaultRenderPipeline = normalPipelineAsset;
+                
+                _extendedCamera.cameraData.SetRenderer(1);
+
                 _occlusionDetector = (OcclusionDetector) Activator.CreateInstance(
                     OcclusionDetectors[(int) OcclusionManagementOptions.occlusionHandlingMethod][
                         OcclusionManagementOptions.staggeredCheck ? 1 : 0]);

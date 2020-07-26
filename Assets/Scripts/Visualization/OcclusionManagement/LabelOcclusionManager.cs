@@ -44,9 +44,6 @@ namespace Visualization.OcclusionManagement {
         // for placing the pointers
         private RectTransform _pointerHolder;
 
-        private ScreenLabel[] _activeRight = new ScreenLabel[0];
-        private ScreenLabel[] _activeLeft = new ScreenLabel[0];
-
         private void Start() {
             _mainCamera = FindObjectOfType<ExtendedCamera>();
             _pointerHolder = transform.Find("Pointer Panel").GetComponent<RectTransform>();
@@ -72,26 +69,6 @@ namespace Visualization.OcclusionManagement {
             if (Time.frameCount % 5 != 0) return; // reduce the load by only updating every 5 frames
             
             PickActiveLabels();
-        }
-
-        private void OnGUI() {
-            //return; // TODO maybe reenable
-            
-            GUI.depth = -100;
-
-            return;
-            
-            foreach (var label in _activeRight) {
-                Drawing.DrawLine(LocalScreenToActualScreenPoint(label.AnchorScreenPosition),
-                    LocalScreenToActualScreenPoint(label.LabelMainObject.localPosition),
-                    label.Agent.ColorMaterial.color, 3f);
-            }
-            
-            foreach (var label in _activeLeft) {
-                Drawing.DrawLine(LocalScreenToActualScreenPoint(label.AnchorScreenPosition),
-                    LocalScreenToActualScreenPoint(label.LabelMainObject.localPosition),
-                    label.Agent.ColorMaterial.color, 3f);
-            }
         }
 
         [SuppressMessage("ReSharper", "PossibleMultipleEnumeration")]
@@ -131,9 +108,6 @@ namespace Visualization.OcclusionManagement {
 
             PlaceLabels(ref leftLabelsActive, true);
             PlaceLabels(ref rightLabelsActive, false);
-
-            _activeLeft = leftLabelsActive.ToArray();
-            _activeRight = rightLabelsActive.ToArray();
         }
 
         private void PlaceLabels(ref List<ScreenLabel> activeLabels, bool left) {

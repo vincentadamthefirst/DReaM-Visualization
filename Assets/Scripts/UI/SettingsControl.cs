@@ -124,13 +124,13 @@ namespace UI {
             var testA = float.TryParse(_agentTransparency.text.Replace(".", ","), out var agentTransparency);
             if (!testA) {
                 agentTransparency = .3f;
-                _agentTransparency.text = "0,3";
+               _agentTransparency.SetTextWithoutNotify("0,3");
             }
             
             var testB = float.TryParse(_objectTransparency.text.Replace(".", ","), out var objectTransparency);
             if (!testB) {
                 objectTransparency = .1f;
-                _objectTransparency.text = "0,1";
+                _objectTransparency.SetTextWithoutNotify("0,1");
             }
 
             _agentOcclusionManager.OcclusionManagementOptions.agentTransparencyValue = agentTransparency;
@@ -150,7 +150,7 @@ namespace UI {
 
             if (!testA) {
                 randomPointAmount = 15;
-                _randomPointAmount.text = "15";
+                _randomPointAmount.SetTextWithoutNotify("15");
             }
 
             _agentOcclusionManager.OcclusionManagementOptions.nearClipPlaneAsStart = _nearClipPlaneAsStart.isOn;
@@ -204,14 +204,15 @@ namespace UI {
         public void SetOcclusionManager(AgentOcclusionManager occlusionManager) {
             _agentOcclusionManager = occlusionManager;
 
-            _objectTransparency.text =
-                _agentOcclusionManager.OcclusionManagementOptions.objectTransparencyValue.ToString("0.000");
-            _agentTransparency.text =
-                _agentOcclusionManager.OcclusionManagementOptions.agentTransparencyValue.ToString("0.000");
-            _randomPointAmount.text = _agentOcclusionManager.OcclusionManagementOptions.randomPointAmount.ToString();
+            _objectTransparency.SetTextWithoutNotify(
+                _agentOcclusionManager.OcclusionManagementOptions.objectTransparencyValue.ToString("0.000"));
+            _agentTransparency.SetTextWithoutNotify(
+                _agentOcclusionManager.OcclusionManagementOptions.agentTransparencyValue.ToString("0.000"));
+            _randomPointAmount.SetTextWithoutNotify(_agentOcclusionManager.OcclusionManagementOptions.randomPointAmount
+                .ToString());
 
-            _detectionMethod.value = (int) _agentOcclusionManager.OcclusionManagementOptions.occlusionDetectionMethod;
-            _handlingMethod.value = (int) _agentOcclusionManager.OcclusionManagementOptions.occlusionHandlingMethod;
+            _detectionMethod.SetValueWithoutNotify((int) _agentOcclusionManager.OcclusionManagementOptions.occlusionDetectionMethod);
+            _handlingMethod.SetValueWithoutNotify((int) _agentOcclusionManager.OcclusionManagementOptions.occlusionHandlingMethod);
 
             _preCheckViewFrustum.SetIsOnWithoutNotify(_agentOcclusionManager.OcclusionManagementOptions
                 .preCheckViewFrustum);

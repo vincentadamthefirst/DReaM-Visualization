@@ -94,6 +94,15 @@ namespace Visualization.OcclusionManagement {
             var hitElement = ColliderMapping[hit.collider];
             if (!hitElement.GetType().IsSubclassOf(typeof(Agent))) return;
             
+            if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) {
+                // snap the camera to the agent
+
+                _extendedCamera.CameraController.LockedOnAgent = (Agent) hitElement;
+                _extendedCamera.CameraController.LockedOnAgentIsSet = true;
+                
+                return;
+            }
+            
             if (Targets.Contains(hitElement)) {
                 Targets.Remove(hitElement);
                 hitElement.SetIsTarget(false);
@@ -113,12 +122,9 @@ namespace Visualization.OcclusionManagement {
         public void HandleCardClick(AgentCard card) {
             if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) {
                 // snap the camera to the agent
-                
-                var offsetVector2 = new Vector2(10, 0);
-                offsetVector2.RotateRadians(_agentCards[card].CurrentRotation);
 
-                _extendedCamera.Camera.transform.position = new Vector3(offsetVector2.x, 30, offsetVector2.y) +
-                                                            _agentCards[card].Model.transform.position;
+                _extendedCamera.CameraController.LockedOnAgent = _agentCards[card];
+                _extendedCamera.CameraController.LockedOnAgentIsSet = true;
                 
                 return;
             }
