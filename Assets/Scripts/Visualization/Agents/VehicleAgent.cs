@@ -32,17 +32,16 @@ namespace Visualization.Agents {
         
         private Vector3 _centerHeightOffset; // TODO maybe remove
 
-        public override void Prepare() {
-            base.Prepare();
-            
+        public override void Prepare() { 
             // coloring the chassis
             _modelMeshRenderer = Model.transform.GetChild(0).GetComponent<MeshRenderer>();
             _modelMeshRenderer.material = ColorMaterial;
+            
+            base.Prepare();
 
             // scaling up the model
             _chassis = Model.transform.Find("chassis");
-            //chassis.SetSize(ModelInformation.Length, ModelInformation.Height, ModelInformation.Width);
-            
+
             // offsetting the agent model inside its parent
             _chassis.transform.localPosition -= ModelInformation.Center;
 
@@ -79,6 +78,7 @@ namespace Visualization.Agents {
             // preparing the label
             OwnLabel.SetStrings(gameObject.name);
             OwnLabel.SetFloats(ModelInformation.Height + 1.4f);
+            OwnLabel.SetColors(ColorMaterial.color);
 
             boundingBox = new Bounds(new Vector3(0, ModelInformation.Height / 2f, 0),
                 new Vector3(ModelInformation.Width, ModelInformation.Height, ModelInformation.Length));
@@ -165,6 +165,8 @@ namespace Visualization.Agents {
         protected override void UpdateRotation() {
             _currentHdg = deltaTMs * ((previous.Next.Rotation - previous.Rotation) / 100) + previous.Rotation;
             Model.transform.rotation = Quaternion.Euler(0, -_currentHdg * Mathf.Rad2Deg, 0);
+
+            CurrentRotation = -_currentHdg;
         }
 
         public override Vector3 GetAnchorPoint() {

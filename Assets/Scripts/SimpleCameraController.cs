@@ -69,6 +69,14 @@ public class SimpleCameraController : MonoBehaviour {
     [Tooltip("Whether or not to invert our Y axis for mouse input to rotation.")]
     public bool invertY;
 
+    private bool _settingsOpen;
+
+    public void SetSettingsOpen(bool value) {
+        _settingsOpen = value;
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
+    }
+
     void OnEnable() {
         m_TargetCameraState.SetFromTransform(transform);
         m_InterpolatingCameraState.SetFromTransform(transform);
@@ -104,14 +112,8 @@ public class SimpleCameraController : MonoBehaviour {
     }
 
     private void Update() {
-        // Exit Sample  
-        if (Input.GetKey(KeyCode.Escape)) {
-            Application.Quit();
-#if UNITY_EDITOR
-            UnityEditor.EditorApplication.isPlaying = false;
-#endif
-        }
-
+        if (_settingsOpen) return;
+    
         // Hide and lock cursor when right mouse button pressed
         if (Input.GetMouseButtonDown(1)) {
             Cursor.lockState = CursorLockMode.Locked;

@@ -1,38 +1,52 @@
 ﻿using System;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
+using Utils;
+using Visualization.Agents;
 
 namespace Visualization.Labels {
     public class SceneLabel : Label {
 
+        public RectTransform LabelMainObject { get; set; }
+
+        private RectTransform _cognitiveMap;
+
+        private List<RectTransform> _otherAgents = new List<RectTransform>();
+        
+        private TextMeshProUGUI _position;
+        private TextMeshProUGUI _velocity;
+        private TextMeshProUGUI _acceleration;
+
+        private TextMeshProUGUI _crossingPhase;
+        private TextMeshProUGUI _scanAoi;
+        private TextMeshProUGUI _gazeType;
+
         private Camera _mainCamera;
 
-        protected Transform labelMainObject;
-
-        private TextMeshPro _position;
-        private TextMeshPro _velocity;
-        private TextMeshPro _acceleration;
-
-        private TextMeshPro _crossingPhase;
-        private TextMeshPro _scanAoi;
-        private TextMeshPro _gazeType;
-
-        private float _height = 3f;
+        private RectTransform _rectTransform;
 
         /// <summary>
         /// Called on program start, retrieves the necessary objects to display information
         /// </summary>
         private void Start() {
-            _mainCamera = Camera.main;
+            LabelMainObject = transform.GetChild(0).GetChild(0).GetComponent<RectTransform>();
 
-            labelMainObject = transform.GetChild(0);
-            
+            _rectTransform = GetComponent<RectTransform>();
+
             FindLabels();
+
+            _mainCamera = Camera.main;
+            
+            // setting the camera parameters
+            var targetTexture = new RenderTexture(250, 250, 1);
+            _cognitiveMap.GetComponent<RawImage>().texture = targetTexture;
+            AgentCamera.aspect = 1f;
+            AgentCamera.orthographicSize = 35f;
+            AgentCamera.targetTexture = targetTexture;
         }
 
-        /// <summary>
-        /// Called every frame, makes the label always face the camera
-        /// </summary>
         private void Update() {
             transform.LookAt(2 * transform.position - _mainCamera.transform.position);
         }
@@ -41,19 +55,19 @@ namespace Visualization.Labels {
         /// Retrieves the objects for displaying the data
         /// </summary>
         protected virtual void FindLabels() {
-            _gazeType = labelMainObject.GetChild(0).GetChild(0).GetChild(1).GetComponent<TextMeshPro>();
-            _scanAoi = labelMainObject.GetChild(0).GetChild(1).GetChild(1).GetComponent<TextMeshPro>();
-            _crossingPhase = labelMainObject.GetChild(0).GetChild(2).GetChild(1).GetComponent<TextMeshPro>();
+            _gazeType = LabelMainObject.GetChild(0).GetChild(0).GetChild(1).GetComponent<TextMeshProUGUI>();
+            _scanAoi = LabelMainObject.GetChild(0).GetChild(1).GetChild(1).GetComponent<TextMeshProUGUI>();
+            _crossingPhase = LabelMainObject.GetChild(0).GetChild(2).GetChild(1).GetComponent<TextMeshProUGUI>();
 
-            // TODO add minimap
+            _cognitiveMap = LabelMainObject.GetChild(1).GetChild(1).GetChild(0).GetComponent<RectTransform>();
             
-            _position = labelMainObject.GetChild(2).GetChild(0).GetChild(1).GetComponent<TextMeshPro>();
-            _velocity = labelMainObject.GetChild(2).GetChild(1).GetChild(1).GetComponent<TextMeshPro>();
-            _acceleration = labelMainObject.GetChild(2).GetChild(2).GetChild(1).GetComponent<TextMeshPro>();
+            _position = LabelMainObject.GetChild(2).GetChild(0).GetChild(1).GetComponent<TextMeshProUGUI>();
+            _velocity = LabelMainObject.GetChild(2).GetChild(1).GetChild(1).GetComponent<TextMeshProUGUI>();
+            _acceleration = LabelMainObject.GetChild(2).GetChild(2).GetChild(1).GetComponent<TextMeshProUGUI>();
             
             // TODO add sensors
         }
-
+        
         public override void UpdateStrings(params string[] parameters) {
             _crossingPhase.text = parameters[0];
             _scanAoi.text = parameters[1];
@@ -67,6 +81,8 @@ namespace Visualization.Labels {
         public override void UpdateFloats(params float[] parameters) {
             var posX = parameters[0];
             var posY = parameters[1];
+            
+            _rectTransform.position = new Vector3(posX, 3, posY);
 
             var vel = parameters[2];
             var acc = parameters[3];
@@ -74,32 +90,55 @@ namespace Visualization.Labels {
             _position.text = Math.Round(posX, 1) + "/" + Math.Round(posY, 1);
             _velocity.text = Math.Round(vel, 2) + "m/s";
             _acceleration.text = Math.Round(acc, 2) + "m/s²";
-            
-            transform.position = new Vector3(posX, _height, posY);
         }
-
+        
         public override void UpdatePositions(params Tuple<Vector2, float>[] parameters) {
-            // TODO implement
-        }
+            if (parameters == null) return;
+            var difference = parameters.Length - _otherAgents.Count;
 
+            if (difference > 0) {
+                var go = new GameObject("agent pointer");
+                var img = go.AddComponent<Image>();
+                img.rectTransform.sizeDelta = new Vector2(7f, 7f);
+                img.color = Color.cyan;
+                go.transform.parent = _cognitiveMap;
+                _otherAgents.Add(img.rectTransform);
+            }
+            
+            for (var i = 0; i < _otherAgents.Count; i++) {
+                if (i >= parameters.Length) {
+                    _otherAgents[i].localPosition = Vector2.one * 500f;
+                    continue;
+                }
+                
+                var localPosition =
+                    AgentCamera.WorldToViewportPoint(new Vector3(parameters[i].Item1.x, 0, parameters[i].Item1.y));
+
+                var actualPosition = new Vector2((localPosition.x - 0.5f) * 250, (localPosition.y - 0.5f) * 250);
+                _otherAgents[i].localPosition = actualPosition;
+            }
+        }
+        
         public override void SetColors(params Color[] parameters) {
             // TODO implement
         }
 
         public override void SetStrings(params string[] parameters) {
-            transform.GetChild(0).GetChild(1).GetChild(4).GetChild(1).GetComponent<TextMeshPro>().text = parameters[0];
+            transform.GetChild(0).GetChild(0).GetChild(1).GetChild(5).GetComponent<TextMeshProUGUI>().text = parameters[0];
         }
 
         public override void SetFloats(params float[] parameters) {
-            _height = parameters[0];
+            // nothing to be set here (yet)
         }
 
         public override void Activate() {
-            labelMainObject.gameObject.SetActive(true);
+            LabelMainObject.gameObject.SetActive(true);
+            AgentCamera.gameObject.SetActive(true);
         }
 
         public override void Deactivate() {
-            labelMainObject.gameObject.SetActive(false);
+            LabelMainObject.gameObject.SetActive(false);
+            AgentCamera.gameObject.SetActive(false);
         }
     }
 }

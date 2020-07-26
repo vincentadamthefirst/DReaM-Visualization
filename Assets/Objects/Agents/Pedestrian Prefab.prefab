@@ -198,6 +198,7 @@ GameObject:
   - component: {fileID: 1399693235267685004}
   - component: {fileID: 9200163614065206101}
   - component: {fileID: 1267876996349020775}
+  - component: {fileID: 6355366008885396804}
   m_Layer: 0
   m_Name: Torso
   m_TagString: Untagged
@@ -268,6 +269,20 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!136 &6355366008885396804
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4487098996018175771}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  m_Radius: 0.46
+  m_Height: 2.45
+  m_Direction: 2
+  m_Center: {x: 0, y: -0.000000029802322, z: -0.2604978}
 --- !u!1 &5129726091690469822
 GameObject:
   m_ObjectHideFlags: 0

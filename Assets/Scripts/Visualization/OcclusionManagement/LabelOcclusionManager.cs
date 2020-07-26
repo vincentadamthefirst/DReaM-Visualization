@@ -2,20 +2,21 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using Scenery.RoadNetwork;
-using UnityEditor;
 using UnityEngine;
+using UnityEngine.UI;
 using Utils;
-using Utils.AdditionalMath;
+using Visualization.Labels;
 
-namespace Visualization.Labels {
+namespace Visualization.OcclusionManagement {
     public class LabelOcclusionManager : MonoBehaviour {
         public RectTransform labelObject;
+
+        public Image pointerPrefab;
 
         /// <summary>
         /// All Labels that are managed by this OcclusionManager
         /// </summary>
-        public List<ScreenLabel> AllLabels { get; set; } = new List<ScreenLabel>();
+        private readonly List<ScreenLabel> _allLabels = new List<ScreenLabel>();
         
         // information about the screen
         private const float MaxHeight = 1080f;
@@ -39,12 +40,16 @@ namespace Visualization.Labels {
         
         // main camera
         private ExtendedCamera _mainCamera;
+        
+        // for placing the pointers
+        private RectTransform _pointerHolder;
 
         private ScreenLabel[] _activeRight = new ScreenLabel[0];
         private ScreenLabel[] _activeLeft = new ScreenLabel[0];
 
         private void Start() {
             _mainCamera = FindObjectOfType<ExtendedCamera>();
+            _pointerHolder = transform.Find("Pointer Panel").GetComponent<RectTransform>();
             
             RecalculateParameters();
         }
@@ -73,6 +78,8 @@ namespace Visualization.Labels {
             //return; // TODO maybe reenable
             
             GUI.depth = -100;
+
+            return;
             
             foreach (var label in _activeRight) {
                 Drawing.DrawLine(LocalScreenToActualScreenPoint(label.AnchorScreenPosition),
@@ -99,7 +106,7 @@ namespace Visualization.Labels {
             // 4. taking the first _maxLabelsPerSide labels (these will be displayed)
             // 5. ordering those labels by their y-value (bottom to top of the screen)
             // 6. converting the enumerable to a list
-            var leftLabelsActive = AllLabels
+            var leftLabelsActive = _allLabels
                 .Where(l => l.Agent.IsTarget() && l.AnchorScreenPosition.x < 0 && l.Agent.Model.activeSelf &&
                             GeometryUtility.TestPlanesAABB(frustumPlanes, new Bounds(l.Agent.GetAnchorPoint(), Vector3.one * .05f)) &&
                             Vector2.Distance(Vector2.zero, l.AnchorScreenPosition) <= _detectionRadius)
@@ -108,7 +115,7 @@ namespace Visualization.Labels {
                 .OrderBy(l => l.AnchorScreenPosition.y).ToList();
 
             // see the left label ordering, done the same way
-            var rightLabelsActive = AllLabels
+            var rightLabelsActive = _allLabels
                 .Where(l => l.Agent.IsTarget() && l.AnchorScreenPosition.x >= 0 && l.Agent.Model.activeSelf &&
                             GeometryUtility.TestPlanesAABB(frustumPlanes, new Bounds(l.Agent.GetAnchorPoint(), Vector3.one * .05f)) &&
                             Vector2.Distance(Vector2.zero, l.AnchorScreenPosition) <= _detectionRadius)
@@ -116,7 +123,7 @@ namespace Visualization.Labels {
                 .ThenBy(l => Mathf.Abs(l.AnchorScreenPosition.y)).Take(_maxLabelsPerSide)
                 .OrderBy(l => l.AnchorScreenPosition.y).ToList();
 
-            var pointsInactive = AllLabels.Except(leftLabelsActive).Except(rightLabelsActive);
+            var pointsInactive = _allLabels.Except(leftLabelsActive).Except(rightLabelsActive);
 
             foreach (var screenLabel in pointsInactive) {
                 screenLabel.Deactivate();
@@ -162,6 +169,24 @@ namespace Visualization.Labels {
                 activeLabels[i].Activate();
                 var pos = new Vector2((left ? -1 : 1) * GetXForY(preferredY[i] - shiftDown), preferredY[i] - shiftDown);
                 activeLabels[i].LabelMainObject.localPosition = pos;
+
+                var activeLabel = activeLabels[i];
+                var pointerTransform = activeLabel.Pointer.transform;
+
+                var middle = Vector2.Lerp(activeLabel.AnchorScreenPosition, pos, .5f);
+                activeLabel.Pointer.transform.localPosition = middle;
+                
+                var direction = activeLabel.AnchorScreenPosition - pos;
+                
+                var angle = Vector3.Angle(direction, Vector2.right);
+                
+                if (pos.y > activeLabel.AnchorScreenPosition.y) {
+                    angle = -angle;
+                }
+                
+                activeLabel.Pointer.transform.rotation = Quaternion.Euler(0, 0, angle);
+                
+                activeLabel.Pointer.transform.localScale = new Vector3(direction.magnitude, 4);
             }
         }
 
@@ -189,6 +214,12 @@ namespace Visualization.Labels {
         private Vector2 LocalScreenToActualScreenPoint(Vector2 point) {
             return new Vector2(Mathf.Lerp(0, Screen.width, (point.x + MaxWidth / 2f) / MaxWidth),
                 Mathf.Lerp(0, Screen.height, (point.y - MaxHeight / 2f) / -MaxHeight));
+        }
+
+        public void AddLabel(ScreenLabel label) {
+            _allLabels.Add(label);
+            var newPointer= Instantiate(pointerPrefab, _pointerHolder);
+            label.Pointer = newPointer;
         }
     }
 }

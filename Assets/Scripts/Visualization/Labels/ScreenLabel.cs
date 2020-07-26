@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using Utils;
 using Visualization.Agents;
+using Visualization.OcclusionManagement;
+using Color = UnityEngine.Color;
 
 namespace Visualization.Labels {
     public class ScreenLabel : Label {
@@ -12,6 +15,8 @@ namespace Visualization.Labels {
         public RectTransform LabelMainObject { get; set; }
         
         public Agent Agent { get; set; }
+        
+        public Image Pointer { get; set; }
         
         public Vector2 AnchorScreenPosition { get; set; }
         
@@ -120,7 +125,8 @@ namespace Visualization.Labels {
         }
         
         public override void SetColors(params Color[] parameters) {
-            // TODO implement
+            Pointer.color = parameters[0];
+            transform.GetChild(0).GetChild(1).GetChild(0).GetComponent<Image>().color = parameters[0];
         }
 
         public override void SetStrings(params string[] parameters) {
@@ -133,11 +139,13 @@ namespace Visualization.Labels {
 
         public override void Activate() {
             LabelMainObject.gameObject.SetActive(true);
+            Pointer.gameObject.SetActive(true);
             AgentCamera.gameObject.SetActive(true);
         }
 
         public override void Deactivate() {
             LabelMainObject.gameObject.SetActive(false);
+            Pointer.gameObject.SetActive(false);
             AgentCamera.gameObject.SetActive(false);
         }
     }

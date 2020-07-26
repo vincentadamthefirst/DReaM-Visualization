@@ -48,6 +48,13 @@ namespace Scenery {
         }
 
         /// <summary>
+        /// Used to setup all materials used for transparency.
+        /// </summary>
+        public virtual void SetupOccludedMaterials() {
+            
+        }
+
+        /// <summary>
         /// Handles that this object is overlapping a target object.
         /// </summary>
         public abstract void HandleHit();

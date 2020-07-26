@@ -6,12 +6,9 @@ using UnityEngine;
 using UnityEngine.UI;
 using Visualization;
 using Visualization.SimulationEvents;
-using Slider = UnityEngine.UIElements.Slider;
 
 namespace UI {
     public class PlaybackControl : MonoBehaviour {
-        public Slider timeSlider;
-
         public TextMeshProUGUI totalTime;
         public TextMeshProUGUI currentTime;
 
@@ -20,6 +17,7 @@ namespace UI {
         private MagicUiButtonSymbol _playPause;
         private MagicUiButtonSymbol _forwardBackward;
         private Transform _simulationEventPanel;
+        private Slider _timeSlider;
 
         private int _totalTimeInt;
         
@@ -38,6 +36,8 @@ namespace UI {
             _playPause = transform.GetChild(2).GetChild(0).GetComponent<MagicUiButtonSymbol>();
             _forwardBackward = transform.GetChild(2).GetChild(1).GetComponent<MagicUiButtonSymbol>();
             _simulationEventPanel = transform.GetChild(0);
+
+            _timeSlider = transform.Find("TimeSlider").GetComponent<Slider>();
             
             PlaceEventMarkers();
         }
@@ -69,11 +69,15 @@ namespace UI {
 
         public void UpdateCurrentTime(int current) {
             currentTime.text = current + " ms";
+            _timeSlider.SetValueWithoutNotify(current);
         }
 
         public void SetTotalTime(int total) {
             totalTime.text = total + " ms";
             _totalTimeInt = total;
+
+            _timeSlider.maxValue = total;
+            _timeSlider.minValue = 0;
         }
 
         public void HandlePlayPause() {
@@ -84,6 +88,13 @@ namespace UI {
         public void HandlePlayBackwards() {
             _visualizationMaster.PlayBackwards = !_visualizationMaster.PlayBackwards;
             _forwardBackward.ChangeSymbol();
+        }
+
+        public void TimeSliderValueChanged() {
+            _visualizationMaster.CurrentTime = Mathf.RoundToInt(_timeSlider.value);
+            if (_visualizationMaster.Pause) {
+                _visualizationMaster.SmallUpdate();
+            }
         }
     }
 }

@@ -6,6 +6,7 @@ using Importer;
 using Importer.XMLHandlers;
 using Scenery.RoadNetwork;
 using Scenery.RoadNetwork.RoadGeometries;
+using UI;
 using UnityEngine;
 using Utils.VersionSystem;
 using Visualization;
@@ -92,5 +93,9 @@ public class TestScript : MonoBehaviour {
         agentOccManager.Prepare();
         
         visualizationMaster.PrepareAgents();
+
+        FindObjectOfType<SettingsControl>().SetOcclusionManager(agentOccManager);
+        
+        FindObjectOfType<TargetController>().Prepare();
     }
 }

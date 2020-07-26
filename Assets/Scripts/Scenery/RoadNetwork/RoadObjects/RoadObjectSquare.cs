@@ -80,17 +80,7 @@ namespace Scenery.RoadNetwork.RoadObjects {
 
             _modelRenderer = _model.GetComponent<MeshRenderer>();
 
-            if (OcclusionManagementOptions.occlusionHandlingMethod == OcclusionHandlingMethod.Transparency) {
-                _occludedMaterial = new Material(_nonOccludedMaterial);
-                _occludedMaterial.ChangeToTransparent(OcclusionManagementOptions.objectTransparencyValue *
-                                                      (RoadObjectType == RoadObjectType.Tree ? .5f : 1f));
-            } else {
-                _occludedMaterial = OcclusionManagementOptions.wireFrameMaterial;
-            }
-
-            var mesh = _model.GetComponent<MeshFilter>().mesh;
-            
-            Debug.Log(mesh.vertices.Length);
+            SetupOccludedMaterials();
 
             _referencePoints = new[] {
                 new Vector3(-.5f, -.5f, -.5f), 
@@ -109,6 +99,16 @@ namespace Scenery.RoadNetwork.RoadObjects {
             }
 
             MaybeDelete();
+        }
+
+        public override void SetupOccludedMaterials() {
+            if (OcclusionManagementOptions.occlusionHandlingMethod == OcclusionHandlingMethod.Transparency) {
+                _occludedMaterial = new Material(_nonOccludedMaterial);
+                _occludedMaterial.ChangeToTransparent(OcclusionManagementOptions.objectTransparencyValue *
+                                                      (RoadObjectType == RoadObjectType.Tree ? .5f : 1f));
+            } else {
+                _occludedMaterial = OcclusionManagementOptions.wireFrameMaterial;
+            }
         }
 
         private void ShowPlane(Material material) {

@@ -82,10 +82,8 @@ namespace Visualization.OcclusionManagement.DetectionMethods {
             for (var i = 0; i < endPoints.Length; i++) {
                 var result = ExtendedCamera.Camera.WorldToScreenPoint(endPoints[i]);
                 result.y = Screen.height - result.y;
-                toReturn[i] = OcclusionManagementOptions.nearClipPlaneAsStart
-                    ? ExtendedCamera.Camera.ScreenToWorldPoint(new Vector3(result.x, result.y,
-                        OcclusionManagementOptions.nearClipPlaneAsStart ? ExtendedCamera.Camera.nearClipPlane : 0))
-                    : new Vector3(result.x, result.y, 0);
+                toReturn[i] = ExtendedCamera.Camera.ScreenToWorldPoint(new Vector3(result.x, result.y,
+                    OcclusionManagementOptions.nearClipPlaneAsStart ? ExtendedCamera.Camera.nearClipPlane : 0));
             }
             return toReturn;
         }

@@ -27,9 +27,6 @@ namespace Visualization.OcclusionManagement.DetectionMethods {
         /// Triggers the internal occlusion detection logic.
         /// </summary>
         public abstract void Trigger();
-
-        // layer mask for RayCasts
-        public LayerMask LayerMask { get; set; }
         
         public Dictionary<Collider, VisualizationElement> ColliderMapping { get; set; }
         
@@ -41,20 +38,21 @@ namespace Visualization.OcclusionManagement.DetectionMethods {
         /// occludes at the time
         /// </summary>
         public Dictionary<VisualizationElement, int> DistractorCounts { get; } = new Dictionary<VisualizationElement, int>();
-        
-        /// <summary>
-        /// Every possible distractor in the scene
-        /// </summary>
-        public List<VisualizationElement> OnlyDistractors { get; } = new List<VisualizationElement>();
 
         public void SetTarget(VisualizationElement element, bool isTarget) {
             if (isTarget) {
                 Targets.Add(element);
+                LastHits[element] = new HashSet<VisualizationElement>();
                 element.HandleNonHit();
                 if (DistractorCounts.ContainsKey(element)) DistractorCounts[element] = 0;
                 return;
             }
-
+            
+            foreach (var hit in LastHits[element]) {
+                if (DecreaseDistractorEntry(hit)) {
+                    hit.HandleNonHit();
+                }
+            }
             Targets.Remove(element);
         }
         

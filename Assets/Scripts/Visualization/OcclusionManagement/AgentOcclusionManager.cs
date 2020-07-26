@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using Scenery;
+using Scenery.RoadNetwork.RoadObjects;
+using UI;
 using UnityEditor;
 using UnityEngine;
 using Utils;
@@ -69,6 +71,12 @@ namespace Visualization.OcclusionManagement {
 
         private VisualizationElement[] _allElements = new VisualizationElement[0];
 
+        private ExtendedCamera _extendedCamera;
+
+        private TargetController _targetController;
+
+        private SettingsControl _settings;
+
         private static readonly Type[][] OcclusionDetectors = {
             new [] {typeof(RayCastDetectorNormal), typeof(RayCastDetectorStaggered)}, 
             new [] {typeof(PolygonDetectorNormal), typeof(PolygonDetectorStaggered)}
@@ -81,22 +89,65 @@ namespace Visualization.OcclusionManagement {
             _targetPolygons = new List<Polygon>();
             _lastRayCastDict = new Dictionary<VisualizationObject, HashSet<VisualizationObject>>();
             _colliderMapping = new Dictionary<Collider, VisualizationElement>();
+            
+            _targetController = FindObjectOfType<TargetController>();
+            _extendedCamera = FindObjectOfType<ExtendedCamera>();
+            _settings = FindObjectOfType<SettingsControl>();
         }
 
-        public void Prepare() {
+        /// <summary>
+        /// Method to be called when the settings have been changed.
+        /// </summary>
+        public void MajorUpdate() {
+            if (_occlusionDetector != null) {
+                // there already was a detector, restting all elements to non hit
+                foreach (var visualizationElement in _allElements) {
+                    visualizationElement.HandleNonHit();
+                }
+            }
+            
             if (OcclusionManagementOptions.occlusionDetectionMethod == OcclusionDetectionMethod.Shader) {
                 
             } else {
                 _occlusionDetector = (OcclusionDetector) Activator.CreateInstance(
                     OcclusionDetectors[(int) OcclusionManagementOptions.occlusionHandlingMethod][
                         OcclusionManagementOptions.staggeredCheck ? 1 : 0]);
+                
+                // setting the base parameters
+                _occlusionDetector.ExtendedCamera = _extendedCamera;
+                _occlusionDetector.OcclusionManagementOptions = OcclusionManagementOptions;
+            
+                _occlusionDetector.ColliderMapping = _colliderMapping;
+
+                foreach (var visualizationElement in _allElements) {
+                    // adding all VisualizationElements
+                    if (!visualizationElement.IsDistractor) continue;
+                    _occlusionDetector.DistractorCounts[visualizationElement] = 0;
+                }
+
+                foreach (var target in _targetController.Targets) {
+                    _occlusionDetector.SetTarget(target, true);
+                }
             }
+        }
 
-            // setting the base parameters
-            _occlusionDetector.ExtendedCamera = FindObjectOfType<ExtendedCamera>();
-            _occlusionDetector.LayerMask = LayerMask.GetMask("agents_base", "scenery_objects", "scenery_signs", "scenery_targets", "agent_targets");
-            _occlusionDetector.OcclusionManagementOptions = OcclusionManagementOptions;
+        /// <summary>
+        /// Method called when there is a minor update to the settings
+        /// </summary>
+        public void MinorUpdate() {
+            if (OcclusionManagementOptions.occlusionDetectionMethod == OcclusionDetectionMethod.Shader) return;
+            
+            var toChange = new List<VisualizationElement>();
+            foreach (var entry in _occlusionDetector.DistractorCounts) {
+                entry.Key.HandleNonHit();
+                entry.Key.SetupOccludedMaterials();
+                toChange.Add(entry.Key);
+            }
+            
+            toChange.ForEach(x => _occlusionDetector.DistractorCounts[x] = 0);
+        }
 
+        public void Prepare() {
             // finding all colliders in scene
             var colliders = FindObjectsOfType<Collider>();
             foreach (var coll in colliders) {
@@ -106,26 +157,33 @@ namespace Visualization.OcclusionManagement {
                 _colliderMapping[coll] = tmp;
             }
             
-            _occlusionDetector.ColliderMapping = _colliderMapping;
-
+            // setting the collider mapping for the target controller
+            _targetController.ColliderMapping = _colliderMapping;
+            
             // finding all VisualizationElements
-            _allElements = FindObjectsOfType<VisualizationElement>();
-
-            foreach (var visualizationElement in _allElements) { // adding all VisualizationElements
-                if (!visualizationElement.IsDistractor) continue;
-
-                _occlusionDetector.DistractorCounts[visualizationElement] = 0;
-                _occlusionDetector.OnlyDistractors.Add(visualizationElement);
+            _allElements = FindObjectsOfType<VisualizationElement>().Where(e => e.transform.childCount > 0).ToArray();
+            
+            // adding the objects to the settings
+            foreach (var visualizationElement in _allElements) {
+                if (visualizationElement.GetType().IsSubclassOf(typeof(RoadObject))) {
+                    _settings.Elements.Add(visualizationElement);
+                }
             }
+            
+            _settings.Rebuild();
+            
+            MajorUpdate();
         }
 
-        public void AddTarget(VisualizationElement target) {
-            _occlusionDetector.Targets.Add(target);
-            _occlusionDetector.LastHits[target] = new HashSet<VisualizationElement>();
+        public void SetTarget(VisualizationElement element, bool isTarget) {
+            if (OcclusionManagementOptions.occlusionDetectionMethod == OcclusionDetectionMethod.Shader) return;
+            
+            _occlusionDetector.SetTarget(element, isTarget);
         }
-        
+
         private void LateUpdate() {
-            _occlusionDetector.Trigger();
+            if (OcclusionManagementOptions.occlusionDetectionMethod != OcclusionDetectionMethod.Shader)
+                _occlusionDetector.Trigger();
         }
 
         private void Update() {

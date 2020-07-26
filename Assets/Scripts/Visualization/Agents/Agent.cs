@@ -50,6 +50,11 @@ namespace Visualization.Agents {
         /// The assigned color for this agent
         /// </summary>
         public Material ColorMaterial { get; set; }
+        
+        /// <summary>
+        /// The rotation of the agent at a given time (in radians)
+        /// </summary>
+        public float CurrentRotation { get; set; }
 
         // if the agent is deactivated
         protected bool deactivated;
@@ -132,17 +137,25 @@ namespace Visualization.Agents {
 
             _modelRenderers = GetComponentsInChildren<MeshRenderer>();
             
-            _occludedMaterials = new Material[_modelRenderers.Length][];
             _nonOccludedMaterials = new Material[_modelRenderers.Length][];
 
             for (var i = 0; i < _modelRenderers.Length; i++) {
                 _nonOccludedMaterials[i] = _modelRenderers[i].materials;
+            }
+            
+            SetupOccludedMaterials();
+        }
+
+        public override void SetupOccludedMaterials() {
+            _occludedMaterials = new Material[_modelRenderers.Length][];
+            
+            for (var i = 0; i < _modelRenderers.Length; i++) {
                 Material[] tmp;
 
                 if (OcclusionManagementOptions.occlusionHandlingMethod == OcclusionHandlingMethod.Transparency) {
                     tmp = new Material[_modelRenderers[i].materials.Length];
                     for (var j = 0; j < _modelRenderers[i].materials.Length; j++) {
-                        tmp[j] = new Material(_modelRenderers[i].materials[j]);
+                        tmp[j] = new Material(_nonOccludedMaterials[i][j]);
                         tmp[j].ChangeToTransparent(OcclusionManagementOptions.agentTransparencyValue);
                     }
                 } else {

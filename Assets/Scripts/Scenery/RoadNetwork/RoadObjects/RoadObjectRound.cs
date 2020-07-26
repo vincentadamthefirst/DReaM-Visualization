@@ -90,17 +90,27 @@ namespace Scenery.RoadNetwork.RoadObjects {
             transform.parent = Parent.transform;
 
             _modelRenderers = transform.GetComponentsInChildren<MeshRenderer>();
-            _occludedMaterials = new Material[_modelRenderers.Length][];
             _nonOccludedMaterials = new Material[_modelRenderers.Length][];
 
             for (var i = 0; i < _modelRenderers.Length; i++) {
                 _nonOccludedMaterials[i] = _modelRenderers[i].materials;
+            }
+            
+            SetupOccludedMaterials();
+
+            AddCollider();
+        }
+
+        public override void SetupOccludedMaterials() {
+            _occludedMaterials = new Material[_modelRenderers.Length][];
+
+            for (var i = 0; i < _modelRenderers.Length; i++) {
                 Material[] tmp;
 
                 if (OcclusionManagementOptions.occlusionHandlingMethod == OcclusionHandlingMethod.Transparency) {
                     tmp = new Material[_modelRenderers[i].materials.Length];
                     for (var j = 0; j < _modelRenderers[i].materials.Length; j++) {
-                        tmp[j] = new Material(_modelRenderers[i].materials[j]);
+                        tmp[j] = new Material(_nonOccludedMaterials[i][j]);
                         tmp[j].ChangeToTransparent(OcclusionManagementOptions.objectTransparencyValue *
                                                    (RoadObjectType == RoadObjectType.Tree ? .5f : 1f));
                     }
@@ -113,8 +123,6 @@ namespace Scenery.RoadNetwork.RoadObjects {
                 
                 _occludedMaterials[i] = tmp;
             }
-
-            AddCollider();
         }
 
         public override bool MaybeDelete() {

@@ -17,8 +17,6 @@ namespace Visualization {
         public LabelOcclusionManager labelOcclusionManager;
 
         private RoadOcclusionManager _roadOcclusionManager;
-        
-        private AgentOcclusionManager _agentOcclusionManager;
 
         public OcclusionManagementOptions OcclusionManagementOptions { get; set; }
 
@@ -60,7 +58,6 @@ namespace Visualization {
 
         private void Start() {
             _roadOcclusionManager = FindObjectOfType<RoadOcclusionManager>();
-            _agentOcclusionManager = FindObjectOfType<AgentOcclusionManager>();
         }
 
         /// <summary>
@@ -78,14 +75,6 @@ namespace Visualization {
             _agents.ForEach(a => a.Prepare());
             
             playbackControl.SetTotalTime(MaxSampleTime);
-
-            // TODO remove (only for debugging)
-
-            foreach (var agent in _agents) {
-                if (agent.name.Contains("#0")) continue;
-                agent.SetIsTarget(true);
-                _agentOcclusionManager.AddTarget(agent);
-            }
         }
 
         /// <summary>
@@ -112,10 +101,11 @@ namespace Visualization {
                 label.Agent = vehicleAgent;
                 label.LabelOcclusionManager = labelOcclusionManager;
                 label.AgentCamera = vehicleAgent.Model.transform.Find("Camera").GetComponent<Camera>();
-                labelOcclusionManager.AllLabels.Add(label);
+                labelOcclusionManager.AddLabel(label);
                 vehicleAgent.OwnLabel = label;
             } else {
                 var label = Instantiate(agentDesigns.labelPrefabScene, transform);
+                label.AgentCamera = vehicleAgent.Model.transform.Find("Camera").GetComponent<Camera>();
                 vehicleAgent.OwnLabel = label;
             }
 
@@ -150,10 +140,11 @@ namespace Visualization {
                 label.Agent = pedestrianAgent;
                 label.LabelOcclusionManager = labelOcclusionManager;
                 label.AgentCamera = pedestrianAgent.Model.transform.Find("Camera").GetComponent<Camera>();
-                labelOcclusionManager.AllLabels.Add(label);
+                labelOcclusionManager.AddLabel(label);
                 pedestrianAgent.OwnLabel = label;
             } else {
                 var label = Instantiate(agentDesigns.labelPrefabScene, transform);
+                label.AgentCamera = pedestrianAgent.Model.transform.Find("Camera").GetComponent<Camera>();
                 pedestrianAgent.OwnLabel = label;
             }
             
@@ -163,6 +154,17 @@ namespace Visualization {
                 : _basicPedestrian;
             
             return pedestrianAgent;
+        }
+
+        public void SmallUpdate() {
+            if (CurrentTime < 0) CurrentTime = 0;
+            else if (CurrentTime > MaxSampleTime) CurrentTime = MaxSampleTime;
+
+            foreach (var agent in _agents) {
+                agent.UpdateForTimeStep(CurrentTime, PlayBackwards);
+            }
+            
+            _roadOcclusionManager.ChangeRoadLayers();
         }
 
         /// <summary>
