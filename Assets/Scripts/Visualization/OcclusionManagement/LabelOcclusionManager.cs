@@ -44,7 +44,7 @@ namespace Visualization.OcclusionManagement {
         // for placing the pointers
         private RectTransform _pointerHolder;
 
-        private void Start() {
+        public void FindAll() {
             _mainCamera = FindObjectOfType<ExtendedCamera>();
             _pointerHolder = transform.Find("Pointer Panel").GetComponent<RectTransform>();
             

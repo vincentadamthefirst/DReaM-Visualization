@@ -42,7 +42,7 @@ namespace Visualization {
         /// <summary>
         /// The information of this Agents sensors at this step.
         /// </summary>
-        public Dictionary<string, SensorInformation> SensorInformation { get; set; }
+        public List<SensorInformation> SensorInformation { get; set; }
         
         /// <summary>
         /// The additional information for an agent at this SimulationStep
@@ -70,24 +70,17 @@ namespace Visualization {
         /// The relative position of the sensor towards the center of the vehicle
         /// </summary>
         public Vector2 RelativePosition { get; set; }
-        
-        /// <summary>
-        /// The name of this sensor
-        /// </summary>
-        public string SensorName { get; set; }
 
         /// <summary>
-        /// Tells whether the data of this Sensor Changed towards the previous SimulationStep
+        /// Tells whether the opening angle of this Sensor Changed towards the previous SimulationStep
         /// </summary>
-        public bool ChangedTowardsPrevious { get; set; }
+        public bool OpeningChangedTowardsPrevious { get; set; }
         
         /// <summary>
-        /// Tells whether the data of this Sensor Changed towards the next SimulationStep
+        /// Tells whether the opening angle of this Sensor Changed towards the next SimulationStep
         /// </summary>
-        public bool ChangedTowardsNext { get; set; }
-    }
-
-    public class BasicConeSensorInformation : SensorInformation {
+        public bool OpeningChangedTowardsNext { get; set; }
+        
         /// <summary>
         /// Global heading the sensor looks at.
         /// </summary>

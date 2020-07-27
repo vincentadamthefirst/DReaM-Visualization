@@ -140,7 +140,11 @@ public class SimpleCameraController : MonoBehaviour {
             var modelPosition = LockedOnAgent.Model.transform.position;
             transform.position = new Vector3(offsetVector2.x, 30, offsetVector2.y) +
                                  modelPosition;
-            transform.LookAt(modelPosition);
+            
+            var secondOffsetVector = new Vector2(.5f, 0);
+            secondOffsetVector.RotateRadians(LockedOnAgent.CurrentRotation + Mathf.PI - Mathf.PI / 2f);
+            
+            transform.LookAt(modelPosition + new Vector3(secondOffsetVector.x, 0, secondOffsetVector.y));
             
             return;
         }

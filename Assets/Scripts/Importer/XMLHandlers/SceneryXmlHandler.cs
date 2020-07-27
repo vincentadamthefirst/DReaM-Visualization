@@ -2,16 +2,14 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Xml.Linq;
 using JetBrains.Annotations;
-using Packages.Rider.Editor;
 using Scenery.RoadNetwork;
 using Scenery.RoadNetwork.RoadGeometries;
 using Scenery.RoadNetwork.RoadObjects;
 using UnityEngine;
 using ContactPoint = Scenery.RoadNetwork.ContactPoint;
+using Version = Utils.VersionSystem.Version;
 
 namespace Importer.XMLHandlers {
     [SuppressMessage("ReSharper", "ConvertSwitchStatementToSwitchExpression")]
@@ -21,7 +19,7 @@ namespace Importer.XMLHandlers {
         private int _roadIdCounter;
 
         public override string GetName() {
-            return "SceneryXmlHandler";
+            return "Scenery";
         }
 
         public override void StartImport() {
@@ -32,8 +30,25 @@ namespace Importer.XMLHandlers {
             roadNetworkHolder.CreateMeshes();
         }
 
-        public override List<GameObject> GetInfoFields() {
-            throw new System.NotImplementedException();
+        public override string GetDetails() {
+            if (xmlDocument.Root?.Element("header") == null) return "<color=\"red\"><b>XML Error</b>";
+
+            var supported = new Version("1.4");
+
+            var header = xmlDocument.Root.Element("header");
+            var revMajor = header?.Attribute("revMajor")?.Value;
+            var revMinor = header?.Attribute("revMinor")?.Value;
+            var versionString = "<color=\"orange\">Version unknown";
+
+            if (revMajor != null && revMinor != null) {
+                var fileVersion = new Version(revMajor + "." + revMinor);
+                versionString = fileVersion.CompareTo(supported) >= 0
+                    ? "<color=\"green\">Version " + revMajor + "." + revMinor
+                    : "<color=\"red\">Version " + revMajor + "." + revMinor;
+            }
+
+            return versionString + "<color=\"white\"> <b>|</b> " + "Date: " + (header?.Attribute("date")?.Value ?? "") +
+                   " <b>|</b> " + "Name: " +  (header?.Attribute("name")?.Value ?? "");
         }
 
         private void ImportRoads() {

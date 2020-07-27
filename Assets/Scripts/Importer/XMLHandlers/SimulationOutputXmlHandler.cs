@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Xml.Linq;
+using Unity.Collections;
 using UnityEngine;
 using Visualization;
 using Visualization.Agents;
@@ -13,13 +14,11 @@ namespace Importer.XMLHandlers {
     public class SimulationOutputXmlHandler : XmlHandler {
 
         private Dictionary<int, XmlAgent> _xmlAgents;
-
-        public VisualizationMaster visualizationMaster;
-
+        
         private int _maxSampleTime = int.MinValue;
 
         public override string GetName() {
-            return "SimulationOutputXmlHandler";
+            return "Output";
         }
 
         public override void StartImport() {
@@ -31,22 +30,60 @@ namespace Importer.XMLHandlers {
             CreateAgents();
             ParseAgentData();
 
-            visualizationMaster.MaxSampleTime = _maxSampleTime;
+            VisualizationMaster.MaxSampleTime = _maxSampleTime;
         }
 
-        public override List<GameObject> GetInfoFields() {
-            throw new System.NotImplementedException();
+        public override string GetDetails() {
+            if (xmlDocument.Root == null) return "<color=\"red\"><b>XML Error</b>";
+
+            var supported = new Version("0.3.0");
+            
+            var versionInFile = xmlDocument.Root?.Attribute("SchemaVersion")?.Value;
+            var versionString = "<color=\"orange\">Version unknown";
+
+            if (versionInFile != null) {
+                var fileVersion = new Version(versionInFile);
+                versionString = fileVersion.CompareTo(supported) >= 0
+                    ? "<color=\"green\">Version " + versionInFile
+                    : "<color=\"red\">Version " + versionInFile;
+            }
+
+            var statistics = xmlDocument.Root.Element("RunResults")?.Element("RunResult")?.Element("RunStatistics");
+            var events = xmlDocument.Root.Element("RunResults")?.Element("RunResult")?.Element("Events");
+            var agents = xmlDocument.Root.Element("RunResults")?.Element("RunResult")?.Element("Agents");
+
+            if (statistics == null) {
+                return versionString + " <color=\"red\"> RunResults missing!";
+            }
+
+            var returnString = versionString + "<color=\"white\">";
+
+            if (events != null) {
+                returnString += " <b>|</b> Events: " + events.Elements("Event").Count();
+            }
+
+            if (statistics.Element("StopReason") != null) {
+                returnString += " <b>|</b> Stop: " + String.Concat(statistics.Element("StopReason").Nodes());
+            }
+
+            if (agents != null && agents.Elements("Agent").Count() != 0) {
+                returnString += " <b>|</b> Agents: " + agents.Elements("Agent").Count();
+            } else {
+                returnString += " <b>|</b><color=\"red\"> Agents missing!";
+            }
+
+            return returnString;
         }
 
         private void CreateAgents() {
             foreach (var xmlAgent in _xmlAgents.Values) {
                 switch (xmlAgent.AgentType) {
                     case AgentType.Pedestrian:
-                        xmlAgent.ActualAgent = visualizationMaster.InstantiatePedestrian(xmlAgent.ModelType);
+                        xmlAgent.ActualAgent = VisualizationMaster.InstantiatePedestrian(xmlAgent.ModelType);
                         xmlAgent.ActualAgent.name = "Ped #" + xmlAgent.Id + " [" + xmlAgent.ModelType + "]";
                         break;
                     default:
-                        xmlAgent.ActualAgent = visualizationMaster.InstantiateVehicleAgent(xmlAgent.ModelType);
+                        xmlAgent.ActualAgent = VisualizationMaster.InstantiateVehicleAgent(xmlAgent.ModelType);
                         xmlAgent.ActualAgent.name = "Car #" + xmlAgent.Id + " [" + xmlAgent.ModelType + "]";
                         break;
                 }

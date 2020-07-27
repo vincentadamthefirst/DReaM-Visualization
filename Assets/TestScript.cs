@@ -24,7 +24,8 @@ public class TestScript : MonoBehaviour {
 
     public int debugTestFile = 0;
     
-    void Start() {
+    void Test() {
+
         // IMPORT OF OPENDRIVE
         
         var sceneryImporter = new SceneryXmlHandler();
@@ -83,7 +84,7 @@ public class TestScript : MonoBehaviour {
         
         var outputImporter = new SimulationOutputXmlHandler();
         outputImporter.SetFilePath("C:\\OpenPass\\bin - Kopie\\results\\simulationOutput_before.xml");
-        outputImporter.visualizationMaster = visualizationMaster;
+        outputImporter.VisualizationMaster = visualizationMaster;
         outputImporter.StartImport();
         
        

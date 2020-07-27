@@ -55,6 +55,11 @@ namespace Visualization.Agents {
         /// The rotation of the agent at a given time (in radians)
         /// </summary>
         public float CurrentRotation { get; set; }
+        
+        /// <summary>
+        /// All of the sensors the agent has.
+        /// </summary>
+        public List<AgentSensor> AgentSensors { get; set; }
 
         // if the agent is deactivated
         protected bool deactivated;
@@ -122,6 +127,10 @@ namespace Visualization.Agents {
                 // setting the next simulation step
                 ordered[i].Next = ordered[i + 1];
                 ordered[i + 1].Previous = ordered[i];
+
+                // for (var j = 0; j < ordered[i].SensorInformation.Count; j++) {
+                //     
+                // }
             }
 
             foreach (var simulationStep in SimulationSteps.Values) {

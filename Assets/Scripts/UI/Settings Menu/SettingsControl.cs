@@ -62,7 +62,7 @@ namespace UI {
         // target controller
         private TargetController _targetController;
 
-        private void Start() {
+        public void FindAll() {
             _objectContent = objectSettings.GetChild(0).GetChild(0).GetChild(0).GetComponent<RectTransform>();
             _allContent = transform.GetChild(0).GetComponent<RectTransform>();
 

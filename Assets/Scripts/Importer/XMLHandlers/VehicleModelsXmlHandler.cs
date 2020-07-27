@@ -6,11 +6,8 @@ using Visualization.Agents;
 
 namespace Importer.XMLHandlers {
     public class VehicleModelsXmlHandler : XmlHandler {
-        
-        public VisualizationMaster VisualizationMaster { get; set; }
-        
         public override string GetName() {
-            return "VehicleModelsXmlHandler";
+            return "Veh. Models";
         }
 
         public override void StartImport() {
@@ -64,8 +61,8 @@ namespace Importer.XMLHandlers {
             }
         }
 
-        public override List<GameObject> GetInfoFields() {
-            throw new System.NotImplementedException();
+        public override string GetDetails() {
+            return "...";
         }
     }
 }

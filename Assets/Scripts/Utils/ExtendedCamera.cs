@@ -29,7 +29,7 @@ namespace Utils {
         /// <summary>
         /// Finds necessary objects
         /// </summary>
-        private void Start() {
+        private void Awake() {
             Camera = GetComponent<Camera>();
             CameraController = Camera.GetComponent<SimpleCameraController>();
         }

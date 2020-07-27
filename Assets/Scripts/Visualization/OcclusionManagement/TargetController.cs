@@ -48,7 +48,7 @@ namespace Visualization.OcclusionManagement {
             _settingsOpen = value;
         }
 
-        private void Start() {
+        public void FindAll() {
             _layerMask = LayerMask.GetMask("agent_targets", "agents_base");
             _extendedCamera = FindObjectOfType<ExtendedCamera>();
             _agentOcclusionManager = FindObjectOfType<AgentOcclusionManager>();

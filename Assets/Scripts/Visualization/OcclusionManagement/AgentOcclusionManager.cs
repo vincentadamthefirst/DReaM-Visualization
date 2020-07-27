@@ -73,7 +73,7 @@ namespace Visualization.OcclusionManagement {
         
         public OcclusionManagementOptions OcclusionManagementOptions { get; set; }
 
-        private Dictionary<Collider, VisualizationElement> _colliderMapping;
+        private Dictionary<Collider, VisualizationElement> _colliderMapping = new Dictionary<Collider, VisualizationElement>();
 
         private VisualizationElement[] _allElements = new VisualizationElement[0];
 
@@ -88,16 +88,15 @@ namespace Visualization.OcclusionManagement {
             new [] {typeof(PolygonDetectorNormal), typeof(PolygonDetectorStaggered)}
         };
 
-        private void Start() {
+        public void FindAll() {
             cam = Camera.main;
             _planes = GeometryUtility.CalculateFrustumPlanes(cam);
             _rayCastPositions = new List<Vector2>();
             _targetPolygons = new List<Polygon>();
             _lastRayCastDict = new Dictionary<VisualizationObject, HashSet<VisualizationObject>>();
-            _colliderMapping = new Dictionary<Collider, VisualizationElement>();
-            
-            _targetController = FindObjectOfType<TargetController>();
+
             _extendedCamera = FindObjectOfType<ExtendedCamera>();
+            _targetController = FindObjectOfType<TargetController>();
             _settings = FindObjectOfType<SettingsControl>();
         }
 

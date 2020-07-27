@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Xml.Linq;
 using UnityEngine;
+using Visualization;
 using Version = Utils.VersionSystem.Version;
 
 namespace Importer.XMLHandlers {
@@ -11,6 +12,8 @@ namespace Importer.XMLHandlers {
         private Version _fileVersion;
         protected string filePath;
         protected XDocument xmlDocument;
+        
+        public VisualizationMaster VisualizationMaster { get; set; }
 
         public void SetFilePath(string path) {
             filePath = path;
@@ -25,7 +28,7 @@ namespace Importer.XMLHandlers {
 
         public abstract void StartImport();
 
-        public abstract List<GameObject> GetInfoFields();
+        public abstract string GetDetails();
     }
 
     [Serializable]

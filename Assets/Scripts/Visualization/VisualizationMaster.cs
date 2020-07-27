@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Importer.XMLHandlers;
 using Scenery.RoadNetwork;
 using UI;
+using UI.Main_Menu;
 using UnityEngine;
 using Visualization.Agents;
 using Visualization.Labels;
@@ -11,13 +12,10 @@ using Visualization.RoadOcclusion;
 
 namespace Visualization {
     public class VisualizationMaster : MonoBehaviour {
-
-        public PlaybackControl playbackControl;
-
-        public LabelOcclusionManager labelOcclusionManager;
-
+        private PlaybackControl _playbackControl;
+        private LabelOcclusionManager _labelOcclusionManager;
         private RoadOcclusionManager _roadOcclusionManager;
-
+        
         public OcclusionManagementOptions OcclusionManagementOptions { get; set; }
 
         /// <summary>
@@ -56,8 +54,10 @@ namespace Visualization {
         // all Agents of the current visualization run
         private readonly List<Agent> _agents = new List<Agent>();
 
-        private void Start() {
+        public void FindAll() {
             _roadOcclusionManager = FindObjectOfType<RoadOcclusionManager>();
+            _labelOcclusionManager = FindObjectOfType<LabelOcclusionManager>();
+            _playbackControl = FindObjectOfType<PlaybackControl>();
         }
 
         /// <summary>
@@ -74,7 +74,7 @@ namespace Visualization {
             
             _agents.ForEach(a => a.Prepare());
             
-            playbackControl.SetTotalTime(MaxSampleTime);
+            _playbackControl.SetTotalTime(MaxSampleTime);
         }
 
         /// <summary>
@@ -97,11 +97,11 @@ namespace Visualization {
 
             // adding label
             if (OcclusionManagementOptions.labelLocation == LabelLocation.Screen) {
-                var label = Instantiate(agentDesigns.labelPrefabScreen, labelOcclusionManager.transform);
+                var label = Instantiate(agentDesigns.labelPrefabScreen, _labelOcclusionManager.transform);
                 label.Agent = vehicleAgent;
-                label.LabelOcclusionManager = labelOcclusionManager;
+                label.LabelOcclusionManager = _labelOcclusionManager;
                 label.AgentCamera = vehicleAgent.Model.transform.Find("Camera").GetComponent<Camera>();
-                labelOcclusionManager.AddLabel(label);
+                _labelOcclusionManager.AddLabel(label);
                 vehicleAgent.OwnLabel = label;
             } else {
                 var label = Instantiate(agentDesigns.labelPrefabScene, transform);
@@ -136,11 +136,11 @@ namespace Visualization {
             
             // adding label TODO use other Label then vehicle!
             if (OcclusionManagementOptions.labelLocation == LabelLocation.Screen) {
-                var label = Instantiate(agentDesigns.labelPrefabScreen, labelOcclusionManager.transform);
+                var label = Instantiate(agentDesigns.labelPrefabScreen, _labelOcclusionManager.transform);
                 label.Agent = pedestrianAgent;
-                label.LabelOcclusionManager = labelOcclusionManager;
+                label.LabelOcclusionManager = _labelOcclusionManager;
                 label.AgentCamera = pedestrianAgent.Model.transform.Find("Camera").GetComponent<Camera>();
-                labelOcclusionManager.AddLabel(label);
+                _labelOcclusionManager.AddLabel(label);
                 pedestrianAgent.OwnLabel = label;
             } else {
                 var label = Instantiate(agentDesigns.labelPrefabScene, transform);
@@ -185,7 +185,7 @@ namespace Visualization {
             }
             
             _roadOcclusionManager.ChangeRoadLayers();
-            playbackControl.UpdateCurrentTime(CurrentTime);
+            _playbackControl.UpdateCurrentTime(CurrentTime);
         }
     }
 }

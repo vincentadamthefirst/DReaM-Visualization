@@ -76,7 +76,7 @@ namespace Visualization.Agents {
             }
             
             // preparing the label
-            OwnLabel.SetStrings(gameObject.name);
+            OwnLabel.SetStrings(gameObject.name.Split(new [] {" ["}, StringSplitOptions.None)[0]);
             OwnLabel.SetFloats(ModelInformation.Height + 1.4f);
             OwnLabel.SetColors(ColorMaterial.color);
 
@@ -98,6 +98,13 @@ namespace Visualization.Agents {
             UpdateBrakes();
             
             boundingBox.center = Model.transform.GetChild(1).position + _centerHeightOffset;
+
+            // for (var i = 0; i < AgentSensors.Count; i++) {
+            //     AgentSensors[i]
+            //         .UpdatePositionAndRotation(Model.transform.position, previous.SensorInformation[i].Heading);
+            //     
+            //     if (AgentSensors[i].IsStatic) continue;
+            // }
         }
 
         private void UpdateWheelRotation() {

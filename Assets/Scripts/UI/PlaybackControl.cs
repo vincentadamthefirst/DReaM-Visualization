@@ -31,7 +31,7 @@ namespace UI {
         /// </summary>
         public List<SimulationEvent> SimulationEvents { get; } = new List<SimulationEvent>();
 
-        private void Start() {
+        public void FindAll() {
             _visualizationMaster = FindObjectOfType<VisualizationMaster>();
             _playPause = transform.GetChild(2).GetChild(0).GetComponent<MagicUiButtonSymbol>();
             _forwardBackward = transform.GetChild(2).GetChild(1).GetComponent<MagicUiButtonSymbol>();

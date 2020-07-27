@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using Utils;
 
@@ -18,7 +19,7 @@ namespace Visualization.Agents {
             Model.transform.GetChild(1).localScale = new Vector3(ModelInformation.Length, ModelInformation.Width, 1);
 
             // preparing the label
-            OwnLabel.SetStrings(gameObject.name);
+            OwnLabel.SetStrings(gameObject.name.Split(new [] {" ["}, StringSplitOptions.None)[0]);
             OwnLabel.SetFloats(3.2f);
             OwnLabel.SetColors(ColorMaterial.color);
             

@@ -6,11 +6,9 @@ using Visualization.Agents;
 
 namespace Importer.XMLHandlers {
     public class PedestrianModelsXmlHandler : XmlHandler {
-        
-        public VisualizationMaster VisualizationMaster { get; set; }
-        
+
         public override string GetName() {
-            return "PedestrianModelsXmlHandler";
+            return "Ped. Models";
         }
 
         public override void StartImport() {
@@ -56,8 +54,8 @@ namespace Importer.XMLHandlers {
             }
         }
 
-        public override List<GameObject> GetInfoFields() {
-            throw new System.NotImplementedException();
+        public override string GetDetails() {
+            return "...";
         }
     }
 }
