@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Xml.Linq;
-using UnityEngine;
 using Visualization;
 using Version = Utils.VersionSystem.Version;
 

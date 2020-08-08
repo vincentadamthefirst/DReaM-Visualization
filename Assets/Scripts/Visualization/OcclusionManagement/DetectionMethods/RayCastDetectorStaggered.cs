@@ -1,8 +1,4 @@
-﻿using System.Collections.Generic;
-using Scenery;
-using UnityEngine;
-
-namespace Visualization.OcclusionManagement.DetectionMethods {
+﻿namespace Visualization.OcclusionManagement.DetectionMethods {
     public class RayCastDetectorStaggered : RayCastDetector {
 
         private int _lastTarget;
@@ -14,6 +10,10 @@ namespace Visualization.OcclusionManagement.DetectionMethods {
             CastRay(Targets[_lastTarget]);
 
             _lastTarget++;
+            
+            // ending the measurement, gets started inside of 'CastRay()'
+            DetectionMeasurement.EndMeasurement();
+            HandlingMeasurement.EndMeasurement();
         }
     }
 }

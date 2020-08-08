@@ -1,19 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using Evaluation;
 using Scenery;
-using Scenery.RoadNetwork;
 using UnityEngine;
-using Utils;
-using Visualization.Agents;
 
-namespace Visualization.RoadOcclusion {
+namespace Visualization.OcclusionManagement {
     
     /// <summary>
     /// This class gets updated by each agent, telling this class what road the agent is on. Based on this information
     /// it will move certain roads to the road_targets layer to display them through other objects.
     /// </summary>
     public class RoadOcclusionManager : MonoBehaviour {
+        
+        public ExecutionMeasurement ExecutionMeasurement { get; set; }
 
         private HashSet<VisualizationElement> _activeRoadIds = new HashSet<VisualizationElement>();
         
@@ -26,6 +25,8 @@ namespace Visualization.RoadOcclusion {
         /// Finds roads and junctions that need to be moved and moves them into the necessary layer.
         /// </summary>
         public void ChangeRoadLayers() {
+            ExecutionMeasurement.StartMeasurement();
+            
             var toBaseLayer = new HashSet<VisualizationElement>(_activeRoadIds);
             toBaseLayer.ExceptWith(_currentRoadIds);
             
@@ -50,12 +51,14 @@ namespace Visualization.RoadOcclusion {
 
             _activeRoadIds = new HashSet<VisualizationElement>(_currentRoadIds);
             _currentRoadIds.Clear();
+            
+            ExecutionMeasurement.EndMeasurement();
         }
 
         /// <summary>
         /// Adds a road Id to the set containing all active roads for the current point in time.
         /// </summary>
-        /// <param name="elementId">The currently active element</param>
+        /// <param name="element">The currently active element</param>
         public void AddOnElement(VisualizationElement element) {
             _currentRoadIds.Add(element);
         }

@@ -1,7 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using Scenery;
-using UnityEngine;
+﻿using UnityEngine;
 using Visualization.OcclusionManagement;
 using Debug = System.Diagnostics.Debug;
 
@@ -29,8 +26,7 @@ public class ScenePopulator : MonoBehaviour {
             newRandom.transform.position = new Vector3(Random.Range(-areaWidth / 2, areaWidth / 2), Random.Range(0, areaHeight), Random.Range(-areaLength / 2, areaLength / 2));
             newRandom.GetComponent<MeshRenderer>().material.renderQueue = 5000;
             if (randomRotation) newRandom.transform.rotation = Random.rotation;
-            cameraScript.AddPossibleOccludingObject(newRandom.GetComponent<VisualizationObject>());
-            
+
             count++;
         }
 
@@ -38,7 +34,6 @@ public class ScenePopulator : MonoBehaviour {
         for (var i = 0; i < 10; i++) {
             var newCube = Instantiate(randomObjectPrefab);
             newCube.transform.position = new Vector3(3f - (float) i * 1.5f, 1, -30f);
-            cameraScript.AddPossibleOccludingObject(newCube.GetComponent<VisualizationObject>());
             newCube.GetComponent<MeshRenderer>().material.renderQueue = 5000;
         }
     }

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 namespace Visualization.Agents {
@@ -11,7 +10,7 @@ namespace Visualization.Agents {
         /// Draw the points for debugging in the scene
         /// </summary>
         private void OnDrawGizmos() {
-            Gizmos.color = Color.cyan;
+            Gizmos.color = Color.black;
             customPoints.ForEach(p => Gizmos.DrawSphere(p, 0.1f));
         }
     }

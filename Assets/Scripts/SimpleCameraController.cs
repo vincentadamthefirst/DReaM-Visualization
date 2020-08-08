@@ -1,13 +1,6 @@
-﻿
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Scenery;
-using UnityEngine;
+﻿using UnityEngine;
 using Utils;
-using Utils.AdditionalMath;
 using Visualization.Agents;
-using Random = UnityEngine.Random;
 
 public class SimpleCameraController : MonoBehaviour {
     public class CameraState {
@@ -77,6 +70,14 @@ public class SimpleCameraController : MonoBehaviour {
     
     public bool LockedOnAgentIsSet { get; set; }
 
+    private Vector3 _lastPosition;
+
+    private Vector3 _lastRotation;
+    
+    public float TravelledDistance { get; private set;  }
+    
+    public float TotalRotation { get; private set; }
+
     public void SetSettingsOpen(bool value) {
         _settingsOpen = value;
         Cursor.visible = true;
@@ -86,6 +87,8 @@ public class SimpleCameraController : MonoBehaviour {
     void OnEnable() {
         m_TargetCameraState.SetFromTransform(transform);
         m_InterpolatingCameraState.SetFromTransform(transform);
+
+        _lastPosition = transform.position;
     }
 
     Vector3 GetInputTranslationDirection() {
@@ -145,7 +148,7 @@ public class SimpleCameraController : MonoBehaviour {
             secondOffsetVector.RotateRadians(LockedOnAgent.CurrentRotation + Mathf.PI - Mathf.PI / 2f);
             
             transform.LookAt(modelPosition + new Vector3(secondOffsetVector.x, 0, secondOffsetVector.y));
-            
+
             return;
         }
 
@@ -180,5 +183,16 @@ public class SimpleCameraController : MonoBehaviour {
         m_InterpolatingCameraState.LerpTowards(m_TargetCameraState, positionLerpPct, rotationLerpPct);
 
         m_InterpolatingCameraState.UpdateTransform(transform);
+
+        var currentPosition = transform.position;
+        TravelledDistance += Mathf.Abs(Vector3.Distance(_lastPosition, currentPosition));
+
+        var currentRotation = transform.eulerAngles;
+        TotalRotation += Mathf.Abs(_lastRotation.x - currentRotation.x);
+        TotalRotation += Mathf.Abs(_lastRotation.y - currentRotation.y);
+        TotalRotation += Mathf.Abs(_lastRotation.z - currentRotation.z);
+        
+        _lastPosition = currentPosition;
+        _lastRotation = currentRotation;
     }
 }

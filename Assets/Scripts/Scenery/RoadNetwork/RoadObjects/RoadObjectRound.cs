@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using UnityEditor.ShaderGraph.Internal;
+﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.ProBuilder;
 using Utils;
 using Visualization.OcclusionManagement;
 

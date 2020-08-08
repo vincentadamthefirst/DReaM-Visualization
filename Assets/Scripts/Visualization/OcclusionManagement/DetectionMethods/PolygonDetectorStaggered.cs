@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Scenery;
-using UnityEditor;
 using UnityEngine;
 using Utils.AdditionalMath;
 
@@ -16,6 +15,7 @@ namespace Visualization.OcclusionManagement.DetectionMethods {
 
             var target = Targets[_lastTarget];
             
+            HandlingMeasurement.StartMeasurement();
             if (!target.IsActive || !GeometryUtility.TestPlanesAABB(ExtendedCamera.CurrentFrustumPlanes, 
                     target.AxisAlignedBoundingBox)) {
                 // target no longer active or outside of the camera view
@@ -33,6 +33,9 @@ namespace Visualization.OcclusionManagement.DetectionMethods {
                 _lastTarget++;
                 return;
             }
+            HandlingMeasurement.PauseMeasurement();
+            
+            DetectionMeasurement.StartMeasurement();
             
             var targetPolygon = ConstructPolygon(target);
             var distanceToTarget = Vector3.Distance(ExtendedCamera.Camera.transform.position,
@@ -58,6 +61,9 @@ namespace Visualization.OcclusionManagement.DetectionMethods {
                 }
             }
             
+            DetectionMeasurement.EndMeasurement();
+            HandlingMeasurement.StartMeasurement();
+            
             var lastHits = new HashSet<VisualizationElement>(LastHits[target]);
 
             var actualNewHits = new HashSet<VisualizationElement>(newHits);
@@ -76,6 +82,8 @@ namespace Visualization.OcclusionManagement.DetectionMethods {
             LastHits[target] = newHits;
             
             _lastTarget++;
+            
+            HandlingMeasurement.EndMeasurement();
         }
     }
 }

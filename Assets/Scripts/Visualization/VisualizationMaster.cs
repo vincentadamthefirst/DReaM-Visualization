@@ -1,21 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using Importer.XMLHandlers;
+﻿using System.Collections.Generic;
 using Scenery.RoadNetwork;
 using UI;
-using UI.Main_Menu;
 using UnityEngine;
 using Visualization.Agents;
-using Visualization.Labels;
 using Visualization.OcclusionManagement;
-using Visualization.RoadOcclusion;
 
 namespace Visualization {
     public class VisualizationMaster : MonoBehaviour {
         private PlaybackControl _playbackControl;
         private LabelOcclusionManager _labelOcclusionManager;
         private RoadOcclusionManager _roadOcclusionManager;
-        
+
         public OcclusionManagementOptions OcclusionManagementOptions { get; set; }
 
         /// <summary>
@@ -108,6 +103,7 @@ namespace Visualization {
                 label.AgentCamera = vehicleAgent.Model.transform.Find("Camera").GetComponent<Camera>();
                 vehicleAgent.OwnLabel = label;
             }
+            
 
             // retrieving model information
             vehicleAgent.ModelInformation = VehicleModelCatalog.ContainsKey(modelType)
@@ -148,6 +144,7 @@ namespace Visualization {
                 pedestrianAgent.OwnLabel = label;
             }
             
+
             // retrieving model information
             pedestrianAgent.ModelInformation = PedestrianModelCatalog.ContainsKey(modelType)
                 ? PedestrianModelCatalog[modelType]
@@ -165,6 +162,7 @@ namespace Visualization {
             }
             
             _roadOcclusionManager.ChangeRoadLayers();
+            _playbackControl.UpdateCurrentTime(CurrentTime);
         }
 
         /// <summary>
@@ -184,7 +182,8 @@ namespace Visualization {
                 agent.UpdateForTimeStep(CurrentTime, PlayBackwards);
             }
             
-            _roadOcclusionManager.ChangeRoadLayers();
+            if (OcclusionManagementOptions.occlusionDetectionMethod == OcclusionDetectionMethod.Shader) 
+                _roadOcclusionManager.ChangeRoadLayers();
             _playbackControl.UpdateCurrentTime(CurrentTime);
         }
     }

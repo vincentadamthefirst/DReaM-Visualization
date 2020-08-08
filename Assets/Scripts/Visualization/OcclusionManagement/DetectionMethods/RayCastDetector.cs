@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Scenery;
-using UnityEditor;
 using UnityEngine;
 using Random = System.Random;
 
@@ -12,6 +11,8 @@ namespace Visualization.OcclusionManagement.DetectionMethods {
         private readonly Random _random = new Random(Environment.TickCount);
 
         protected void CastRay(VisualizationElement target) {
+            
+            HandlingMeasurement.StartMeasurement();
             if (!target.IsActive || !GeometryUtility.TestPlanesAABB(
                     ExtendedCamera.CurrentFrustumPlanes, target.AxisAlignedBoundingBox)) {
                 
@@ -26,7 +27,9 @@ namespace Visualization.OcclusionManagement.DetectionMethods {
                 LastHits[target].Clear();
                 return;
             }
+            HandlingMeasurement.PauseMeasurement();
 
+            DetectionMeasurement.StartMeasurement();
             var endPoints = GetEndPoints(target);
             var startPoints = GetStartPoints(endPoints);
             
@@ -39,8 +42,6 @@ namespace Visualization.OcclusionManagement.DetectionMethods {
                 // ReSharper disable once Unity.PreferNonAllocApi
                 var currentHits = Physics.RaycastAll(startPoints[i], directionVector, distance);
 
-                Debug.DrawLine(startPoints[i], endPoints[i]);
-
                 foreach (var hit in currentHits) {
                     var hitObject = ColliderMapping[hit.collider];
                     if (hitObject == null || hitObject.IsTarget()) continue;
@@ -48,7 +49,9 @@ namespace Visualization.OcclusionManagement.DetectionMethods {
                     newHits.Add(hitObject);
                 }
             }
+            DetectionMeasurement.PauseMeasurement();
 
+            HandlingMeasurement.StartMeasurement();
             var lastHits = new HashSet<VisualizationElement>(LastHits[target]);
 
             var actualNewHits = new HashSet<VisualizationElement>(newHits);
@@ -65,6 +68,7 @@ namespace Visualization.OcclusionManagement.DetectionMethods {
             }
 
             LastHits[target] = newHits;
+            HandlingMeasurement.PauseMeasurement();
         }
 
         private Vector3[] SelectRandom(IEnumerable<Vector3> input) {

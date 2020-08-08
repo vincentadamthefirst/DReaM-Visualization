@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
+﻿using System.Collections.Generic;
 using Scenery;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using Visualization;
-using Visualization.Agents;
 using Visualization.OcclusionManagement;
 
 namespace UI {
     [RequireComponent(typeof(AgentOcclusionManager))]
-    public class SettingsControl : MonoBehaviour {
+    public class SettingsController : MonoBehaviour {
 
         // the images for the buttons on the left side
         public Image objSetImage;
@@ -25,6 +21,11 @@ namespace UI {
 
         public ObjectEntry objectEntryPrefab;
         public RectTransform paddingPrefab;
+        
+        /// <summary>
+        /// If the settings window should be disabled
+        /// </summary>
+        public bool Disable { get; set; }
 
         /// <summary>
         /// The list of all objects in the scene that can be deactivated (buildings, trees, ...)
@@ -93,7 +94,7 @@ namespace UI {
         }
 
         private void Update() {
-            if (Input.GetKeyDown(KeyCode.Escape)) {
+            if (Input.GetKeyDown(KeyCode.Escape) && !Disable) {
                 if (_allContent.gameObject.activeSelf) {
                     _allContent.gameObject.SetActive(false);
 

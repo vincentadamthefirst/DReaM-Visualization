@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Xml.Linq;
-using Unity.Collections;
 using UnityEngine;
 using Visualization;
 using Visualization.Agents;
@@ -81,10 +79,12 @@ namespace Importer.XMLHandlers {
                     case AgentType.Pedestrian:
                         xmlAgent.ActualAgent = VisualizationMaster.InstantiatePedestrian(xmlAgent.ModelType);
                         xmlAgent.ActualAgent.name = "Ped #" + xmlAgent.Id + " [" + xmlAgent.ModelType + "]";
+                        xmlAgent.ActualAgent.OpenDriveId = xmlAgent.Id + "";
                         break;
                     default:
                         xmlAgent.ActualAgent = VisualizationMaster.InstantiateVehicleAgent(xmlAgent.ModelType);
                         xmlAgent.ActualAgent.name = "Car #" + xmlAgent.Id + " [" + xmlAgent.ModelType + "]";
+                        xmlAgent.ActualAgent.OpenDriveId = xmlAgent.Id + "";
                         break;
                 }
             }
@@ -285,7 +285,7 @@ namespace Importer.XMLHandlers {
                 newAgent.AgentTypeString = agent.Attribute("AgentTypeName")?.Value ?? "none";
                 newAgent.ModelType = agent.Attribute("VehicleModelType")?.Value ?? "none";
 
-                newAgent.AgentType = newAgent.AgentTypeString.ToLower() == "pedestrian"
+                newAgent.AgentType = newAgent.AgentTypeString.ToLower().Contains("pedestrian")
                     ? AgentType.Pedestrian
                     : AgentType.Vehicle;
                 

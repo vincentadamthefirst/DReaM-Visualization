@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Scenery;
 using Scenery.RoadNetwork;
-using Scenery.RoadNetwork.RoadObjects;
 using UnityEngine;
 using Utils;
 using Visualization.Labels;
 using Visualization.OcclusionManagement;
-using Visualization.RoadOcclusion;
 
 namespace Visualization.Agents {
     public abstract class Agent : VisualizationElement {

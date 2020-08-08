@@ -2,9 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Assertions;
-using UnityEngine.PlayerLoop;
-using UnityEngine.UI;
 using Utils;
 
 namespace Visualization.Agents {
@@ -43,7 +40,7 @@ namespace Visualization.Agents {
             _chassis = Model.transform.Find("chassis");
 
             // offsetting the agent model inside its parent
-            _chassis.transform.localPosition -= ModelInformation.Center;
+            _chassis.transform.localPosition += ModelInformation.Center;
 
             _chassis.SetTotalSize(ModelInformation.Width, ModelInformation.Height, ModelInformation.Length);
 
@@ -182,7 +179,7 @@ namespace Visualization.Agents {
         }
 
         protected override void UpdateLabel() {
-            if (Time.frameCount % 10 != 0) return; // reduce the load by only updating every 10 frames
+            //if (Time.frameCount % 10 != 0) return; // reduce the load by only updating every 10 frames
             
             var avi = previous.AdditionalInformation as AdditionalVehicleInformation;
 
@@ -239,7 +236,7 @@ namespace Visualization.Agents {
                 toReturn[i] =
                     tr2.MultiplyPoint3x4(
                         new Vector3(tmp.x * _chassis.lossyScale.x, tmp.y * _chassis.lossyScale.y,
-                            tmp.z * _chassis.lossyScale.z) - ModelInformation.Center);
+                            tmp.z * _chassis.lossyScale.z) + ModelInformation.Center);
 
             }
 

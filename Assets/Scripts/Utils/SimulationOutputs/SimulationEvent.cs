@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-namespace Utils.SimulationOutputs {
+﻿namespace Utils.SimulationOutputs {
     public abstract class SimulationEvent {
         private static int _timeStamp;
 

@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using Utils;
-using Visualization.Agents;
 
 namespace Visualization.Labels {
     public class SceneLabel : Label {
@@ -45,10 +43,6 @@ namespace Visualization.Labels {
             AgentCamera.aspect = 1f;
             AgentCamera.orthographicSize = 35f;
             AgentCamera.targetTexture = targetTexture;
-        }
-
-        private void Update() {
-            transform.LookAt(2 * transform.position - _mainCamera.transform.position);
         }
 
         /// <summary>
@@ -139,6 +133,10 @@ namespace Visualization.Labels {
         public override void Deactivate() {
             LabelMainObject.gameObject.SetActive(false);
             AgentCamera.gameObject.SetActive(false);
+        }
+
+        public  void Update() {
+            transform.LookAt(2 * transform.position - _mainCamera.transform.position);
         }
     }
 }

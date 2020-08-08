@@ -51,7 +51,7 @@ namespace Visualization.Agents {
         }
 
         protected override void UpdateLabel() {
-            if (Time.frameCount % 10 != 0) return; // reduce the load by only updating every 10 frames
+            //if (Time.frameCount % 10 != 0) return; // reduce the load by only updating every 10 frames
             
             var modelPosition = Model.transform.position;
             OwnLabel.UpdateFloats(modelPosition.x, modelPosition.z, previous.Velocity, previous.Acceleration);

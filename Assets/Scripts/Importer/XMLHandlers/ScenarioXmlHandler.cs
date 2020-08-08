@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
-
-namespace Importer.XMLHandlers {
+﻿namespace Importer.XMLHandlers {
     public class ScenarioXmlHandler : XmlHandler {
         public override string GetName() {
             return "Scenario";

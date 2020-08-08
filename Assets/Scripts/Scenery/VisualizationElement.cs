@@ -1,8 +1,5 @@
-﻿using System;
-using System.Diagnostics;
-using UnityEngine;
+﻿using UnityEngine;
 using Visualization.OcclusionManagement;
-using Debug = UnityEngine.Debug;
 
 namespace Scenery {
     public abstract class VisualizationElement : MonoBehaviour {

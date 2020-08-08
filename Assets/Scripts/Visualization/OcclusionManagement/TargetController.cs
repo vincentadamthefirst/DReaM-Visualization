@@ -13,6 +13,11 @@ namespace Visualization.OcclusionManagement {
         public AgentCard agentCardPrefab;
         
         /// <summary>
+        /// If the controller functionality should be disabled
+        /// </summary>
+        public bool Disable { get; set; }
+        
+        /// <summary>
         /// The current Targets
         /// </summary>
         public List<VisualizationElement> Targets { get; } = new List<VisualizationElement>();
@@ -59,6 +64,7 @@ namespace Visualization.OcclusionManagement {
         /// Checks for mouse clicks.
         /// </summary>
         private void Update() {
+            if (Disable) return;
             CheckMouseClick();
         }
 
@@ -67,7 +73,7 @@ namespace Visualization.OcclusionManagement {
         /// </summary>
         public void Prepare() {
             var agents = FindObjectsOfType<Agent>().ToList()
-                .OrderBy(x => x.name.Split(new[] {" ["}, StringSplitOptions.None)[0]);
+                .OrderBy(x => int.Parse(x.OpenDriveId));
             foreach (var agent in agents) {
                 var newCard = Instantiate(agentCardPrefab, _agentCardHolder);
                 newCard.Parent = _agentCardHolder;
@@ -107,12 +113,12 @@ namespace Visualization.OcclusionManagement {
                 Targets.Remove(hitElement);
                 hitElement.SetIsTarget(false);
                 _agentCardsReverse[(Agent) hitElement].SetIsTarget(false);
-                _agentOcclusionManager.SetTarget(hitElement, false);
+                _agentOcclusionManager.SetTarget((Agent) hitElement, false);
             } else {
                 Targets.Add(hitElement);
                 hitElement.SetIsTarget(true);
                 _agentCardsReverse[(Agent) hitElement].SetIsTarget(true);
-                _agentOcclusionManager.SetTarget(hitElement, true);
+                _agentOcclusionManager.SetTarget((Agent) hitElement, true);
             }
         }
 

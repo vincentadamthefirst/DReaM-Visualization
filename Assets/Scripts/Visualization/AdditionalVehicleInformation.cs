@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Visualization {
     public class AdditionalVehicleInformation : AdditionalAgentInformation {

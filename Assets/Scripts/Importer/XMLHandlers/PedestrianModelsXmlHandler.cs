@@ -1,7 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Globalization;
+﻿using System.Globalization;
 using UnityEngine;
-using Visualization;
 using Visualization.Agents;
 
 namespace Importer.XMLHandlers {

@@ -1,6 +1,4 @@
-﻿using System.Numerics;
-
-namespace Visualization.SimulationEvents {
+﻿namespace Visualization.SimulationEvents {
     public class AdditionalPedestrianInformation : AdditionalAgentInformation {
         /// <summary>
         /// If the agent is currently stopping

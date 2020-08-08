@@ -1,12 +1,21 @@
 ﻿using System.Collections.Generic;
-using Meta.Numerics.Functions;
+using Evaluation;
 using Scenery;
-using UnityEditor;
 using UnityEngine;
 using Utils;
 
 namespace Visualization.OcclusionManagement.DetectionMethods {
     public abstract class OcclusionDetector {
+        
+        /// <summary>
+        /// The measurement for the handling part of the occlusion management.
+        /// </summary>
+        public ExecutionMeasurement HandlingMeasurement { get; set; }
+        
+        /// <summary>
+        /// The measurement for the detection part of the occlusion management.
+        /// </summary>
+        public ExecutionMeasurement DetectionMeasurement { get; set; }
         
         /// <summary>
         /// The overall options for managing occlusions

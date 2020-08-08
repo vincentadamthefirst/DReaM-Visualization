@@ -4,6 +4,8 @@
             foreach (var target in Targets) {
                 CastRay(target);
             }
+            HandlingMeasurement.EndMeasurement();
+            DetectionMeasurement.EndMeasurement();
         }
     }
 }

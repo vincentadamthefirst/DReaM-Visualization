@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using Utils;
 using Visualization.OcclusionManagement;
 
@@ -157,6 +155,7 @@ namespace Scenery.RoadNetwork.RoadObjects {
         }
 
         public override void HandleHit() {
+            if (RoadObjectType == RoadObjectType.CrossWalk || RoadObjectType == RoadObjectType.ParkingSpace) return;
             _modelRenderer.material = _occludedMaterial;
         }
 

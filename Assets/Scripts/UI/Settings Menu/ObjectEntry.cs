@@ -1,5 +1,4 @@
-﻿using System;
-using Scenery;
+﻿using Scenery;
 using UnityEngine;
 using UnityEngine.UI;
 

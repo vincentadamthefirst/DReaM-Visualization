@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using Evaluation;
 using UnityEngine;
 using UnityEngine.UI;
 using Utils;
@@ -9,9 +10,14 @@ using Visualization.Labels;
 
 namespace Visualization.OcclusionManagement {
     public class LabelOcclusionManager : MonoBehaviour {
+        
+        public ExecutionMeasurement ExecutionMeasurement { get; set; }
+        
         public RectTransform labelObject;
 
         public Image pointerPrefab;
+        
+        public bool Disable { get; set; }
 
         /// <summary>
         /// All Labels that are managed by this OcclusionManager
@@ -51,6 +57,10 @@ namespace Visualization.OcclusionManagement {
             RecalculateParameters();
         }
 
+        public void DisableAllLabels() {
+            _allLabels.ForEach(x => x.Deactivate());
+        }
+
         private void RecalculateParameters() {
             var labelScale = labelObject.localScale.x;
             var rect = labelObject.rect;
@@ -66,9 +76,22 @@ namespace Visualization.OcclusionManagement {
         }
 
         private void LateUpdate() {
-            if (Time.frameCount % 5 != 0) return; // reduce the load by only updating every 5 frames
+            _allLabels.ForEach(x => x.UpdateLabel());
+            
+            ExecutionMeasurement.StartMeasurement();
+            if (Time.frameCount % 3 != 0) {
+                ExecutionMeasurement.EndMeasurement();
+                return; // reduce the load by only updating every 5 frames
+            }
+            if (Disable) {
+                ExecutionMeasurement.EndMeasurement();
+                DisableAllLabels();
+                Destroy(this);
+                return; // disable this process
+            }
             
             PickActiveLabels();
+            ExecutionMeasurement.EndMeasurement();
         }
 
         [SuppressMessage("ReSharper", "PossibleMultipleEnumeration")]
@@ -145,7 +168,6 @@ namespace Visualization.OcclusionManagement {
                 activeLabels[i].LabelMainObject.localPosition = pos;
 
                 var activeLabel = activeLabels[i];
-                var pointerTransform = activeLabel.Pointer.transform;
 
                 var middle = Vector2.Lerp(activeLabel.AnchorScreenPosition, pos, .5f);
                 activeLabel.Pointer.transform.localPosition = middle;
@@ -183,11 +205,6 @@ namespace Visualization.OcclusionManagement {
             
             return new Vector2(Mathf.Lerp(-MaxWidth / 2f, MaxWidth / 2f, wts.x / Screen.width),
                 Mathf.Lerp(-MaxHeight / 2f, MaxHeight / 2f, wts.y / Screen.height));
-        }
-
-        private Vector2 LocalScreenToActualScreenPoint(Vector2 point) {
-            return new Vector2(Mathf.Lerp(0, Screen.width, (point.x + MaxWidth / 2f) / MaxWidth),
-                Mathf.Lerp(0, Screen.height, (point.y - MaxHeight / 2f) / -MaxHeight));
         }
 
         public void AddLabel(ScreenLabel label) {

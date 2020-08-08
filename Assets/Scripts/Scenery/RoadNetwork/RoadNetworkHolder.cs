@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Scenery.RoadNetwork.RoadObjects;
 using UnityEngine;
-using Utils;
 using Visualization.OcclusionManagement;
 
 namespace Scenery.RoadNetwork {

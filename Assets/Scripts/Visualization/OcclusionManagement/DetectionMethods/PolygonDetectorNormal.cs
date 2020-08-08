@@ -11,6 +11,8 @@ namespace Visualization.OcclusionManagement.DetectionMethods {
 
             var currentPolygons = new Dictionary<Polygon, VisualizationElement>();
 
+            DetectionMeasurement.StartMeasurement();
+            
             foreach (var element in ColliderMapping.Values) {
                 var inViewFrustum = OcclusionManagementOptions.preCheckViewFrustum &&
                                     GeometryUtility.TestPlanesAABB(ExtendedCamera.CurrentFrustumPlanes,
@@ -22,8 +24,12 @@ namespace Visualization.OcclusionManagement.DetectionMethods {
                 
                 currentPolygons.Add(ConstructPolygon(element), element);
             }
+            
+            DetectionMeasurement.PauseMeasurement();
 
             foreach (var target in Targets) {
+                DetectionMeasurement.StartMeasurement();
+                
                 if (!target.IsActive || !GeometryUtility.TestPlanesAABB(ExtendedCamera.CurrentFrustumPlanes, 
                         target.AxisAlignedBoundingBox)) {
                     // target no longer active or outside of the camera view
@@ -57,6 +63,9 @@ namespace Visualization.OcclusionManagement.DetectionMethods {
                         newHits.Add(entry.Value);
                     }
                 }
+                
+                DetectionMeasurement.PauseMeasurement();
+                HandlingMeasurement.StartMeasurement();
 
                 var lastHits = new HashSet<VisualizationElement>(LastHits[target]);
 
@@ -74,7 +83,12 @@ namespace Visualization.OcclusionManagement.DetectionMethods {
                 }
 
                 LastHits[target] = newHits;
+                
+                HandlingMeasurement.PauseMeasurement();
             }
+            
+            DetectionMeasurement.EndMeasurement();
+            HandlingMeasurement.EndMeasurement();
         }
     }
 }

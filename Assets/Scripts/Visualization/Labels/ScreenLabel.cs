@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using Utils;
 using Visualization.Agents;
 using Visualization.OcclusionManagement;
 using Color = UnityEngine.Color;
@@ -48,12 +46,8 @@ namespace Visualization.Labels {
             var targetTexture = new RenderTexture(250, 250, 1);
             _cognitiveMap.GetComponent<RawImage>().texture = targetTexture;
             AgentCamera.aspect = 1f;
-            AgentCamera.orthographicSize = 35f;
+            AgentCamera.orthographicSize = 100f;
             AgentCamera.targetTexture = targetTexture;
-        }
-
-        private void Update() {
-            AnchorScreenPosition = LabelOcclusionManager.WorldToScreenPoint(Agent.GetAnchorPoint());
         }
 
         /// <summary>
@@ -147,6 +141,10 @@ namespace Visualization.Labels {
             LabelMainObject.gameObject.SetActive(false);
             Pointer.gameObject.SetActive(false);
             AgentCamera.gameObject.SetActive(false);
+        }
+
+        public void UpdateLabel() {
+            AnchorScreenPosition = LabelOcclusionManager.WorldToScreenPoint(Agent.GetAnchorPoint());
         }
     }
 }

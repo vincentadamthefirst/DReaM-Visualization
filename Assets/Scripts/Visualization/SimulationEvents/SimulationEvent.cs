@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-namespace Visualization.SimulationEvents {
+﻿namespace Visualization.SimulationEvents {
     public class SimulationEvent {
         /// <summary>
         /// the name of the event

@@ -1,5 +1,4 @@
-﻿using System;
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using Visualization.OcclusionManagement;
@@ -37,7 +36,7 @@ namespace UI {
         }
 
         public void SetIsTarget(bool value) {
-            _mainObject.localScale = value ? Vector3.one : Vector3.one * 0.8f;
+            _mainObject.localScale = value ? Vector3.one * 0.9f : Vector3.one * 0.7f;
             _mainImage.color = value ? _highlightedColor : _normalColor;
             LayoutRebuilder.ForceRebuildLayoutImmediate(Parent);
         }

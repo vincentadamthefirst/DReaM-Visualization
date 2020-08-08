@@ -8896,7 +8896,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 700, y: 150}
+  m_SizeDelta: {x: 1184.9004, y: 150}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &975998482
 MonoBehaviour:
@@ -9242,7 +9242,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1305951969}
   m_HandleRect: {fileID: 1305951968}
   m_Direction: 0
-  m_Value: 1
+  m_Value: 0
   m_Size: 0.99999994
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -11216,8 +11216,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1360689082}
   m_HandleRect: {fileID: 1360689081}
   m_Direction: 0
-  m_Value: 0
-  m_Size: 0.9999999
+  m_Value: 1
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -11369,7 +11369,7 @@ RectTransform:
   m_Father: {fileID: 1071695682}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.000000059604645, y: 0}
+  m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 20}
@@ -12277,7 +12277,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 700, y: 150}
+  m_SizeDelta: {x: 1311.8152, y: 150}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &1401035177
 MonoBehaviour:
@@ -13717,25 +13717,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fdf9234566054c1688be79984388cd12, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  focusObjectMaterial: {fileID: 0}
-  disable: 0
-  targetObjects: []
-  detectionMethod: 2
-  checkEveryFrame: 0
-  preCheckViewFrustum: 1
-  nearClipAsStart: 0
-  usePrecision: 0
-  fixedPrecision: 2
-  adaptivePrecision: 0
-  minPrecision: 2
-  maxPrecision: 5
-  precisionNearDistance: 5
-  precisionFarDistance: 50
-  showRayCastEnd: 1
-  distanceCheck: 1
-  showPolygons: 1
-  normalPipelineAsset: {fileID: 11400000, guid: 4d04cb1c092c76e448824cb97d18b3f3, type: 2}
-  aotPipelineAsset: {fileID: 11400000, guid: 1ec229d989010d549aa890f77e182554, type: 2}
 --- !u!4 &1573677348
 Transform:
   m_ObjectHideFlags: 0
@@ -14133,11 +14114,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6514be83d08186b4b9de3d9a6195199d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  roadNetworkHolder: {fileID: 308247174}
-  visualizationMaster: {fileID: 891641986}
-  occlusionManagementOptions: {fileID: 11400000, guid: 2108e11cc4550ae4eb416ebda5ddc8f5, type: 2}
-  terrain: {fileID: 890108868}
-  debugTestFile: 0
+  vehiclePositions: []
+  pedestrianPositions: []
 --- !u!1 &1687258581
 GameObject:
   m_ObjectHideFlags: 0
@@ -18350,7 +18328,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 89368146}
   m_HandleRect: {fileID: 89368145}
   m_Direction: 0
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
