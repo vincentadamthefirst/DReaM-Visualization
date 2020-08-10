@@ -6,6 +6,6 @@
     }
 
     public enum FpsTest {
-        None = 0, Shader, RayCast, Polygon, Transparency, WireFrame
+        None = 0, Shader, RayCast, Polygon, Transparency, WireFrame, Nothing
     }
 }

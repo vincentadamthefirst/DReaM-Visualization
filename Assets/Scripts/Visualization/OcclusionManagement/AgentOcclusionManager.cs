@@ -188,7 +188,12 @@ namespace Visualization.OcclusionManagement {
         /// Sets all Agents in the scene as a target.
         /// </summary>
         public void SetAllTargets() {
-            if (OcclusionManagementOptions.occlusionDetectionMethod == OcclusionDetectionMethod.Shader) return;
+            if (OcclusionManagementOptions.occlusionDetectionMethod == OcclusionDetectionMethod.Shader) {
+                foreach (var agent in FindObjectsOfType<Agent>()) {
+                    agent.SetIsTarget(true);
+                }
+                return;
+            }
 
             foreach (var agent in FindObjectsOfType<Agent>()) {
                 agent.SetIsTarget(true);

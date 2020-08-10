@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using JetBrains.Annotations;
+using UnityEngine;
 using Utils;
 using Visualization.Agents;
 
@@ -66,6 +67,11 @@ public class SimpleCameraController : MonoBehaviour {
 
     private bool _settingsOpen;
     
+    /// <summary>
+    /// Set if the Quantitative Evaluation is performed and the camera is moved throughout the scene.
+    /// </summary>
+    public bool AutomaticMovement { get; set; }
+    
     public Agent LockedOnAgent { get; set; }
     
     public bool LockedOnAgentIsSet { get; set; }
@@ -121,8 +127,7 @@ public class SimpleCameraController : MonoBehaviour {
     }
 
     private void Update() {
-        if (_settingsOpen) return;
-        
+        if (_settingsOpen || AutomaticMovement) return;
 
         // Hide and lock cursor when right mouse button pressed
         if (Input.GetMouseButtonDown(1)) {

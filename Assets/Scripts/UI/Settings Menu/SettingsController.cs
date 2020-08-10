@@ -59,6 +59,9 @@ namespace UI {
         
         // the camera script
         private SimpleCameraController _cameraController;
+
+        // the playback control
+        private PlaybackControl _playbackControl;
         
         // target controller
         private TargetController _targetController;
@@ -68,6 +71,7 @@ namespace UI {
             _allContent = transform.GetChild(0).GetComponent<RectTransform>();
 
             _cameraController = FindObjectOfType<SimpleCameraController>();
+            _playbackControl = FindObjectOfType<PlaybackControl>();
             _targetController = FindObjectOfType<TargetController>();
 
             _randomPointSampling = occlusionSettings.GetChild(0).GetChild(0).GetChild(0).GetChild(2).GetChild(1)
@@ -110,8 +114,10 @@ namespace UI {
 
                     _cameraController.SetSettingsOpen(false);
                     _targetController.SetSettingsOpen(false);
+                    _playbackControl.Disable = false;
                 } else {
                     _allContent.gameObject.SetActive(true);
+                    _playbackControl.Disable = true;
                     _cameraController.SetSettingsOpen(true);
                     _targetController.SetSettingsOpen(true);
                 }

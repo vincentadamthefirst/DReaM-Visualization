@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using TMPro;
 using UI.MagicUI;
 using UnityEngine;
@@ -19,7 +20,9 @@ namespace UI {
         private Slider _timeSlider;
 
         private int _totalTimeInt;
-        
+
+        public bool Disable { get; set; }
+
         /// <summary>
         /// The VisualizationDesign to be used
         /// </summary>
@@ -42,6 +45,8 @@ namespace UI {
         }
 
         private void Update() {
+            if (Disable) return;
+            
             if (Input.GetKeyUp(KeyCode.Space)) {
                 HandlePlayPause();
             }

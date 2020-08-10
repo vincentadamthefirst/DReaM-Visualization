@@ -161,7 +161,8 @@ namespace Visualization {
                 agent.UpdateForTimeStep(CurrentTime, PlayBackwards);
             }
             
-            _roadOcclusionManager.ChangeRoadLayers();
+            if (OcclusionManagementOptions.occlusionDetectionMethod == OcclusionDetectionMethod.Shader) 
+                _roadOcclusionManager.ChangeRoadLayers();
             _playbackControl.UpdateCurrentTime(CurrentTime);
         }
 

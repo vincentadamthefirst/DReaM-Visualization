@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using Evaluation;
 using Scenery.RoadNetwork;
+using TMPro;
 using UI;
 using UI.Main_Menu;
 using UnityEngine;
@@ -38,44 +40,54 @@ namespace Visualization {
             _roadOcclusionManager = FindObjectOfType<RoadOcclusionManager>();
             
             _dataMover = FindObjectOfType<DataMover>();
-            
-            // build necessary objects for the evaluation
-            SetupEvaluationMeasurement();
 
-            if (_dataMover.FpsTestType == FpsTest.None) {
-                switch (_dataMover.EvaluationType) {
-                    case EvaluationType.None:
-                        BigImport();
-                        break;
-                    case EvaluationType.CountingOccOff:
-                        Evaluation_Setup(true, true, true);
-                        break;
-                    case EvaluationType.CountingOccOn:
-                        Evaluation_Setup(false, true, true);
-                        _agentOcclusionManager.SetAllTargets();
-                        break;
-                    case EvaluationType.LabelScene:
-                    case EvaluationType.LabelScreen:
-                        Evaluation_Setup(false, false, false);
-                        break;
-                    case EvaluationType.OccTransparency:
-                    case EvaluationType.OccWireFrame:
-                    case EvaluationType.OccShader:
-                        Evaluation_Setup(false, false, false);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
+            if (_dataMover.EvaluationType != EvaluationType.None || _dataMover.FpsTestType != FpsTest.None) {
+                EvaluationSetup();
             } else {
-                Evaluation_Setup(false, false, true);
-                _agentOcclusionManager.SetAllTargets();
+                SetupEvaluationMeasurement();
+                NormalImport();
             }
 
             // self destruct after complete import
             Destroy(this);
         }
 
-        private void BigImport() {
+        [SuppressMessage("ReSharper", "SwitchStatementHandlesSomeKnownEnumValuesWithDefault")]
+        [SuppressMessage("ReSharper", "SwitchStatementMissingSomeEnumCasesNoDefault")]
+        private void EvaluationSetup() {
+            // build necessary objects for the evaluation
+            SetupEvaluationMeasurement();
+
+            if (_dataMover.FpsTestType == FpsTest.None) {
+                // no fps test
+                switch (_dataMover.EvaluationType) {
+                    case EvaluationType.CountingOccOff:
+                        EvaluationImport(true, true, true);
+                        break;
+                    case EvaluationType.CountingOccOn:
+                        EvaluationImport(false, true, true);
+                        _agentOcclusionManager.SetAllTargets();
+                        break;
+                    case EvaluationType.LabelScene:
+                    case EvaluationType.LabelScreen:
+                        EvaluationImport(false, false, false);
+                        break;
+                    case EvaluationType.OccTransparency:
+                    case EvaluationType.OccWireFrame:
+                    case EvaluationType.OccShader:
+                        EvaluationImport(false, false, false);
+                        break;
+                }
+            } else if (_dataMover.FpsTestType == FpsTest.Nothing) {
+                EvaluationImport(true, true, true);
+                _agentOcclusionManager.SetAllTargets();
+            } else { 
+                EvaluationImport(false, true, true);
+                _agentOcclusionManager.SetAllTargets();
+            }
+        }
+
+        private void NormalImport() {
             // finding necessary elements in the different components
             _settingsController.FindAll();
             _playbackControl.FindAll();
@@ -120,7 +132,7 @@ namespace Visualization {
         /// <summary>
         /// Sets up the scene for evaluation, can disable agentOcclusion, labelOcclusion, settings
         /// </summary>
-        private void Evaluation_Setup(bool disableAgentOcclusion, bool disableLabelOcclusion, bool disableTargetSelection) {
+        private void EvaluationImport(bool disableAgentOcclusion, bool disableLabelOcclusion, bool disableTargetSelection) {
             // finding the data mover
             var dataMover = FindObjectOfType<DataMover>();
 
@@ -169,6 +181,7 @@ namespace Visualization {
             // moving all agents
             visualizationMaster.SmallUpdate();
             
+            // disabling settings and target selection (if wanted)
             _targetController.gameObject.SetActive(!disableTargetSelection);
             _settingsController.gameObject.SetActive(false);
         }
@@ -183,6 +196,8 @@ namespace Visualization {
             _labelOcclusionManager.ExecutionMeasurement = new ExecutionMeasurement();
             _agentOcclusionManager.DetectionMeasurement = new ExecutionMeasurement();
             _agentOcclusionManager.HandlingMeasurement = new ExecutionMeasurement();
+
+            var evalMenu = FindObjectOfType<EvaluationMenuController>();
 
             switch (_dataMover.FpsTestType) {
                 case FpsTest.None:
@@ -200,6 +215,14 @@ namespace Visualization {
                     var qe = holder.AddComponent<QualitativeEvaluation>();
                     qe.TestPersonId = _dataMover.EvaluationPersonString;
                     qe.EvaluationType = _dataMover.EvaluationType;
+                    
+                    evalMenu.TestType = _dataMover.EvaluationType;
+                    evalMenu.FindAll();
+                    evalMenu.PauseTest(true);
+                    
+                    Destroy(FindObjectOfType<EvaluationCameraMover>().gameObject);
+                    _extendedCamera.CameraController.AutomaticMovement = false;
+
                     return;
                 default: // RayCast / Polygon / Shader
                     var eval = holder.AddComponent<QuantitativeEvaluation>();
@@ -209,6 +232,10 @@ namespace Visualization {
                     eval.RoadOcclusionMeasurement = _roadOcclusionManager.ExecutionMeasurement;
                     eval.DetectionMeasurement = _agentOcclusionManager.DetectionMeasurement;
                     eval.HandlingMeasurement = _agentOcclusionManager.HandlingMeasurement;
+                    
+                    // deleting redundant UI component
+                    Destroy(evalMenu.gameObject);
+
                     return;
             }
         }

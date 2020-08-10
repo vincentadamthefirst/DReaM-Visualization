@@ -18,6 +18,8 @@ namespace Evaluation {
         /// List containing all elapsed times, its size corresponds to the number of execution times
         /// </summary>
         public List<long> ElapsedTimeMs { get; } = new List<long>();
+        
+        public List<double> TotalElapsedMs { get; } = new List<double>();
 
         // the stopwatch to be used
         private readonly Stopwatch _stopwatch = new Stopwatch();
@@ -42,8 +44,11 @@ namespace Evaluation {
         /// </summary>
         public void EndMeasurement() {
             _stopwatch.Stop();
-            if (!Disable)
-                ElapsedTimeMs.Add(_stopwatch.ElapsedMilliseconds);
+            if (!Disable) {
+                ElapsedTimeMs.Add(_stopwatch.Elapsed.Milliseconds);
+                TotalElapsedMs.Add(_stopwatch.Elapsed.TotalMilliseconds);
+            }
+                
             _stopwatch.Reset();
         }
     }
