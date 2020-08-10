@@ -7,6 +7,7 @@ using UI;
 using UI.Main_Menu;
 using UnityEngine;
 using Utils;
+using Visualization.Labels;
 using Visualization.OcclusionManagement;
 
 namespace Visualization {
@@ -184,6 +185,12 @@ namespace Visualization {
             // disabling settings and target selection (if wanted)
             _targetController.gameObject.SetActive(!disableTargetSelection);
             _settingsController.gameObject.SetActive(false);
+
+            if (disableLabelOcclusion) {
+                foreach (var label in FindObjectsOfType<Label>()) {
+                    Destroy(label.transform.GetChild(0).gameObject);
+                }
+            }
         }
 
         /// <summary>

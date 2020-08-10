@@ -32,28 +32,21 @@ namespace Evaluation {
 
             var averageFps = _fpsList.Sum() / (float) _fpsList.Count;
             var averageExecLabel = LabelPlacementMeasurement.ElapsedTimeMs.Sum() /
-                                   (float) LabelPlacementMeasurement.ElapsedTimeMs.Count;
+                                   LabelPlacementMeasurement.ElapsedTimeMs.Count;
             var averageExecRoad = RoadOcclusionMeasurement.ElapsedTimeMs.Sum() /
-                                  (float) RoadOcclusionMeasurement.ElapsedTimeMs.Count;
+                                  RoadOcclusionMeasurement.ElapsedTimeMs.Count;
             var averageExecDetection = DetectionMeasurement.ElapsedTimeMs.Sum() /
-                                       (float) DetectionMeasurement.ElapsedTimeMs.Count;
+                                       DetectionMeasurement.ElapsedTimeMs.Count;
             var averageExecHandle = HandlingMeasurement.ElapsedTimeMs.Sum() /
-                                    (float) HandlingMeasurement.ElapsedTimeMs.Count;
-            
-            var averageTotalExecDetection = DetectionMeasurement.TotalElapsedMs.Sum() /
-                                       DetectionMeasurement.TotalElapsedMs.Count;
-            var averageTotalExecHandle = HandlingMeasurement.TotalElapsedMs.Sum() /
-                                    HandlingMeasurement.TotalElapsedMs.Count;
+                                    HandlingMeasurement.ElapsedTimeMs.Count;
 
             File.AppendAllText(fileName, "Evaluation Type: " + FpsTestType + "\n");
             File.AppendAllText(fileName, "Averages:\n" +
                                          "\tFPS: " + averageFps + "\n" +
                                          "\tLabels: " + averageExecLabel + "\n" +
                                          "\tRoads: " + averageExecRoad + "\n" +
-                                         "\tDetection: " + averageExecDetection + " & " + averageTotalExecDetection + "\n" +
-                                         "\tHandling: " + averageExecHandle + " & " + averageTotalExecHandle + "\n");
-
-            DetectionMeasurement.ElapsedTimeMs.ForEach(x => File.AppendAllText(fileName, x + "\n"));
+                                         "\tDetection: " + averageExecDetection + "\n" +
+                                         "\tHandling: " + averageExecHandle + "\n");
         }
     }
 }

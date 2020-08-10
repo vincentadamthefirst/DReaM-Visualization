@@ -10,7 +10,7 @@ using Color = UnityEngine.Color;
 namespace Visualization.Labels {
     public class ScreenLabel : Label {
 
-        public RectTransform LabelMainObject { get; set; }
+        public RectTransform LabelMainObject { get; private set; }
         
         public Agent Agent { get; set; }
         
@@ -22,7 +22,7 @@ namespace Visualization.Labels {
 
         private RectTransform _cognitiveMap;
 
-        private List<RectTransform> _otherAgents = new List<RectTransform>();
+        private readonly List<RectTransform> _otherAgents = new List<RectTransform>();
         
         private TextMeshProUGUI _position;
         private TextMeshProUGUI _velocity;
@@ -31,8 +31,6 @@ namespace Visualization.Labels {
         private TextMeshProUGUI _crossingPhase;
         private TextMeshProUGUI _scanAoi;
         private TextMeshProUGUI _gazeType;
-
-        private Vector2 _currentAgentPosition;
 
         /// <summary>
         /// Called on program start, retrieves the necessary objects to display information
@@ -68,20 +66,21 @@ namespace Visualization.Labels {
         }
         
         public override void UpdateStrings(params string[] parameters) {
+            if (LabelOcclusionManager.Disable) return;
             _crossingPhase.text = parameters[0];
             _scanAoi.text = parameters[1];
             _gazeType.text = parameters[2];
         }
 
         public override void UpdateIntegers(params int[] parameters) {
-            // nothing to be updated here (yet)
+            if (LabelOcclusionManager.Disable) return;
+            // nothing to be updated here (yet) TODO add
         }
 
         public override void UpdateFloats(params float[] parameters) {
+            if (LabelOcclusionManager.Disable) return;
             var posX = parameters[0];
             var posY = parameters[1];
-            
-            _currentAgentPosition = new Vector2(posX, posY);
 
             var vel = parameters[2];
             var acc = parameters[3];
@@ -92,6 +91,7 @@ namespace Visualization.Labels {
         }
         
         public override void UpdatePositions(params Tuple<Vector2, float>[] parameters) {
+            if (LabelOcclusionManager.Disable) return;
             if (parameters == null) return;
             var difference = parameters.Length - _otherAgents.Count;
 
@@ -119,26 +119,29 @@ namespace Visualization.Labels {
         }
         
         public override void SetColors(params Color[] parameters) {
+            if (LabelOcclusionManager.Disable) return;
             Pointer.color = parameters[0];
             transform.GetChild(0).GetChild(1).GetChild(0).GetComponent<Image>().color = parameters[0];
         }
 
         public override void SetStrings(params string[] parameters) {
+        if (LabelOcclusionManager.Disable) return;
             transform.GetChild(0).GetChild(1).GetChild(5).GetComponent<TextMeshProUGUI>().text = parameters[0];
         }
 
         public override void SetFloats(params float[] parameters) {
+            if (LabelOcclusionManager.Disable) return;
             // nothing to be set here (yet)
         }
 
         public override void Activate() {
-            LabelMainObject.gameObject.SetActive(true);
+            if (!LabelOcclusionManager.Disable) LabelMainObject.gameObject.SetActive(true);
             Pointer.gameObject.SetActive(true);
             AgentCamera.gameObject.SetActive(true);
         }
 
         public override void Deactivate() {
-            LabelMainObject.gameObject.SetActive(false);
+            if (!LabelOcclusionManager.Disable) LabelMainObject.gameObject.SetActive(false);
             Pointer.gameObject.SetActive(false);
             AgentCamera.gameObject.SetActive(false);
         }
