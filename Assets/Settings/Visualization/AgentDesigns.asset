@@ -15,7 +15,7 @@ MonoBehaviour:
   pedestrianPrefab: {fileID: 2622044893451893758, guid: a0db774c791ad834899632ff88998c3a, type: 3}
   vehiclePrefab: {fileID: 1355119702227136009, guid: e612f190c653f194385110a5f17f48a8, type: 3}
   vehicleSceneLabel: {fileID: 3023259783854893831, guid: 56f01617187481c4c9783eff7581b43a, type: 3}
-  pedestrianSceneLabel: {fileID: 0}
+  pedestrianSceneLabel: {fileID: 7780702484389247341, guid: c26ee82a87434e249b8642d9477dd940, type: 3}
   vehicleScreenLabel: {fileID: -7317012153058038631, guid: e432839680d350b4e8204ea88164423b, type: 3}
   pedestrianScreenLabel: {fileID: 7782673565424965651, guid: 7b84e41ada3a8f9418f5aa84c9b950c3, type: 3}
   sensorPrefab: {fileID: 7751897596784934655, guid: 2306ae10112037f46ab6c9d00e1bf43b, type: 3}

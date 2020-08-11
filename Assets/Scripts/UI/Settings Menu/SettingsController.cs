@@ -2,6 +2,7 @@
 using Scenery;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Utils;
 using Visualization.OcclusionManagement;
@@ -260,6 +261,14 @@ namespace UI {
             occSetImage.color = new Color(1, 1, 1, 0f);
             objectSettings.gameObject.SetActive(true);
             objSetImage.color = new Color(1, 1, 1, .2f);
+        }
+
+        public void Exit() {
+            Application.Quit();
+        }
+
+        public void MainMenu() {
+            SceneManager.LoadScene(0);
         }
     }
 }

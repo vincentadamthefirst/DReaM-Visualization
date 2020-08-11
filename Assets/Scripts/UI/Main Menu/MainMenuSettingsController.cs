@@ -44,7 +44,7 @@ namespace UI.Main_Menu {
         }
 
         public void GetOcclusionManagementOptions() {
-            var omo = ScriptableObject.CreateInstance<OcclusionManagementOptions>();
+            var omo = occlusionManagementOptions;
 
             omo.labelLocation = (LabelLocation) labelLocation.value;
             omo.occlusionDetectionMethod = (OcclusionDetectionMethod) detectionMethod.value;

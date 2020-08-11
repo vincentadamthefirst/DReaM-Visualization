@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c47dd0d288ac47298a1daf6f7e3cee1f, type: 3}
   m_Name: Basic Occlusion Management Options
   m_EditorClassIdentifier: 
-  labelLocation: 1
-  occlusionDetectionMethod: 2
+  labelLocation: 0
+  occlusionDetectionMethod: 1
   occlusionHandlingMethod: 0
   sampleRandomPoints: 0
   nearClipPlaneAsStart: 1
@@ -23,6 +23,6 @@ MonoBehaviour:
   useCombinedBoundingBox: 1
   preCheckViewFrustum: 1
   objectTransparencyValue: 0.1
-  agentTransparencyValue: 0.3
+  agentTransparencyValue: 0.18
   staggeredCheck: 1
   wireFrameMaterial: {fileID: 2100000, guid: f3ae08bd39007874a86a0285d96e797d, type: 2}
