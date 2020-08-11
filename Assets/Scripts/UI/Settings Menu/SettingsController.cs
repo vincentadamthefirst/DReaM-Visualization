@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Scenery;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Utils;
 using Visualization.OcclusionManagement;
 
 namespace UI {
@@ -65,6 +67,10 @@ namespace UI {
         
         // target controller
         private TargetController _targetController;
+
+        private void OnDestroy() {
+            _agentOcclusionManager.OcclusionManagementOptions.StoreToPrefs();
+        }
 
         public void FindAll() {
             _objectContent = objectSettings.GetChild(0).GetChild(0).GetChild(0).GetComponent<RectTransform>();

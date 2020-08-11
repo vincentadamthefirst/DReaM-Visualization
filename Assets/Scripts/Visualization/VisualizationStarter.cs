@@ -99,9 +99,9 @@ namespace Visualization {
             _labelOcclusionManager.FindAll();
 
             // setting the OcclusionManagementOptions where they are needed
-            visualizationMaster.OcclusionManagementOptions = occlusionManagementOptions;
-            roadNetworkHolder.OcclusionManagementOptions = occlusionManagementOptions;
-            _agentOcclusionManager.OcclusionManagementOptions = occlusionManagementOptions;
+            visualizationMaster.OcclusionManagementOptions = _dataMover.occlusionManagementOptions;
+            roadNetworkHolder.OcclusionManagementOptions = _dataMover.occlusionManagementOptions;
+            _agentOcclusionManager.OcclusionManagementOptions = _dataMover.occlusionManagementOptions;
 
             // setting the Visualization Master
             _dataMover.SceneryXmlHandler.VisualizationMaster = visualizationMaster;
@@ -135,9 +135,6 @@ namespace Visualization {
         /// Sets up the scene for evaluation, can disable agentOcclusion, labelOcclusion, settings
         /// </summary>
         private void EvaluationImport(bool disableAgentOcclusion, bool disableLabelOcclusion, bool disableTargetSelection) {
-            // finding the data mover
-            var dataMover = FindObjectOfType<DataMover>();
-
             // finding necessary elements in the different components and disabling unused components
             _settingsController.FindAll();
             _playbackControl.FindAll();
@@ -152,27 +149,27 @@ namespace Visualization {
             _labelOcclusionManager.Disable = disableLabelOcclusion;
 
             // setting the OcclusionManagementOptions where they are needed
-            visualizationMaster.OcclusionManagementOptions = dataMover.occlusionManagementOptions;
-            roadNetworkHolder.OcclusionManagementOptions = dataMover.occlusionManagementOptions;
-            _agentOcclusionManager.OcclusionManagementOptions = dataMover.occlusionManagementOptions;
+            visualizationMaster.OcclusionManagementOptions = _dataMover.occlusionManagementOptions;
+            roadNetworkHolder.OcclusionManagementOptions = _dataMover.occlusionManagementOptions;
+            _agentOcclusionManager.OcclusionManagementOptions = _dataMover.occlusionManagementOptions;
 
             // setting the Visualization Master
-            dataMover.SceneryXmlHandler.VisualizationMaster = visualizationMaster;
-            dataMover.SimulationOutputXmlHandler.VisualizationMaster = visualizationMaster;
-            dataMover.PedestrianModelsXmlHandler.VisualizationMaster = visualizationMaster;
-            dataMover.VehicleModelsXmlHandler.VisualizationMaster = visualizationMaster;
+            _dataMover.SceneryXmlHandler.VisualizationMaster = visualizationMaster;
+            _dataMover.SimulationOutputXmlHandler.VisualizationMaster = visualizationMaster;
+            _dataMover.PedestrianModelsXmlHandler.VisualizationMaster = visualizationMaster;
+            _dataMover.VehicleModelsXmlHandler.VisualizationMaster = visualizationMaster;
 
             // Starting Model Import
-            dataMover.VehicleModelsXmlHandler.StartImport();
-            dataMover.PedestrianModelsXmlHandler.StartImport();
+            _dataMover.VehicleModelsXmlHandler.StartImport();
+            _dataMover.PedestrianModelsXmlHandler.StartImport();
             
             // Starting Scenery import
-            dataMover.SceneryXmlHandler.roadNetworkHolder = roadNetworkHolder;
-            dataMover.SceneryXmlHandler.StartImport();
+            _dataMover.SceneryXmlHandler.roadNetworkHolder = roadNetworkHolder;
+            _dataMover.SceneryXmlHandler.StartImport();
             roadNetworkHolder.ShowSimpleGround(terrain);
 
             // Starting Simulation Output import
-            dataMover.SimulationOutputXmlHandler.StartImport();
+            _dataMover.SimulationOutputXmlHandler.StartImport();
 
             // preparing visualization
             _agentOcclusionManager.Prepare();

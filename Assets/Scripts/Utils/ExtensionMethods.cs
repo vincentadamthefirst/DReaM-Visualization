@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using Visualization.OcclusionManagement;
 
 namespace Utils {
     public static class ExtensionMethods {
@@ -135,6 +136,42 @@ namespace Utils {
             foreach (Transform child in obj.transform) {
                 SetLayerRecursive(child.gameObject, layer);
             }
+        }
+        
+        public static void LoadFromPrefs(this OcclusionManagementOptions omo) {
+            if (!PlayerPrefs.HasKey("OMOSET")) return;
+
+            omo.labelLocation = (LabelLocation) PlayerPrefs.GetInt("omo_LL");
+            omo.occlusionDetectionMethod = (OcclusionDetectionMethod) PlayerPrefs.GetInt("omo_ODM");
+            omo.occlusionHandlingMethod = (OcclusionHandlingMethod) PlayerPrefs.GetInt("omo_OHM");
+
+            omo.randomPointAmount = PlayerPrefs.GetInt("omo_RPA");
+            omo.agentTransparencyValue = PlayerPrefs.GetFloat("omo_ATV");
+            omo.objectTransparencyValue = PlayerPrefs.GetFloat("omo_OTV");
+
+            omo.sampleRandomPoints = PlayerPrefs.GetInt("omo_SRP") == 1;
+            omo.preCheckViewFrustum = PlayerPrefs.GetInt("omo_PVF") == 1;
+            omo.staggeredCheck = PlayerPrefs.GetInt("omo_SC") == 1;
+            omo.nearClipPlaneAsStart = PlayerPrefs.GetInt("omo_NCP") == 1;
+        }
+        
+        public static void StoreToPrefs(this OcclusionManagementOptions omo) {
+            PlayerPrefs.SetInt("OMOSET", 1);
+
+            PlayerPrefs.SetInt("omo_LL", (int) omo.labelLocation);
+            PlayerPrefs.SetInt("omo_ODM", (int) omo.occlusionDetectionMethod);
+            PlayerPrefs.SetInt("omo_OHM", (int) omo.occlusionHandlingMethod);
+            
+            PlayerPrefs.SetInt("omo_RPA", omo.randomPointAmount);
+            PlayerPrefs.SetFloat("omo_ATV", omo.agentTransparencyValue);
+            PlayerPrefs.SetFloat("omo_OTV", omo.objectTransparencyValue);
+
+            PlayerPrefs.SetInt("omo_SRP", omo.sampleRandomPoints ? 1 : 0);
+            PlayerPrefs.SetInt("omo_PVF", omo.preCheckViewFrustum ? 1 : 0);
+            PlayerPrefs.SetInt("omo_SC", omo.staggeredCheck ? 1 : 0);
+            PlayerPrefs.SetInt("omo_NCP", omo.nearClipPlaneAsStart ? 1 : 0);
+            
+            PlayerPrefs.Save();
         }
     }
 }

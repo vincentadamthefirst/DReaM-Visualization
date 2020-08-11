@@ -25,6 +25,8 @@ namespace UI.Main_Menu {
         // the occlusion management options to be used for evaluating the program
         public OcclusionManagementOptions evaluationOptions;
 
+        public MainMenuSettingsController mainMenuSettingsController;
+
         private Button _startButton;
         private Button _importButton;
         private Button _settingsButton;
@@ -184,6 +186,9 @@ namespace UI.Main_Menu {
             _dataMover.SimulationOutputXmlHandler = outputHandler;
             _dataMover.VehicleModelsXmlHandler = vehicleHandler;
             _dataMover.PedestrianModelsXmlHandler = pedestrianHandler;
+
+            mainMenuSettingsController.GetOcclusionManagementOptions();
+            _dataMover.occlusionManagementOptions = mainMenuSettingsController.occlusionManagementOptions;
 
             if (sceneryHandler != null && outputHandler != null && vehicleHandler != null &&
                 pedestrianHandler != null) {
