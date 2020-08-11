@@ -2,10 +2,7 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Rendering.Universal;
 using UnityEngine.UI;
-using Utils;
-using Visualization.OcclusionManagement;
 
 namespace Visualization.Labels {
     public class SceneLabel : Label {

@@ -1,7 +1,4 @@
-﻿using System;
-using JetBrains.Annotations;
-using UnityEngine;
-using UnityEngine.Rendering.Universal;
+﻿using UnityEngine;
 using Utils;
 using Visualization.Agents;
 

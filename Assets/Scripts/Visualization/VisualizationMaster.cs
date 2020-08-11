@@ -1,10 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using JetBrains.Annotations;
 using Scenery.RoadNetwork;
 using UI;
-using Unity.Collections;
-using Unity.Jobs;
 using UnityEngine;
 using Visualization.Agents;
 using Visualization.OcclusionManagement;

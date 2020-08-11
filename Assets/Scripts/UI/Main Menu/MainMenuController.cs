@@ -1,5 +1,4 @@
-﻿using System;
-using Evaluation;
+﻿using Evaluation;
 using Importer.XMLHandlers;
 using TMPro;
 using UnityEngine;
