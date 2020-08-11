@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Utils;
+using Visualization.SimulationEvents;
 
 namespace Visualization.Agents {
     public class PedestrianAgent : Agent {
@@ -52,12 +53,13 @@ namespace Visualization.Agents {
         }
 
         protected override void UpdateLabel() {
-            //if (Time.frameCount % 10 != 0) return; // reduce the load by only updating every 10 frames
+            var avi = previous.AdditionalInformation as AdditionalPedestrianInformation;
             
             var modelPosition = Model.transform.position;
             OwnLabel.UpdateFloats(modelPosition.x, modelPosition.z, previous.Velocity, previous.Acceleration);
             OwnLabel.UpdateStrings(previous.AdditionalInformation.CrossingPhase, previous.AdditionalInformation.ScanAoI, previous.AdditionalInformation.GlanceType);
             OwnLabel.UpdatePositions(previous.AdditionalInformation.OtherAgents);
+            OwnLabel.UpdateIntegers(avi?.Stopping ?? false ? 1 : 0);
         }
 
         protected override Vector3[] GetReferencePointsRenderer() {

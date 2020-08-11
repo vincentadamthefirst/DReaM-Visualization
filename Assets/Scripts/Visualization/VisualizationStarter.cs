@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Security.Cryptography;
 using Evaluation;
 using Scenery.RoadNetwork;
 using TMPro;
@@ -67,7 +68,7 @@ namespace Visualization {
                         break;
                     case QualitativeEvaluationType.CountingOccOn:
                         EvaluationImport(false, true, true);
-                        _agentOcclusionManager.SetAllTargets();
+                        _agentOcclusionManager.SetAllTargets(true);
                         break;
                     case QualitativeEvaluationType.LabelScene:
                     case QualitativeEvaluationType.LabelScreen:
@@ -81,10 +82,10 @@ namespace Visualization {
                 }
             } else if (_dataMover.QuantitativeEvaluationTypeType == QuantitativeEvaluationType.Nothing) {
                 EvaluationImport(true, true, true);
-                _agentOcclusionManager.SetAllTargets();
+                _agentOcclusionManager.SetAllTargets(true);
             } else { 
                 EvaluationImport(false, true, true);
-                _agentOcclusionManager.SetAllTargets();
+                _agentOcclusionManager.SetAllTargets(true);
             }
         }
 
@@ -206,42 +207,38 @@ namespace Visualization {
 
             var evalMenu = FindObjectOfType<EvaluationMenuController>();
 
-            switch (_dataMover.QuantitativeEvaluationTypeType) {
-                case QuantitativeEvaluationType.None:
-                    _roadOcclusionManager.ExecutionMeasurement.Disable = true;
-                    _labelOcclusionManager.ExecutionMeasurement.Disable = true;
-                    _agentOcclusionManager.DetectionMeasurement.Disable = true;
-                    _agentOcclusionManager.HandlingMeasurement.Disable = true;
+            if (_dataMover.QuantitativeEvaluationTypeType == QuantitativeEvaluationType.None) {
+                _roadOcclusionManager.ExecutionMeasurement.Disable = true;
+                _labelOcclusionManager.ExecutionMeasurement.Disable = true;
+                _agentOcclusionManager.DetectionMeasurement.Disable = true;
+                _agentOcclusionManager.HandlingMeasurement.Disable = true;
 
-                    // no qualitative evaluation needed
-                    if (_dataMover.QualitativeEvaluationType == QualitativeEvaluationType.None) {
-                        Destroy(holder);
-                        Destroy(FindObjectOfType<EvaluationCameraMover>().gameObject);
-                        return;
-                    }
-                    
-                    var qe = holder.AddComponent<QualitativeEvaluation>();
-                    qe.TestPersonId = _dataMover.EvaluationPersonString;
-                    qe.QualitativeEvaluationType = _dataMover.QualitativeEvaluationType;
-                    
-                    evalMenu.TestType = _dataMover.QualitativeEvaluationType;
-                    evalMenu.FindAll();
-                    evalMenu.PauseTest(true);
-
-                    return;
-                default: // RayCast / Polygon / Shader
-                    var eval = holder.AddComponent<QuantitativeEvaluation>();
-                    eval.QuantitativeEvaluationTypeType = _dataMover.QuantitativeEvaluationTypeType;
-
-                    eval.LabelPlacementMeasurement = _labelOcclusionManager.ExecutionMeasurement;
-                    eval.RoadOcclusionMeasurement = _roadOcclusionManager.ExecutionMeasurement;
-                    eval.DetectionMeasurement = _agentOcclusionManager.DetectionMeasurement;
-                    eval.HandlingMeasurement = _agentOcclusionManager.HandlingMeasurement;
-                    
-                    // deleting redundant UI component
+                // no qualitative evaluation needed
+                if (_dataMover.QualitativeEvaluationType == QualitativeEvaluationType.None) {
+                    Destroy(holder);
+                    Destroy(FindObjectOfType<EvaluationCameraMover>().gameObject);
                     Destroy(evalMenu.gameObject);
-
                     return;
+                }
+                    
+                var qe = holder.AddComponent<QualitativeEvaluation>();
+                qe.TestPersonId = _dataMover.EvaluationPersonString;
+                qe.QualitativeEvaluationType = _dataMover.QualitativeEvaluationType;
+
+                evalMenu.TestType = _dataMover.QualitativeEvaluationType;
+                evalMenu.FindAll();
+                evalMenu.PauseTest(true);
+            } else {
+                var eval = holder.AddComponent<QuantitativeEvaluation>();
+                eval.QuantitativeEvaluationTypeType = _dataMover.QuantitativeEvaluationTypeType;
+
+                eval.LabelPlacementMeasurement = _labelOcclusionManager.ExecutionMeasurement;
+                eval.RoadOcclusionMeasurement = _roadOcclusionManager.ExecutionMeasurement;
+                eval.DetectionMeasurement = _agentOcclusionManager.DetectionMeasurement;
+                eval.HandlingMeasurement = _agentOcclusionManager.HandlingMeasurement;
+                    
+                // deleting redundant UI component
+                Destroy(evalMenu.gameObject);
             }
         }
     }

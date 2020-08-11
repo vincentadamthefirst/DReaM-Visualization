@@ -173,8 +173,6 @@ namespace Visualization.Agents {
         }
 
         protected override void UpdateLabel() {
-            //if (Time.frameCount % 10 != 0) return; // reduce the load by only updating every 10 frames
-            
             var avi = previous.AdditionalInformation as AdditionalVehicleInformation;
 
             var modelPosition = Model.transform.position;

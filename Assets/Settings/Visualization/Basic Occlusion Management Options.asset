@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c47dd0d288ac47298a1daf6f7e3cee1f, type: 3}
   m_Name: Basic Occlusion Management Options
   m_EditorClassIdentifier: 
-  labelLocation: 0
-  occlusionDetectionMethod: 1
+  labelLocation: 1
+  occlusionDetectionMethod: 2
   occlusionHandlingMethod: 0
   sampleRandomPoints: 0
   nearClipPlaneAsStart: 1

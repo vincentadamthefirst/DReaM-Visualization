@@ -82,7 +82,7 @@ Material:
     - _SrcBlend: 5
     - _Surface: 1
     - _WireSmoothness: 16.6
-    - _WireThickness: 565
+    - _WireThickness: 287
     - _WorkflowMode: 1
     - _ZWrite: 0
     m_Colors:

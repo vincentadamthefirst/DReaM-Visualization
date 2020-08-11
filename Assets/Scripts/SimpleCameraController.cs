@@ -1,5 +1,7 @@
-﻿using JetBrains.Annotations;
+﻿using System;
+using JetBrains.Annotations;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 using Utils;
 using Visualization.Agents;
 
@@ -90,7 +92,7 @@ public class SimpleCameraController : MonoBehaviour {
         Cursor.lockState = CursorLockMode.None;
     }
 
-    void OnEnable() {
+    private void OnEnable() {
         m_TargetCameraState.SetFromTransform(transform);
         m_InterpolatingCameraState.SetFromTransform(transform);
 

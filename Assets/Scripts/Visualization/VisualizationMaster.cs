@@ -97,18 +97,17 @@ namespace Visualization {
 
             // adding label
             if (OcclusionManagementOptions.labelLocation == LabelLocation.Screen) {
-                var label = Instantiate(agentDesigns.labelPrefabScreen, _labelOcclusionManager.transform);
+                var label = Instantiate(agentDesigns.vehicleScreenLabel, _labelOcclusionManager.transform);
                 label.Agent = vehicleAgent;
                 label.LabelOcclusionManager = _labelOcclusionManager;
                 label.AgentCamera = vehicleAgent.Model.transform.Find("Camera").GetComponent<Camera>();
                 _labelOcclusionManager.AddLabel(label);
                 vehicleAgent.OwnLabel = label;
             } else {
-                var label = Instantiate(agentDesigns.labelPrefabScene, transform);
+                var label = Instantiate(agentDesigns.vehicleSceneLabel, transform);
                 label.AgentCamera = vehicleAgent.Model.transform.Find("Camera").GetComponent<Camera>();
                 vehicleAgent.OwnLabel = label;
             }
-            
 
             // retrieving model information
             vehicleAgent.ModelInformation = VehicleModelCatalog.ContainsKey(modelType)
@@ -138,14 +137,14 @@ namespace Visualization {
 
             // adding label TODO use other Label then vehicle!
             if (OcclusionManagementOptions.labelLocation == LabelLocation.Screen) {
-                var label = Instantiate(agentDesigns.labelPrefabScreen, _labelOcclusionManager.transform);
+                var label = Instantiate(agentDesigns.pedestrianScreenLabel, _labelOcclusionManager.transform);
                 label.Agent = pedestrianAgent;
                 label.LabelOcclusionManager = _labelOcclusionManager;
                 label.AgentCamera = pedestrianAgent.Model.transform.Find("Camera").GetComponent<Camera>();
                 _labelOcclusionManager.AddLabel(label);
                 pedestrianAgent.OwnLabel = label;
             } else {
-                var label = Instantiate(agentDesigns.labelPrefabScene, transform);
+                var label = Instantiate(agentDesigns.pedestrianSceneLabel, transform);
                 label.AgentCamera = pedestrianAgent.Model.transform.Find("Camera").GetComponent<Camera>();
                 pedestrianAgent.OwnLabel = label;
             }

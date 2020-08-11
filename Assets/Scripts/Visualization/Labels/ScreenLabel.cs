@@ -115,6 +115,7 @@ namespace Visualization.Labels {
 
                 var actualPosition = new Vector2((localPosition.x - 0.5f) * 250, (localPosition.y - 0.5f) * 250);
                 _otherAgents[i].localPosition = actualPosition;
+                _otherAgents[i].localRotation = Quaternion.identity;
             }
         }
         

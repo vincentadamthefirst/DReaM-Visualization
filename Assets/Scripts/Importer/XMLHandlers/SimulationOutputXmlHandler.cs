@@ -270,7 +270,7 @@ namespace Importer.XMLHandlers {
                 agent.ValuePositions["BrakeLight"] <= sampleSplit.Length - 1) {
 
                 var brakeInfo = sampleSplit[agent.ValuePositions["BrakeLight"]];
-                info.Stopping = brakeInfo == "1";
+                info.Stopping = brakeInfo.Replace(" ", "") == "1";
             }
         }
 

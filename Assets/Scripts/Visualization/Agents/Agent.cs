@@ -321,9 +321,17 @@ namespace Visualization.Agents {
 
         public override void SetIsTarget(bool target) {
             base.SetIsTarget(target);
-            Model.SetLayerRecursive(target ? 14 : 15);
+            Model.SetLayerRecursive(target && OcclusionManagementOptions.occlusionDetectionMethod ==
+                                    OcclusionDetectionMethod.Shader
+                ? 14
+                : 15);
             DriverView.SetActive(target);
             _targetStatusChanged = true;
+
+            if (OwnLabel.GetType().IsSubclassOf(typeof(SceneLabel))) {
+                if (target) OwnLabel.Activate();
+                else OwnLabel.Deactivate();
+            }
         }
         
         public override void HandleHit() {

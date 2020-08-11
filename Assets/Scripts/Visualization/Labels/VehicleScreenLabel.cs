@@ -36,6 +36,7 @@ namespace Visualization.Labels {
         [SuppressMessage("ReSharper", "ConvertSwitchStatementToSwitchExpression")]
         public override void UpdateIntegers(params int[] parameters) {
             base.UpdateIntegers();
+            if (LabelOcclusionManager.Disable) return;
             
             switch (parameters[0]) {
                 case 0:

@@ -7,6 +7,7 @@ using Scenery;
 using Scenery.RoadNetwork.RoadObjects;
 using UI;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 using Utils;
 using Visualization.Agents;
 using Visualization.OcclusionManagement.DetectionMethods;
@@ -17,6 +18,11 @@ namespace Visualization.OcclusionManagement {
     /// Class managing the occlusion of Agents in the scene by RoadObjects.
     /// </summary>
     public class AgentOcclusionManager : MonoBehaviour {
+        
+        // information about the renderer
+        public ForwardRendererData aotRendererData;
+        public List<ScriptableRendererFeature> shaderFeatures;
+        public List<ScriptableRendererFeature> normalFeatures;
         
         /// <summary>
         /// The class measuring the handling time for this manager.
@@ -84,18 +90,17 @@ namespace Visualization.OcclusionManagement {
             }
             
             if (OcclusionManagementOptions.occlusionDetectionMethod == OcclusionDetectionMethod.Shader) {
-                //GraphicsSettings.renderPipelineAsset = aotPipelineAsset;
-                //GraphicsSettings.defaultRenderPipeline = aotPipelineAsset;
-                
-                _extendedCamera.cameraData.SetRenderer(0);
+                aotRendererData.rendererFeatures.Clear();
+                aotRendererData.rendererFeatures.AddRange(shaderFeatures);
+                aotRendererData.opaqueLayerMask = LayerMask.GetMask("Default", "agents_base", "scenery_objects",
+                    "scenery_road", "scenery_signs", "Water", "Ignore Raycast", "UI", "TransparentFX", "Terrain");
                 
                 // disabling the occlusion management in code
                 Disable = true;
             } else {
-                //GraphicsSettings.renderPipelineAsset = normalPipelineAsset;
-                //GraphicsSettings.defaultRenderPipeline = normalPipelineAsset;
-                
-                _extendedCamera.cameraData.SetRenderer(1);
+                aotRendererData.rendererFeatures.Clear();
+                aotRendererData.opaqueLayerMask = LayerMask.GetMask("Default", "agents_base", "scenery_objects",
+                    "scenery_road", "scenery_signs", "Water", "Ignore Raycast", "UI", "TransparentFX", "Terrain", "agent_targets", "scenery_targets");
 
                 _occlusionDetector = (OcclusionDetector) Activator.CreateInstance(
                     OcclusionDetectors[(int) OcclusionManagementOptions.occlusionHandlingMethod][
@@ -124,6 +129,14 @@ namespace Visualization.OcclusionManagement {
                 // enabling the occlusion management 
                 Disable = false;
             }
+        }
+
+        /// <summary>
+        /// Resets the renderer to the standard information
+        /// </summary>
+        private void OnDestroy() {
+            aotRendererData.rendererFeatures.Clear();
+            aotRendererData.rendererFeatures.AddRange(shaderFeatures);
         }
 
         /// <summary>
@@ -188,10 +201,11 @@ namespace Visualization.OcclusionManagement {
         /// <summary>
         /// Sets all Agents in the scene as a target.
         /// </summary>
-        public void SetAllTargets() {
+        /// <param name="targetStatus">The new target status for all agents</param>
+        public void SetAllTargets(bool targetStatus) {
             if (OcclusionManagementOptions.occlusionDetectionMethod == OcclusionDetectionMethod.Shader) {
                 foreach (var agent in FindObjectsOfType<Agent>()) {
-                    agent.SetIsTarget(true);
+                    agent.SetIsTarget(targetStatus);
                 }
                 return;
             }

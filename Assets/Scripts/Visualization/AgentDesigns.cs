@@ -12,8 +12,10 @@ namespace Visualization {
         [Header("Prefabs")] 
         public PedestrianAgent pedestrianPrefab;
         public VehicleAgent vehiclePrefab;
-        public VehicleSceneLabel labelPrefabScene;
-        public VehicleScreenLabel labelPrefabScreen;
+        public VehicleSceneLabel vehicleSceneLabel;
+        public PedestrianSceneLabel pedestrianSceneLabel;
+        public VehicleScreenLabel vehicleScreenLabel;
+        public PedestrianScreenLabel pedestrianScreenLabel;
         public AgentSensor sensorPrefab;
         
         [Header("AgentModels")]

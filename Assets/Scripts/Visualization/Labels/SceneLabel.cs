@@ -2,7 +2,10 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 using UnityEngine.UI;
+using Utils;
+using Visualization.OcclusionManagement;
 
 namespace Visualization.Labels {
     public class SceneLabel : Label {
@@ -41,8 +44,10 @@ namespace Visualization.Labels {
             var targetTexture = new RenderTexture(250, 250, 1);
             _cognitiveMap.GetComponent<RawImage>().texture = targetTexture;
             AgentCamera.aspect = 1f;
-            AgentCamera.orthographicSize = 35f;
+            AgentCamera.orthographicSize = 100f;
             AgentCamera.targetTexture = targetTexture;
+
+            Deactivate();
         }
 
         /// <summary>
@@ -93,10 +98,12 @@ namespace Visualization.Labels {
             if (difference > 0) {
                 var go = new GameObject("agent pointer");
                 var img = go.AddComponent<Image>();
-                img.rectTransform.sizeDelta = new Vector2(7f, 7f);
+                img.rectTransform.sizeDelta = new Vector2(7, 7);
                 img.color = Color.cyan;
                 go.transform.parent = _cognitiveMap;
                 _otherAgents.Add(img.rectTransform);
+                go.transform.localScale = Vector3.one;
+                go.transform.localRotation = Quaternion.identity;
             }
             
             for (var i = 0; i < _otherAgents.Count; i++) {
@@ -114,7 +121,7 @@ namespace Visualization.Labels {
         }
         
         public override void SetColors(params Color[] parameters) {
-            // TODO implement
+            transform.GetChild(0).GetChild(0).GetChild(1).GetChild(0).GetComponent<Image>().color = parameters[0];
         }
 
         public override void SetStrings(params string[] parameters) {
