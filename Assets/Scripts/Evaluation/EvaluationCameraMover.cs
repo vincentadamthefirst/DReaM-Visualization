@@ -48,6 +48,11 @@ namespace Evaluation {
             _currentPosition++;
             _t = 0;
         }
+
+        private void OnDestroy() {
+            if (_simpleCameraController == null) return;
+            _simpleCameraController.AutomaticMovement = false;
+        }
     }
     
     [Serializable]

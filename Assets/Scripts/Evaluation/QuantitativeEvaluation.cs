@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using UI.Main_Menu;
 using UnityEngine;
+using Visualization.OcclusionManagement;
 
 namespace Evaluation {
     public class QuantitativeEvaluation : MonoBehaviour {
         
-        public FpsTest FpsTestType { get; set; }
+        public QuantitativeEvaluationType QuantitativeEvaluationTypeType { get; set; }
         
         public ExecutionMeasurement LabelPlacementMeasurement { get; set; }
         
@@ -19,12 +21,19 @@ namespace Evaluation {
         
         private readonly List<int> _fpsList = new List<int>();
 
+        private OcclusionManagementOptions _occlusionManagementOptions;
+
+        private void Start() {
+            _occlusionManagementOptions = FindObjectOfType<AgentOcclusionManager>().OcclusionManagementOptions;
+        }
+
         private void Update() {
             _fpsList.Add(Mathf.RoundToInt(1.0f / Time.deltaTime));
         }
 
         private void OnDestroy() {
-            var fileName = "C:/Bachelor Evaluation/Quantitative/Results/" + FpsTestType + ".txt";
+            var fileName = "C:/Bachelor Evaluation/Quantitative/Results/" + QuantitativeEvaluationTypeType +
+                           (_occlusionManagementOptions.staggeredCheck ? "_staggered" : "_normal") + ".txt";
 
             if (File.Exists(fileName))
                 File.Delete(fileName);
@@ -40,7 +49,7 @@ namespace Evaluation {
             var averageExecHandle = HandlingMeasurement.ElapsedTimeMs.Sum() /
                                     HandlingMeasurement.ElapsedTimeMs.Count;
 
-            File.AppendAllText(fileName, "Evaluation Type: " + FpsTestType + "\n");
+            File.AppendAllText(fileName, "Evaluation Type: " + QuantitativeEvaluationTypeType + "\n");
             File.AppendAllText(fileName, "Averages:\n" +
                                          "\tFPS: " + averageFps + "\n" +
                                          "\tLabels: " + averageExecLabel + "\n" +

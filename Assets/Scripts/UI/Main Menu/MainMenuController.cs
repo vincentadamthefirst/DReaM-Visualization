@@ -11,13 +11,16 @@ namespace UI.Main_Menu {
     public class MainMenuController : MonoBehaviour {
 
         // dropdown for selecting the evaluation step
-        public TMP_Dropdown evaluationStepDropdown;
+        public TMP_Dropdown qualitativeEvaluationDropdown;
 
         // input field for the tester name
         public TMP_InputField testerInputField;
 
         // the dropdown for the fps test
-        public TMP_Dropdown fpsDropdown;
+        public TMP_Dropdown quantitativeEvaluationDropdown;
+
+        // the toggle for staggered check in the quantitative evaluation
+        public Toggle quantitativeStaggeredToggle;
 
         // the occlusion management options to be used for evaluating the program
         public OcclusionManagementOptions evaluationOptions;
@@ -75,28 +78,34 @@ namespace UI.Main_Menu {
         private void FpsTest() {
             evaluationOptions.occlusionHandlingMethod = OcclusionHandlingMethod.Transparency;
             
-            switch ((FpsTest) fpsDropdown.value) {
-                case Evaluation.FpsTest.None:
+            switch ((QuantitativeEvaluationType) quantitativeEvaluationDropdown.value) {
+                case QuantitativeEvaluationType.None:
                     return;
-                case Evaluation.FpsTest.Shader:
+                case QuantitativeEvaluationType.Shader:
                     evaluationOptions.occlusionDetectionMethod = OcclusionDetectionMethod.Shader;
                     break;
-                case Evaluation.FpsTest.RayCast:
+                case QuantitativeEvaluationType.RayCast:
                     evaluationOptions.occlusionDetectionMethod = OcclusionDetectionMethod.RayCast;
                     break;
-                case Evaluation.FpsTest.Polygon:
+                case QuantitativeEvaluationType.Polygon:
                     evaluationOptions.occlusionDetectionMethod = OcclusionDetectionMethod.Polygon;
                     break;
-                case Evaluation.FpsTest.Transparency:
+                case QuantitativeEvaluationType.Transparency:
                     evaluationOptions.occlusionDetectionMethod = OcclusionDetectionMethod.RayCast;
                     break;
-                case Evaluation.FpsTest.WireFrame:
+                case QuantitativeEvaluationType.WireFrame:
                     evaluationOptions.occlusionDetectionMethod = OcclusionDetectionMethod.RayCast;
+                    evaluationOptions.occlusionHandlingMethod = OcclusionHandlingMethod.WireFrame;
+                    break;
+                case QuantitativeEvaluationType.Nothing:
+                    evaluationOptions.occlusionDetectionMethod = OcclusionDetectionMethod.Shader;
                     evaluationOptions.occlusionHandlingMethod = OcclusionHandlingMethod.WireFrame;
                     break;
                 default:
                     return;
             }
+
+            evaluationOptions.staggeredCheck = quantitativeStaggeredToggle.isOn;
             
             // finding the necessary files
             const string basePath = "C:/Bachelor Evaluation/Quantitative/Test/";
@@ -116,7 +125,7 @@ namespace UI.Main_Menu {
             _dataMover.VehicleModelsXmlHandler = vehicleModelHandler;
             _dataMover.PedestrianModelsXmlHandler = pedestrianModelHandler;
 
-            _dataMover.FpsTestType = (FpsTest) fpsDropdown.value;
+            _dataMover.QuantitativeEvaluationTypeType = (QuantitativeEvaluationType) quantitativeEvaluationDropdown.value;
             
             _dataMover.occlusionManagementOptions = evaluationOptions;
 
@@ -125,22 +134,22 @@ namespace UI.Main_Menu {
 
         private void QualitativeEvaluation() {
             // setting up any settings
-            switch ((EvaluationType) evaluationStepDropdown.value) {
-                case EvaluationType.OccTransparency:
+            switch ((QualitativeEvaluationType) qualitativeEvaluationDropdown.value) {
+                case QualitativeEvaluationType.OccTransparency:
                     evaluationOptions.occlusionDetectionMethod = OcclusionDetectionMethod.RayCast;
                     evaluationOptions.occlusionHandlingMethod = OcclusionHandlingMethod.Transparency;
                     break;
-                case EvaluationType.OccWireFrame:
+                case QualitativeEvaluationType.OccWireFrame:
                     evaluationOptions.occlusionDetectionMethod = OcclusionDetectionMethod.RayCast;
                     evaluationOptions.occlusionHandlingMethod = OcclusionHandlingMethod.WireFrame;
                     break;
-                case EvaluationType.OccShader:
+                case QualitativeEvaluationType.OccShader:
                     evaluationOptions.occlusionDetectionMethod = OcclusionDetectionMethod.Shader;
                     break;
             }
 
             // finding the necessary files
-            var basePath = "C:/Bachelor Evaluation/Test " + evaluationStepDropdown.value + "/";
+            var basePath = "C:/Bachelor Evaluation/Test " + qualitativeEvaluationDropdown.value + "/";
             
             var sceneHandler = new SceneryXmlHandler();
             sceneHandler.SetFilePath(basePath + "SceneryConfiguration.xodr");
@@ -157,7 +166,7 @@ namespace UI.Main_Menu {
             _dataMover.VehicleModelsXmlHandler = vehicleModelHandler;
             _dataMover.PedestrianModelsXmlHandler = pedestrianModelHandler;
 
-            _dataMover.EvaluationType = (EvaluationType) evaluationStepDropdown.value;
+            _dataMover.QualitativeEvaluationType = (QualitativeEvaluationType) qualitativeEvaluationDropdown.value;
             _dataMover.EvaluationPersonString = testerInputField.text ?? "NULL";
 
             _dataMover.occlusionManagementOptions = evaluationOptions;
@@ -185,11 +194,11 @@ namespace UI.Main_Menu {
         }
 
         private void StartButtonClicked() {
-            if (fpsDropdown.value != 0) {
+            if (quantitativeEvaluationDropdown.value != 0) {
                 FpsTest();
                 return;
             }
-            if (evaluationStepDropdown.value != 0) {
+            if (qualitativeEvaluationDropdown.value != 0) {
                 // evaluation is selected... load necessary files based on the test to be performed
                 QualitativeEvaluation();
                 return;

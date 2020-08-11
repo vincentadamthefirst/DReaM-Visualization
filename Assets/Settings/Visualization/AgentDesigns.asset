@@ -16,6 +16,7 @@ MonoBehaviour:
   vehiclePrefab: {fileID: 1355119702227136009, guid: e612f190c653f194385110a5f17f48a8, type: 3}
   labelPrefabScene: {fileID: 3023259783854893831, guid: 56f01617187481c4c9783eff7581b43a, type: 3}
   labelPrefabScreen: {fileID: -7317012153058038631, guid: e432839680d350b4e8204ea88164423b, type: 3}
+  sensorPrefab: {fileID: 7751897596784934655, guid: 2306ae10112037f46ab6c9d00e1bf43b, type: 3}
   agentModels:
   - agentType: 0
     model: {fileID: 8021603542940219362, guid: 065e7830a165f024f9807bd6c831065a, type: 3}
@@ -24,3 +25,4 @@ MonoBehaviour:
     model: {fileID: 5129726091690469822, guid: 8eb856c6103d8ef47a8a687752378dc7, type: 3}
     modelName: pedestrian
   vehicleChassisBase: {fileID: 2100000, guid: 37bcefb3339b1a04694b35a056aea715, type: 2}
+  sensorBase: {fileID: 2100000, guid: bdc46eb2ee69b3c4a95671e9877c5ed4, type: 2}

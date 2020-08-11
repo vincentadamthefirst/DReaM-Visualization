@@ -14,12 +14,14 @@ namespace Visualization {
         public VehicleAgent vehiclePrefab;
         public VehicleSceneLabel labelPrefabScene;
         public VehicleScreenLabel labelPrefabScreen;
+        public AgentSensor sensorPrefab;
         
         [Header("AgentModels")]
         public List<AgentModel> agentModels = new List<AgentModel>();
 
         [Header("Materials")]
         public Material vehicleChassisBase;
+        public Material sensorBase;
 
         public AgentModel GetAgentModel(AgentType agentType, string vehicleModel) {
             var found = agentModels.Where(am => am.agentType == agentType && vehicleModel.Contains(am.modelName));

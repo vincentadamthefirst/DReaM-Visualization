@@ -8,7 +8,7 @@ using Visualization.OcclusionManagement;
 namespace Evaluation {
     public class EvaluationMenuController : MonoBehaviour {
         
-        public EvaluationType TestType { get; set; }
+        public QualitativeEvaluationType TestType { get; set; }
 
         private Transform _currentTestPanel;
 

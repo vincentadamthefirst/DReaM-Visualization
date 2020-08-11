@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Scenery;
 using Scenery.RoadNetwork;
@@ -48,14 +49,24 @@ namespace Visualization.Agents {
         public Material ColorMaterial { get; set; }
         
         /// <summary>
-        /// The rotation of the agent at a given time (in radians)
+        /// The rotation of the agent at a given time (in radians).
         /// </summary>
-        public float CurrentRotation { get; set; }
+        public float CurrentRotation { get; protected set; }
         
         /// <summary>
-        /// All of the sensors the agent has.
+        /// The position of the agent at the current time (world coordinates).
         /// </summary>
-        public List<AgentSensor> AgentSensors { get; set; }
+        public Vector3 CurrentPosition { get; protected set; }
+        
+        /// <summary>
+        /// The design used in this program run.
+        /// </summary>
+        public AgentDesigns AgentDesigns { get; set; }
+
+        /// <summary>
+        /// The sensor representing the driver view
+        /// </summary>
+        public AgentSensor DriverView { get; set; }
 
         // if the agent is deactivated
         protected bool deactivated;
@@ -97,6 +108,8 @@ namespace Visualization.Agents {
         
         public override bool IsDistractor => true;
 
+        private bool _targetStatusChanged;
+
         public override Bounds AxisAlignedBoundingBox => boundingBox;
         
         // the materials for this agents meshes
@@ -123,10 +136,7 @@ namespace Visualization.Agents {
                 // setting the next simulation step
                 ordered[i].Next = ordered[i + 1];
                 ordered[i + 1].Previous = ordered[i];
-
-                // for (var j = 0; j < ordered[i].SensorInformation.Count; j++) {
-                //     
-                // }
+                
             }
 
             foreach (var simulationStep in SimulationSteps.Values) {
@@ -149,6 +159,8 @@ namespace Visualization.Agents {
             }
             
             SetupOccludedMaterials();
+            
+            SetupSensors();
         }
 
         public override void SetupOccludedMaterials() {
@@ -172,6 +184,58 @@ namespace Visualization.Agents {
                 
                 _occludedMaterials[i] = tmp;
             }
+        }
+
+        /// <summary>
+        /// Initializes this agents sensors if necessary. Currently only handles the drivers view.
+        /// </summary>
+        private void SetupSensors() {
+            // TODO extend by adding support for >1 sensor
+            
+            // step zero: initializing (for now only one) AgentSensor
+            var sensorScript = Instantiate(AgentDesigns.sensorPrefab, transform.parent);
+            DriverView = sensorScript;
+            DriverView.FindAll();
+            
+            // step one: is a driver sensor needed?
+            var driverSensorNeeded = SimulationSteps.Values.Any(step => step.SensorInformation.Count > 0);
+            if (!driverSensorNeeded) return; // no sensor, stop execution
+            
+            // step two: filling holes in the simulation steps
+            foreach (var step in SimulationSteps.Values) {
+                if (step.SensorInformation.Count != 0) continue;
+                // this steps information is empty
+                var dummyData = new SensorInformation {Distance = 0, Heading = 0, OpeningAngle = 0};
+                step.SensorInformation.Add(dummyData);
+            }
+            
+            // ordered list of SimulationSteps
+            var ordered = SimulationSteps.Values.OrderBy(s => s.Time).ToArray();
+            
+            // step three: check if the sensor data changes between SimulationSteps
+            for (var i = 0; i < ordered.Length - 1; i++) {
+                var a = ordered[i];
+                var b = ordered[i + 1];
+
+                for (var j = 0; j < a.SensorInformation.Count; j++) {
+                    if (Math.Abs(a.SensorInformation[j].OpeningAngle - b.SensorInformation[j].OpeningAngle) >
+                        Tolerance) { // opening angles not the same
+                        a.SensorInformation[j].OpeningChangedTowardsNext = true;
+                        b.SensorInformation[j].OpeningChangedTowardsPrevious = true;
+                    }
+                }
+            }
+            
+            // step four: set first and last Sensor data in SimulationSteps
+            ordered[0].SensorInformation.ForEach(x => x.OpeningChangedTowardsPrevious = true);
+            ordered[ordered.Length - 1].SensorInformation.ForEach(x => x.OpeningChangedTowardsNext = true);
+            
+            // step five: setting the material
+            var sensorMat = new Material(AgentDesigns.sensorBase) {
+                color = new Color(ColorMaterial.color.r, ColorMaterial.color.g, ColorMaterial.color.b,
+                    AgentDesigns.sensorBase.color.a)
+            };
+            DriverView.SetMeshMaterial(sensorMat);
         }
 
         /// <summary>
@@ -216,6 +280,17 @@ namespace Visualization.Agents {
             if (!isTarget) return;
             RoadOcclusionManager.AddOnElement(previous.OnElement);
             UpdateLabel();
+            
+            // updating the driver view (if there is one)
+            if (previous.SensorInformation.Count != 0) {
+                var driverSensorInfo = previous.SensorInformation[0];
+                if (backwards && driverSensorInfo.OpeningChangedTowardsNext ||
+                    !backwards && driverSensorInfo.OpeningChangedTowardsPrevious || _targetStatusChanged) {
+                    DriverView.UpdateOpeningAngle(driverSensorInfo.OpeningAngle, driverSensorInfo.Distance);
+                }
+
+                DriverView.UpdatePositionAndRotation(CurrentPosition + new Vector3(0, 1f, 0), driverSensorInfo.Heading);
+            }
         }
 
         protected abstract void UpdatePosition();
@@ -235,16 +310,20 @@ namespace Visualization.Agents {
         private void Deactivate() {
             deactivated = true;
             Model.SetActive(false);
+            DriverView.SetActive(false);
         }
 
         private void Activate() {
             deactivated = false;
             Model.SetActive(true);
+            DriverView.SetActive(true);
         }
 
         public override void SetIsTarget(bool target) {
             base.SetIsTarget(target);
             Model.SetLayerRecursive(target ? 14 : 15);
+            DriverView.SetActive(target);
+            _targetStatusChanged = true;
         }
         
         public override void HandleHit() {

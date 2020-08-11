@@ -140,7 +140,14 @@ namespace Importer.XMLHandlers {
 
                 // not the correct amount of values inside the fov
                 if (fovSplit.Length != 4) return;
-                
+
+                var sensorInformation = new SensorInformation {
+                    Distance = 100f,  // TODO not hard coded (but where to get this info from?)
+                    Heading = float.Parse(fovSplit[0], CultureInfo.InvariantCulture.NumberFormat),
+                    OpeningAngle = float.Parse(fovSplit[1], CultureInfo.InvariantCulture.NumberFormat)
+                };
+                step.SensorInformation.Add(sensorInformation);
+
                 info.GlanceType = fovSplit[2];
                 info.ScanAoI = fovSplit[3];
             }

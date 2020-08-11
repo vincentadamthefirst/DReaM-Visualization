@@ -35,7 +35,8 @@ namespace Visualization.Agents {
             Model.transform.position = new Vector3(previous.Position.x + nextPositionPointer.x, 0, 
                 previous.Position.y + nextPositionPointer.y);
 
-            boundingBox.center = Model.transform.position + _heightOffset;
+            CurrentPosition = Model.transform.position;
+            boundingBox.center = CurrentPosition + _heightOffset;
         }
 
         protected override void UpdateRotation() {

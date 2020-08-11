@@ -42,7 +42,7 @@ namespace Visualization {
         /// <summary>
         /// The information of this Agents sensors at this step.
         /// </summary>
-        public List<SensorInformation> SensorInformation { get; set; }
+        public List<SensorInformation> SensorInformation { get; } = new List<SensorInformation>();
         
         /// <summary>
         /// The additional information for an agent at this SimulationStep
@@ -65,7 +65,7 @@ namespace Visualization {
         public bool OnJunction { get; set; }
     }
 
-    public abstract class SensorInformation {
+    public class SensorInformation {
         /// <summary>
         /// The relative position of the sensor towards the center of the vehicle
         /// </summary>

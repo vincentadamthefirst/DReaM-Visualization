@@ -10,10 +10,10 @@ namespace UI.Main_Menu {
         public OcclusionManagementOptions occlusionManagementOptions;
         
         // the current evaluationType (if any)
-        public EvaluationType EvaluationType { get; set; }
+        public QualitativeEvaluationType QualitativeEvaluationType { get; set; }
         
         // the type of fps test to be performed (none if there should be none)
-        public FpsTest FpsTestType { get; set; }
+        public QuantitativeEvaluationType QuantitativeEvaluationTypeType { get; set; }
         
         // the current tester (if any)
         public string EvaluationPersonString { get; set; }

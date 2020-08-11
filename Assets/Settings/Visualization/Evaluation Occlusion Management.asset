@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   labelLocation: 0
   occlusionDetectionMethod: 0
-  occlusionHandlingMethod: 0
+  occlusionHandlingMethod: 1
   sampleRandomPoints: 0
   nearClipPlaneAsStart: 1
   rayCastPrecision: 3

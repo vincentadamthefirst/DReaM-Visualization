@@ -1,6 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
+using JetBrains.Annotations;
 using Scenery.RoadNetwork;
 using UI;
+using Unity.Collections;
+using Unity.Jobs;
 using UnityEngine;
 using Visualization.Agents;
 using Visualization.OcclusionManagement;
@@ -84,6 +88,7 @@ namespace Visualization {
             vehicleAgent.RoadNetworkHolder = FindObjectOfType<RoadNetworkHolder>();
             vehicleAgent.RoadOcclusionManager = _roadOcclusionManager;
             vehicleAgent.OcclusionManagementOptions = OcclusionManagementOptions;
+            vehicleAgent.AgentDesigns = agentDesigns;
             
             // retrieving prefab for 3d model
             var model = Instantiate(agentDesigns.GetAgentModel(AgentType.Vehicle, modelType).model, vehicleAgent.transform, true);
@@ -124,12 +129,13 @@ namespace Visualization {
             pedestrianAgent.RoadNetworkHolder = FindObjectOfType<RoadNetworkHolder>();
             pedestrianAgent.RoadOcclusionManager = _roadOcclusionManager;
             pedestrianAgent.OcclusionManagementOptions = OcclusionManagementOptions;
+            pedestrianAgent.AgentDesigns = agentDesigns;
             
             // retrieving prefab for 3d model
             var model = Instantiate(agentDesigns.GetAgentModel(AgentType.Pedestrian, "pedestrian").model, pedestrianAgent.transform, true);
             _agents.Add(pedestrianAgent);
             pedestrianAgent.Model = model;
-            
+
             // adding label TODO use other Label then vehicle!
             if (OcclusionManagementOptions.labelLocation == LabelLocation.Screen) {
                 var label = Instantiate(agentDesigns.labelPrefabScreen, _labelOcclusionManager.transform);
@@ -143,7 +149,6 @@ namespace Visualization {
                 label.AgentCamera = pedestrianAgent.Model.transform.Find("Camera").GetComponent<Camera>();
                 pedestrianAgent.OwnLabel = label;
             }
-            
 
             // retrieving model information
             pedestrianAgent.ModelInformation = PedestrianModelCatalog.ContainsKey(modelType)
@@ -180,12 +185,18 @@ namespace Visualization {
             else if (CurrentTime > MaxSampleTime) CurrentTime = MaxSampleTime;
 
             foreach (var agent in _agents) {
-                agent.UpdateForTimeStep(CurrentTime, PlayBackwards);
+                StartCoroutine(UpdateAgent(agent));
+                //agent.UpdateForTimeStep(CurrentTime, PlayBackwards);
             }
             
             if (OcclusionManagementOptions.occlusionDetectionMethod == OcclusionDetectionMethod.Shader) 
                 _roadOcclusionManager.ChangeRoadLayers();
             _playbackControl.UpdateCurrentTime(CurrentTime);
+        }
+
+        private IEnumerator UpdateAgent(Agent agent) {
+            agent.UpdateForTimeStep(CurrentTime, PlayBackwards);
+            yield return null;
         }
     }
 }

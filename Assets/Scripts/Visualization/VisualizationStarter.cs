@@ -42,7 +42,7 @@ namespace Visualization {
             
             _dataMover = FindObjectOfType<DataMover>();
 
-            if (_dataMover.EvaluationType != EvaluationType.None || _dataMover.FpsTestType != FpsTest.None) {
+            if (_dataMover.QualitativeEvaluationType != QualitativeEvaluationType.None || _dataMover.QuantitativeEvaluationTypeType != QuantitativeEvaluationType.None) {
                 EvaluationSetup();
             } else {
                 SetupEvaluationMeasurement();
@@ -59,27 +59,27 @@ namespace Visualization {
             // build necessary objects for the evaluation
             SetupEvaluationMeasurement();
 
-            if (_dataMover.FpsTestType == FpsTest.None) {
+            if (_dataMover.QuantitativeEvaluationTypeType == QuantitativeEvaluationType.None) {
                 // no fps test
-                switch (_dataMover.EvaluationType) {
-                    case EvaluationType.CountingOccOff:
+                switch (_dataMover.QualitativeEvaluationType) {
+                    case QualitativeEvaluationType.CountingOccOff:
                         EvaluationImport(true, true, true);
                         break;
-                    case EvaluationType.CountingOccOn:
+                    case QualitativeEvaluationType.CountingOccOn:
                         EvaluationImport(false, true, true);
                         _agentOcclusionManager.SetAllTargets();
                         break;
-                    case EvaluationType.LabelScene:
-                    case EvaluationType.LabelScreen:
+                    case QualitativeEvaluationType.LabelScene:
+                    case QualitativeEvaluationType.LabelScreen:
                         EvaluationImport(false, false, false);
                         break;
-                    case EvaluationType.OccTransparency:
-                    case EvaluationType.OccWireFrame:
-                    case EvaluationType.OccShader:
+                    case QualitativeEvaluationType.OccTransparency:
+                    case QualitativeEvaluationType.OccWireFrame:
+                    case QualitativeEvaluationType.OccShader:
                         EvaluationImport(false, false, false);
                         break;
                 }
-            } else if (_dataMover.FpsTestType == FpsTest.Nothing) {
+            } else if (_dataMover.QuantitativeEvaluationTypeType == QuantitativeEvaluationType.Nothing) {
                 EvaluationImport(true, true, true);
                 _agentOcclusionManager.SetAllTargets();
             } else { 
@@ -206,34 +206,32 @@ namespace Visualization {
 
             var evalMenu = FindObjectOfType<EvaluationMenuController>();
 
-            switch (_dataMover.FpsTestType) {
-                case FpsTest.None:
+            switch (_dataMover.QuantitativeEvaluationTypeType) {
+                case QuantitativeEvaluationType.None:
                     _roadOcclusionManager.ExecutionMeasurement.Disable = true;
                     _labelOcclusionManager.ExecutionMeasurement.Disable = true;
                     _agentOcclusionManager.DetectionMeasurement.Disable = true;
                     _agentOcclusionManager.HandlingMeasurement.Disable = true;
 
                     // no qualitative evaluation needed
-                    if (_dataMover.EvaluationType == EvaluationType.None) {
+                    if (_dataMover.QualitativeEvaluationType == QualitativeEvaluationType.None) {
                         Destroy(holder);
+                        Destroy(FindObjectOfType<EvaluationCameraMover>().gameObject);
                         return;
                     }
                     
                     var qe = holder.AddComponent<QualitativeEvaluation>();
                     qe.TestPersonId = _dataMover.EvaluationPersonString;
-                    qe.EvaluationType = _dataMover.EvaluationType;
+                    qe.QualitativeEvaluationType = _dataMover.QualitativeEvaluationType;
                     
-                    evalMenu.TestType = _dataMover.EvaluationType;
+                    evalMenu.TestType = _dataMover.QualitativeEvaluationType;
                     evalMenu.FindAll();
                     evalMenu.PauseTest(true);
-                    
-                    Destroy(FindObjectOfType<EvaluationCameraMover>().gameObject);
-                    _extendedCamera.CameraController.AutomaticMovement = false;
 
                     return;
                 default: // RayCast / Polygon / Shader
                     var eval = holder.AddComponent<QuantitativeEvaluation>();
-                    eval.FpsTestType = _dataMover.FpsTestType;
+                    eval.QuantitativeEvaluationTypeType = _dataMover.QuantitativeEvaluationTypeType;
 
                     eval.LabelPlacementMeasurement = _labelOcclusionManager.ExecutionMeasurement;
                     eval.RoadOcclusionMeasurement = _roadOcclusionManager.ExecutionMeasurement;

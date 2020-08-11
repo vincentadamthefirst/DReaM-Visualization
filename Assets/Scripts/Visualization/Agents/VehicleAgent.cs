@@ -94,14 +94,8 @@ namespace Visualization.Agents {
             UpdateIndicators();
             UpdateBrakes();
             
-            boundingBox.center = Model.transform.GetChild(1).position + _centerHeightOffset;
-
-            // for (var i = 0; i < AgentSensors.Count; i++) {
-            //     AgentSensors[i]
-            //         .UpdatePositionAndRotation(Model.transform.position, previous.SensorInformation[i].Heading);
-            //     
-            //     if (AgentSensors[i].IsStatic) continue;
-            // }
+            CurrentPosition = Model.transform.GetChild(1).position;
+            boundingBox.center = CurrentPosition + _centerHeightOffset;
         }
 
         private void UpdateWheelRotation() {

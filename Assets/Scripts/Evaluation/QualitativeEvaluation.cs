@@ -26,7 +26,7 @@ namespace Evaluation {
 
         private EvaluationMenuController _evaluationMenuController;
 
-        public EvaluationType EvaluationType { get; set; }
+        public QualitativeEvaluationType QualitativeEvaluationType { get; set; }
 
         public bool Disable { get; set; }
 
@@ -67,7 +67,7 @@ namespace Evaluation {
 
             var endTime = DateTime.Now.ToString("yy-MMM-dd_HH-mm-ss");
             var startTime = _startTime.ToString("yy-MMM-dd_HH-mm-ss");
-            var path = "C:/Bachelor Evaluation/Results/" + TestPersonId + "_Test " + (int) EvaluationType + ".txt";
+            var path = "C:/Bachelor Evaluation/Results/" + TestPersonId + "_Test " + (int) QualitativeEvaluationType + ".txt";
             
             File.Create(path).Dispose();
 
