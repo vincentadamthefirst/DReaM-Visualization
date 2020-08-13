@@ -24,8 +24,6 @@ namespace Importer.XMLHandlers {
 
         public abstract string GetName();
 
-        public abstract void StartImport();
-
         public abstract string GetDetails();
     }
 

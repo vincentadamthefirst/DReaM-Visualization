@@ -2,50 +2,61 @@
 using Utils;
 using Visualization.Agents;
 
+/// <summary>
+/// Class to be used on the main camera in the scene. Handles Movement, is based on the Unity Standard Movement-System.
+/// Controls:
+///     - W A S D     : Movement
+///     - Q / E       : Up / Down
+///     - Shift       : Speed up
+///     - Scroll      : Change movement speed
+///     - Right click : Hold to move the camera (locks cursor)
+/// </summary>
 public class SimpleCameraController : MonoBehaviour {
     public class CameraState {
         public float yaw;
         public float pitch;
-        public float roll;
-        public float x;
-        public float y;
-        public float z;
+        private float _roll;
+        private float _x;
+        private float _y;
+        private float _z;
 
         public void SetFromTransform(Transform t) {
-            pitch = t.eulerAngles.x;
-            yaw = t.eulerAngles.y;
-            roll = t.eulerAngles.z;
-            x = t.position.x;
-            y = t.position.y;
-            z = t.position.z;
+            var eulerAngles = t.eulerAngles;
+            pitch = eulerAngles.x;
+            yaw = eulerAngles.y;
+            _roll = eulerAngles.z;
+            var position = t.position;
+            _x = position.x;
+            _y = position.y;
+            _z = position.z;
         }
 
         public void Translate(Vector3 translation) {
-            Vector3 rotatedTranslation = Quaternion.Euler(pitch, yaw, roll) * translation;
+            var rotatedTranslation = Quaternion.Euler(pitch, yaw, _roll) * translation;
 
-            x += rotatedTranslation.x;
-            y += rotatedTranslation.y;
-            z += rotatedTranslation.z;
+            _x += rotatedTranslation.x;
+            _y += rotatedTranslation.y;
+            _z += rotatedTranslation.z;
         }
 
         public void LerpTowards(CameraState target, float positionLerpPct, float rotationLerpPct) {
             yaw = Mathf.Lerp(yaw, target.yaw, rotationLerpPct);
             pitch = Mathf.Lerp(pitch, target.pitch, rotationLerpPct);
-            roll = Mathf.Lerp(roll, target.roll, rotationLerpPct);
+            _roll = Mathf.Lerp(_roll, target._roll, rotationLerpPct);
 
-            x = Mathf.Lerp(x, target.x, positionLerpPct);
-            y = Mathf.Lerp(y, target.y, positionLerpPct);
-            z = Mathf.Lerp(z, target.z, positionLerpPct);
+            _x = Mathf.Lerp(_x, target._x, positionLerpPct);
+            _y = Mathf.Lerp(_y, target._y, positionLerpPct);
+            _z = Mathf.Lerp(_z, target._z, positionLerpPct);
         }
 
         public void UpdateTransform(Transform t) {
-            t.eulerAngles = new Vector3(pitch, yaw, roll);
-            t.position = new Vector3(x, y, z);
+            t.eulerAngles = new Vector3(pitch, yaw, _roll);
+            t.position = new Vector3(_x, _y, _z);
         }
     }
 
-    public CameraState m_TargetCameraState = new CameraState();
-    public CameraState m_InterpolatingCameraState = new CameraState();
+    public CameraState targetCameraState = new CameraState();
+    public CameraState interpolatingCameraState = new CameraState();
 
     [Header("Movement Settings")] [Tooltip("Exponential boost factor on translation, controllable by mouse wheel.")]
     public float boost = 3.5f;
@@ -64,25 +75,42 @@ public class SimpleCameraController : MonoBehaviour {
     [Tooltip("Whether or not to invert our Y axis for mouse input to rotation.")]
     public bool invertY;
 
-    private bool _settingsOpen;
-    
     /// <summary>
     /// Set if the Quantitative Evaluation is performed and the camera is moved throughout the scene.
     /// </summary>
     public bool AutomaticMovement { get; set; }
     
+    /// <summary>
+    /// The current Agent to follow with the camera.
+    /// </summary>
     public Agent LockedOnAgent { get; set; }
     
+    /// <summary>
+    /// If a new Agent was selected as the locked on target.
+    /// </summary>
     public bool LockedOnAgentIsSet { get; set; }
 
-    private Vector3 _lastPosition;
-
-    private Vector3 _lastRotation;
-    
+    /// <summary>
+    /// The total distance travelled in units (m).
+    /// </summary>
     public float TravelledDistance { get; private set;  }
     
+    /// <summary>
+    /// The Total rotation on all axis in degrees.
+    /// </summary>
     public float TotalRotation { get; private set; }
+    
+    // information for the statistics
+    private Vector3 _lastPosition;
+    private Vector3 _lastRotation;
+    
+    // if the settings panel is currently open
+    private bool _settingsOpen;
 
+    /// <summary>
+    /// Sets information on the state of the settings panel.
+    /// </summary>
+    /// <param name="value">If the settings panel has been opened</param>
     public void SetSettingsOpen(bool value) {
         _settingsOpen = value;
         Cursor.visible = true;
@@ -90,14 +118,18 @@ public class SimpleCameraController : MonoBehaviour {
     }
 
     private void OnEnable() {
-        m_TargetCameraState.SetFromTransform(transform);
-        m_InterpolatingCameraState.SetFromTransform(transform);
+        targetCameraState.SetFromTransform(transform);
+        interpolatingCameraState.SetFromTransform(transform);
 
         _lastPosition = transform.position;
     }
 
-    Vector3 GetInputTranslationDirection() {
-        Vector3 direction = new Vector3();
+    /// <summary>
+    /// Returns a Vector3 representing the current button input.
+    /// </summary>
+    /// <returns>A vector containing the x, y and z movement based on W A S D, E & Q</returns>
+    private static Vector3 GetInputTranslationDirection() {
+        var direction = new Vector3();
         if (Input.GetKey(KeyCode.W)) {
             direction += Vector3.forward;
         }
@@ -140,6 +172,7 @@ public class SimpleCameraController : MonoBehaviour {
             Cursor.lockState = CursorLockMode.None;
         }
 
+        // The camera should follow an agent
         if (LockedOnAgentIsSet) {
             var offsetVector2 = new Vector2(20, 0);
             offsetVector2.RotateRadians(LockedOnAgent.CurrentRotation + Mathf.PI);
@@ -152,7 +185,6 @@ public class SimpleCameraController : MonoBehaviour {
             secondOffsetVector.RotateRadians(LockedOnAgent.CurrentRotation + Mathf.PI - Mathf.PI / 2f);
             
             transform.LookAt(modelPosition + new Vector3(secondOffsetVector.x, 0, secondOffsetVector.y));
-
             return;
         }
 
@@ -162,8 +194,8 @@ public class SimpleCameraController : MonoBehaviour {
 
             var mouseSensitivityFactor = mouseSensitivityCurve.Evaluate(mouseMovement.magnitude);
 
-            m_TargetCameraState.yaw += mouseMovement.x * mouseSensitivityFactor;
-            m_TargetCameraState.pitch += mouseMovement.y * mouseSensitivityFactor;
+            targetCameraState.yaw += mouseMovement.x * mouseSensitivityFactor;
+            targetCameraState.pitch += mouseMovement.y * mouseSensitivityFactor;
         }
 
         // Translation
@@ -178,15 +210,15 @@ public class SimpleCameraController : MonoBehaviour {
         boost += Input.mouseScrollDelta.y * 0.2f;
         translation *= Mathf.Pow(2.0f, boost);
 
-        m_TargetCameraState.Translate(translation);
+        targetCameraState.Translate(translation);
 
         // Framerate-independent interpolation
         // Calculate the lerp amount, such that we get 99% of the way to our target in the specified time
         var positionLerpPct = 1f - Mathf.Exp((Mathf.Log(1f - 0.99f) / positionLerpTime) * Time.deltaTime);
         var rotationLerpPct = 1f - Mathf.Exp((Mathf.Log(1f - 0.99f) / rotationLerpTime) * Time.deltaTime);
-        m_InterpolatingCameraState.LerpTowards(m_TargetCameraState, positionLerpPct, rotationLerpPct);
+        interpolatingCameraState.LerpTowards(targetCameraState, positionLerpPct, rotationLerpPct);
 
-        m_InterpolatingCameraState.UpdateTransform(transform);
+        interpolatingCameraState.UpdateTransform(transform);
 
         var currentPosition = transform.position;
         TravelledDistance += Mathf.Abs(Vector3.Distance(_lastPosition, currentPosition));

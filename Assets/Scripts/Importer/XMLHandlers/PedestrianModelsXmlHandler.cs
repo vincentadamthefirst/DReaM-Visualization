@@ -9,7 +9,7 @@ namespace Importer.XMLHandlers {
             return "Ped. Models";
         }
 
-        public override void StartImport() {
+        public virtual void StartImport() {
             ImportPedestrianModels();
         }
         

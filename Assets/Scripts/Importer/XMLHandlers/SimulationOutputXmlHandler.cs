@@ -19,7 +19,7 @@ namespace Importer.XMLHandlers {
             return "Output";
         }
 
-        public override void StartImport() {
+        public virtual void StartImport() {
             _xmlAgents = new Dictionary<int, XmlAgent>();
             
             if (xmlDocument.Root == null) return; // TODO Error handling

@@ -206,11 +206,13 @@ namespace Visualization {
                 _labelOcclusionManager.ExecutionMeasurement.Disable = true;
                 _agentOcclusionManager.DetectionMeasurement.Disable = true;
                 _agentOcclusionManager.HandlingMeasurement.Disable = true;
+                
+                // removing the camera mover when no Quantitative Evaluation takes place
+                Destroy(FindObjectOfType<EvaluationCameraMover>().gameObject);
 
                 // no qualitative evaluation needed
                 if (_dataMover.QualitativeEvaluationType == QualitativeEvaluationType.None) {
                     Destroy(holder);
-                    Destroy(FindObjectOfType<EvaluationCameraMover>().gameObject);
                     Destroy(evalMenu.gameObject);
                     return;
                 }

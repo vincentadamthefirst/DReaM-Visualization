@@ -8,7 +8,7 @@ namespace Importer.XMLHandlers {
             return "Veh. Models";
         }
 
-        public override void StartImport() {
+        public virtual void StartImport() {
             if (xmlDocument.Root == null) return;
 
             ImportAgentModels();

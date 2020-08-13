@@ -1,4 +1,4 @@
-﻿namespace Visualization.SimulationEvents {
+﻿namespace Visualization {
     public class AdditionalPedestrianInformation : AdditionalAgentInformation {
         /// <summary>
         /// If the agent is currently stopping

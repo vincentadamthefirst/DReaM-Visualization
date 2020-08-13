@@ -22,7 +22,7 @@ namespace Importer.XMLHandlers {
             return "Scenery";
         }
 
-        public override void StartImport() {
+        public virtual void StartImport() {
             if (xmlDocument.Root == null) return; // TODO Error handling
             
             ImportRoads();

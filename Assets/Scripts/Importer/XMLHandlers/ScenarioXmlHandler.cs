@@ -4,7 +4,7 @@
             return "Scenario";
         }
 
-        public override void StartImport() {
+        public virtual void StartImport() {
             // TODO implement
         }
 
