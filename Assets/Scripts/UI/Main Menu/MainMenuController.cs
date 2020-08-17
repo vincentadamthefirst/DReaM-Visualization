@@ -1,5 +1,7 @@
-﻿using Evaluation;
+﻿using System.Collections;
+using Evaluation;
 using Importer.XMLHandlers;
+using SimpleFileBrowser;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -25,6 +27,10 @@ namespace UI.Main_Menu {
         public OcclusionManagementOptions evaluationOptions;
 
         public MainMenuSettingsController mainMenuSettingsController;
+
+        public TMP_InputField evaluationFolderInput;
+
+        public Button evaluationFolderSelect;
 
         private Button _startButton;
         private Button _importButton;
@@ -55,7 +61,13 @@ namespace UI.Main_Menu {
             _settingsButton.onClick.AddListener(SettingsButtonClicked);
             _evaluationButton.onClick.AddListener(EvaluationButtonClicked);
             
+            evaluationFolderSelect.onClick.AddListener(OpenFileBrowser);
+            
             _dataMover = FindObjectOfType<DataMover>();
+
+            if (PlayerPrefs.HasKey("evalFolder")) {
+                evaluationFolderInput.SetTextWithoutNotify(PlayerPrefs.GetString("evalFolder"));
+            }
         }
 
         private void ImportButtonClicked() {
@@ -74,6 +86,19 @@ namespace UI.Main_Menu {
             _importWindow.gameObject.SetActive(false);
             _settingsWindow.gameObject.SetActive(false);
             _evaluationWindow.gameObject.SetActive(true);
+        }
+        
+        private IEnumerator ShowLoadDialogCoroutine() {
+            yield return FileBrowser.WaitForLoadDialog(true, false,
+                evaluationFolderInput.text.Replace(" ", "") == "" ? null : evaluationFolderInput.text,
+                "Select Base Folder");
+
+            if (!FileBrowser.Success) yield break;
+            evaluationFolderInput.SetTextWithoutNotify(FileBrowser.Result.Length > 0 ? FileBrowser.Result[0] : "");
+        }
+
+        private void OpenFileBrowser() {
+            StartCoroutine(ShowLoadDialogCoroutine());
         }
 
         private void FpsTest() {
@@ -109,7 +134,7 @@ namespace UI.Main_Menu {
             evaluationOptions.staggeredCheck = quantitativeStaggeredToggle.isOn;
             
             // finding the necessary files
-            const string basePath = "C:/Bachelor Evaluation/Quantitative/Test/";
+            string basePath = evaluationFolderInput.text + "/Quantitative/Test/";
             
             var sceneHandler = new SceneryXmlHandler();
             sceneHandler.SetFilePath(basePath + "SceneryConfiguration.xodr");
@@ -134,8 +159,15 @@ namespace UI.Main_Menu {
         }
 
         private void QualitativeEvaluation() {
+            evaluationOptions.occlusionDetectionMethod = OcclusionDetectionMethod.RayCast;
+            evaluationOptions.occlusionHandlingMethod = OcclusionHandlingMethod.Transparency;
+            evaluationOptions.labelLocation = LabelLocation.Screen;
+            
             // setting up any settings
             switch ((QualitativeEvaluationType) qualitativeEvaluationDropdown.value) {
+                case QualitativeEvaluationType.LabelScene:
+                    evaluationOptions.labelLocation = LabelLocation.World;
+                    break;
                 case QualitativeEvaluationType.OccTransparency:
                     evaluationOptions.occlusionDetectionMethod = OcclusionDetectionMethod.RayCast;
                     evaluationOptions.occlusionHandlingMethod = OcclusionHandlingMethod.Transparency;
@@ -150,7 +182,7 @@ namespace UI.Main_Menu {
             }
 
             // finding the necessary files
-            var basePath = "C:/Bachelor Evaluation/Test " + qualitativeEvaluationDropdown.value + "/";
+            var basePath = evaluationFolderInput.text + "/Test " + qualitativeEvaluationDropdown.value + "/";
             
             var sceneHandler = new SceneryXmlHandler();
             sceneHandler.SetFilePath(basePath + "SceneryConfiguration.xodr");
@@ -198,6 +230,9 @@ namespace UI.Main_Menu {
         }
 
         private void StartButtonClicked() {
+            PlayerPrefs.SetString("evalFolder", evaluationFolderInput.text);
+            PlayerPrefs.Save();
+            
             if (quantitativeEvaluationDropdown.value != 0) {
                 FpsTest();
                 return;

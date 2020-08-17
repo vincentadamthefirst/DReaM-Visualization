@@ -9,13 +9,16 @@ using Visualization.Labels;
 using Visualization.OcclusionManagement;
 
 namespace Visualization {
+    
+    /// <summary>
+    /// Class for starting the actual Visualization. Prepares all components by retrieving the data of the DataMover.
+    /// Also starts the Import of the XML files.
+    /// </summary>
     public class VisualizationStarter : MonoBehaviour {
 
         public VisualizationMaster visualizationMaster;
 
         public RoadNetworkHolder roadNetworkHolder;
-
-        public OcclusionManagementOptions occlusionManagementOptions;
 
         public Terrain terrain;
 
@@ -70,6 +73,7 @@ namespace Visualization {
                     case QualitativeEvaluationType.LabelScene:
                     case QualitativeEvaluationType.LabelScreen:
                         EvaluationImport(false, false, false);
+                        _agentOcclusionManager.SetAllTargets(true);
                         break;
                     case QualitativeEvaluationType.OccTransparency:
                     case QualitativeEvaluationType.OccWireFrame:

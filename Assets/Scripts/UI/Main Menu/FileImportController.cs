@@ -22,8 +22,6 @@ namespace UI.Main_Menu {
 
         private string _basePath = "C:/OpenPass/visualizationConfigs";
 
-        private Coroutine _currentOpen;
-
         private FolderImporter _folderImporter;
 
         private List<Tuple<XmlType, XmlHandler>> _handlers;
@@ -54,7 +52,7 @@ namespace UI.Main_Menu {
         }
 
         private void OpenFileBrowser() {
-            _currentOpen = StartCoroutine(ShowLoadDialogCoroutine());
+            StartCoroutine(ShowLoadDialogCoroutine());
         }
 
         private void StartImport() {

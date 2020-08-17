@@ -18389,7 +18389,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   visualizationMaster: {fileID: 891641986}
   roadNetworkHolder: {fileID: 308247174}
-  occlusionManagementOptions: {fileID: 11400000, guid: 2108e11cc4550ae4eb416ebda5ddc8f5, type: 2}
   terrain: {fileID: 890108868}
 --- !u!1 &1095840257
 GameObject:
@@ -31183,7 +31182,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a79441f348de89743a2939f4d699eac1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_RenderShadows: 1
+  m_RenderShadows: 0
   m_RequiresDepthTextureOption: 2
   m_RequiresOpaqueTextureOption: 2
   m_CameraType: 0

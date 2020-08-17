@@ -30,7 +30,8 @@ namespace Evaluation {
         }
 
         private void OnDestroy() {
-            var fileName = "C:/Bachelor Evaluation/Quantitative/Results/" + QuantitativeEvaluationTypeType +
+            var fileName = PlayerPrefs.GetString("evalFolder") + "/Quantitative/Results/" +
+                           QuantitativeEvaluationTypeType +
                            (_occlusionManagementOptions.staggeredCheck ? "_staggered" : "_normal") + ".txt";
 
             if (File.Exists(fileName))
