@@ -225,12 +225,6 @@ namespace Scenery.RoadNetwork {
                     break;
                 }
             }
-            
-            if (name == "j1_north") {
-                foreach (var ls in LaneSections) {
-                    Debug.Log(ls.S + " & " + ls.Length);
-                }
-            }
         }
 
         /// <summary>

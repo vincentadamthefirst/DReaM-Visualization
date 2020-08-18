@@ -194,11 +194,7 @@ namespace Scenery.RoadNetwork {
                 s += sl.Parent.Length;
                 m *= -1;
             }
-
-            if (lane.Parent.Parent.name == "j1_east-north") {
-                Debug.Log("Successor LaneSection: " + sls.S + " on " + sr.name);
-            }
-
+            
             var i = ps.Count - 8;
             
             ps.AddRange(new[] {

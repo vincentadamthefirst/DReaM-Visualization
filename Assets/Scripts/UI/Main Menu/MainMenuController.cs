@@ -103,6 +103,7 @@ namespace UI.Main_Menu {
 
         private void FpsTest() {
             evaluationOptions.occlusionHandlingMethod = OcclusionHandlingMethod.Transparency;
+            evaluationOptions.labelLocation = LabelLocation.Screen;
             
             switch ((QuantitativeEvaluationType) quantitativeEvaluationDropdown.value) {
                 case QuantitativeEvaluationType.None:
@@ -126,6 +127,14 @@ namespace UI.Main_Menu {
                 case QuantitativeEvaluationType.Nothing:
                     evaluationOptions.occlusionDetectionMethod = OcclusionDetectionMethod.Shader;
                     evaluationOptions.occlusionHandlingMethod = OcclusionHandlingMethod.WireFrame;
+                    break;
+                case QuantitativeEvaluationType.LabelScene:
+                    evaluationOptions.occlusionDetectionMethod = OcclusionDetectionMethod.RayCast;
+                    evaluationOptions.labelLocation = LabelLocation.World;
+                    break;
+                case QuantitativeEvaluationType.LabelScreen:
+                    evaluationOptions.occlusionDetectionMethod = OcclusionDetectionMethod.RayCast;
+                    evaluationOptions.labelLocation = LabelLocation.Screen;
                     break;
                 default:
                     return;

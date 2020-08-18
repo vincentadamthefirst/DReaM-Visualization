@@ -88,7 +88,8 @@ namespace Visualization {
             vehicleAgent.AgentDesigns = agentDesigns;
             
             // retrieving prefab for 3d model
-            var model = Instantiate(agentDesigns.GetAgentModel(AgentType.Vehicle, modelType).model, vehicleAgent.transform, true);
+            var model = Instantiate(agentDesigns.GetAgentModel(AgentType.Vehicle, modelType).model,
+                vehicleAgent.transform, true);
             _agents.Add(vehicleAgent);
             vehicleAgent.Model = model;
 
@@ -104,6 +105,7 @@ namespace Visualization {
                 var label = Instantiate(agentDesigns.vehicleSceneLabel, transform);
                 label.AgentCamera = vehicleAgent.Model.transform.Find("Camera").GetComponent<Camera>();
                 vehicleAgent.OwnLabel = label;
+                label.FindLabels();
             }
 
             // retrieving model information
@@ -128,7 +130,8 @@ namespace Visualization {
             pedestrianAgent.AgentDesigns = agentDesigns;
             
             // retrieving prefab for 3d model
-            var model = Instantiate(agentDesigns.GetAgentModel(AgentType.Pedestrian, "pedestrian").model, pedestrianAgent.transform, true);
+            var model = Instantiate(agentDesigns.GetAgentModel(AgentType.Pedestrian, "pedestrian").model,
+                pedestrianAgent.transform, true);
             _agents.Add(pedestrianAgent);
             pedestrianAgent.Model = model;
 
@@ -144,6 +147,7 @@ namespace Visualization {
                 var label = Instantiate(agentDesigns.pedestrianSceneLabel, transform);
                 label.AgentCamera = pedestrianAgent.Model.transform.Find("Camera").GetComponent<Camera>();
                 pedestrianAgent.OwnLabel = label;
+                label.FindLabels();
             }
 
             // retrieving model information

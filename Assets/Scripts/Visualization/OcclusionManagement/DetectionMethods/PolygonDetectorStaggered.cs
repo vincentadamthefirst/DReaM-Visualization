@@ -14,7 +14,7 @@ namespace Visualization.OcclusionManagement.DetectionMethods {
             if (_lastTarget > Targets.Count - 1) _lastTarget = 0;
 
             var target = Targets[_lastTarget];
-            
+
             HandlingMeasurement.StartMeasurement();
             if (!target.IsActive || !GeometryUtility.TestPlanesAABB(ExtendedCamera.CurrentFrustumPlanes, 
                     target.AxisAlignedBoundingBox)) {

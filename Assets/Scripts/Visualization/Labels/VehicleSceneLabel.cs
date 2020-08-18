@@ -16,7 +16,7 @@ namespace Visualization.Labels {
         private readonly Color _indicatorOffColor = new Color(0, .4f, 0);
         private readonly Color _indicatorOnColor = new Color(0, .8f, 0);
 
-        protected override void FindLabels() {
+        public override void FindLabels() {
             base.FindLabels();
 
             _brake = LabelMainObject.GetChild(1).GetChild(3).GetComponent<TextMeshProUGUI>();

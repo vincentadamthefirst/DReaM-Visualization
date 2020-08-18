@@ -84,9 +84,19 @@ namespace Visualization {
             } else if (_dataMover.QuantitativeEvaluationTypeType == QuantitativeEvaluationType.Nothing) {
                 EvaluationImport(true, true, true);
                 _agentOcclusionManager.SetAllTargets(true);
-            } else { 
+                visualizationMaster.Pause = false;
+            } else if (_dataMover.QuantitativeEvaluationTypeType == QuantitativeEvaluationType.LabelScene) {
+                EvaluationImport(true, true, true);
+                _agentOcclusionManager.SetAllTargets(true);
+                visualizationMaster.Pause = false;
+            } else if (_dataMover.QuantitativeEvaluationTypeType == QuantitativeEvaluationType.LabelScreen) {
+                EvaluationImport(true, false, true);
+                _agentOcclusionManager.SetAllTargets(true);
+                visualizationMaster.Pause = false;
+            } else {
                 EvaluationImport(false, true, true);
                 _agentOcclusionManager.SetAllTargets(true);
+                visualizationMaster.Pause = false;
             }
         }
 
@@ -186,7 +196,7 @@ namespace Visualization {
             _settingsController.gameObject.SetActive(false);
 
             if (disableLabelOcclusion) {
-                foreach (var label in FindObjectsOfType<Label>()) {
+                foreach (var label in FindObjectsOfType<ScreenLabel>()) {
                     Destroy(label.transform.GetChild(0).gameObject);
                 }
             }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Visualization.OcclusionManagement;
 
 namespace Visualization.Labels {
     public class SceneLabel : Label {
@@ -29,11 +30,9 @@ namespace Visualization.Labels {
         /// Called on program start, retrieves the necessary objects to display information
         /// </summary>
         private void Start() {
-            LabelMainObject = transform.GetChild(0).GetChild(0).GetComponent<RectTransform>();
-
             _rectTransform = GetComponent<RectTransform>();
 
-            FindLabels();
+            //FindLabels();
 
             _mainCamera = Camera.main;
             
@@ -50,7 +49,9 @@ namespace Visualization.Labels {
         /// <summary>
         /// Retrieves the objects for displaying the data
         /// </summary>
-        protected virtual void FindLabels() {
+        public virtual void FindLabels() {
+            LabelMainObject = transform.GetChild(0).GetChild(0).GetComponent<RectTransform>();
+            
             _gazeType = LabelMainObject.GetChild(0).GetChild(0).GetChild(1).GetComponent<TextMeshProUGUI>();
             _scanAoi = LabelMainObject.GetChild(0).GetChild(1).GetChild(1).GetComponent<TextMeshProUGUI>();
             _crossingPhase = LabelMainObject.GetChild(0).GetChild(2).GetChild(1).GetComponent<TextMeshProUGUI>();

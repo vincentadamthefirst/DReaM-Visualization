@@ -6,6 +6,6 @@
     }
 
     public enum QuantitativeEvaluationType {
-        None = 0, Shader, RayCast, Polygon, Transparency, WireFrame, Nothing
+        None = 0, Shader, RayCast, Polygon, Transparency, WireFrame, LabelScene, LabelScreen, Nothing
     }
 }

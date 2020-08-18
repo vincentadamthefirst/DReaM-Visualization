@@ -102,7 +102,7 @@ namespace Visualization.OcclusionManagement {
                     "scenery_road", "scenery_signs", "Water", "Ignore Raycast", "UI", "TransparentFX", "Terrain", "agent_targets", "scenery_targets");
 
                 _occlusionDetector = (OcclusionDetector) Activator.CreateInstance(
-                    OcclusionDetectors[(int) OcclusionManagementOptions.occlusionHandlingMethod][
+                    OcclusionDetectors[(int) OcclusionManagementOptions.occlusionDetectionMethod][
                         OcclusionManagementOptions.staggeredCheck ? 1 : 0]);
                 
                 // setting the base parameters

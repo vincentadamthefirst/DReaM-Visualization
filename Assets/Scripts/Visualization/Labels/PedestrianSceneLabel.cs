@@ -9,7 +9,7 @@ namespace Visualization.Labels {
         private readonly Color _stoppingOffColor = new Color(.4f, 0, 0);
         private readonly Color _stoppingOnColor = new Color(.8f, 0, 0);
 
-        protected override void FindLabels() {
+        public override void FindLabels() {
             base.FindLabels();
 
             _stopping = LabelMainObject.GetChild(1).GetChild(3).GetComponent<TextMeshProUGUI>();
