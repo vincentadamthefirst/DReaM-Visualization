@@ -132,6 +132,7 @@ namespace Scenery.RoadNetwork {
             
             Junctions[junctionId].AddRoad(newRoad);
             newRoad.ParentJunction = Junctions[junctionId];
+            newRoad.gameObject.isStatic = true;
 
             return newRoad;
         }
@@ -148,6 +149,7 @@ namespace Scenery.RoadNetwork {
             newLane.RoadDesign = roadDesign;
             
             newLane.OcclusionManagementOptions = OcclusionManagementOptions;
+            newLane.gameObject.isStatic = true;
             
             return newLane;
         }
@@ -164,6 +166,7 @@ namespace Scenery.RoadNetwork {
             newLaneSection.gameObject.layer = RoadLayer;
             
             newLaneSection.OcclusionManagementOptions = OcclusionManagementOptions;
+            newLaneSection.gameObject.isStatic = true;
             
             return newLaneSection;
         }
@@ -181,6 +184,7 @@ namespace Scenery.RoadNetwork {
             newJunction.RoadDesign = roadDesign;
             
             newJunction.OcclusionManagementOptions = OcclusionManagementOptions;
+            newJunction.gameObject.isStatic = true;
             
             Junctions[openDriveId] = newJunction;
             return newJunction;
@@ -201,6 +205,7 @@ namespace Scenery.RoadNetwork {
             parentLane.RoadMark = newRoadMark;
             
             newRoadMark.OcclusionManagementOptions = OcclusionManagementOptions;
+            newRoadMark.gameObject.isStatic = true;
             
             return newRoadMark;
         }
@@ -220,6 +225,7 @@ namespace Scenery.RoadNetwork {
             parentRoad.RoadObjects.Add(newRoadObjectRound);
             
             newRoadObjectRound.OcclusionManagementOptions = OcclusionManagementOptions;
+            newRoadObjectRound.gameObject.isStatic = true;
             
             return newRoadObjectRound;
         }
@@ -239,6 +245,7 @@ namespace Scenery.RoadNetwork {
             parentRoad.RoadObjects.Add(newRoadObjectSquare);
             
             newRoadObjectSquare.OcclusionManagementOptions = OcclusionManagementOptions;
+            newRoadObjectSquare.gameObject.isStatic = true;
             
             return newRoadObjectSquare;
         }

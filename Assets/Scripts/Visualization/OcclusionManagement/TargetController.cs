@@ -149,5 +149,15 @@ namespace Visualization.OcclusionManagement {
                 _agentOcclusionManager.SetTarget(clicked, true);
             }
         }
+
+
+        public void SetAllTargets() {
+            foreach (var entry in _agentCardsReverse) {
+                Targets.Add(entry.Key);
+                entry.Key.SetIsTarget(true);
+                entry.Value.SetIsTarget(true);
+                _agentOcclusionManager.SetTarget(entry.Key, true);
+            }
+        }
     }
 }

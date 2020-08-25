@@ -37,6 +37,13 @@ namespace Evaluation {
             if (File.Exists(fileName))
                 File.Delete(fileName);
             File.Create(fileName).Dispose();
+            
+            var lowestFps = int.MaxValue;
+            var highestFps = int.MinValue;
+            foreach (var frameRate in _fpsList) {
+                if (frameRate < lowestFps) lowestFps = frameRate;
+                if (frameRate > highestFps) highestFps = frameRate;
+            }
 
             var averageFps = _fpsList.Sum() / (float) _fpsList.Count;
             var averageExecLabel = LabelPlacementMeasurement.ElapsedTimeMs.Sum() /
@@ -51,6 +58,8 @@ namespace Evaluation {
             File.AppendAllText(fileName, "Evaluation Type: " + QuantitativeEvaluationTypeType + "\n");
             File.AppendAllText(fileName, "Averages:\n" +
                                          "\tFPS: " + averageFps + "\n" +
+                                         "\t   lowest:  " + lowestFps + "\n" +
+                                         "\t   highest: " + highestFps + "\n" +
                                          "\tLabels: " + averageExecLabel + "\n" +
                                          "\tRoads: " + averageExecRoad + "\n" +
                                          "\tDetection: " + averageExecDetection + "\n" +

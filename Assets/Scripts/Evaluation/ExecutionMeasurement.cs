@@ -23,7 +23,7 @@ namespace Evaluation {
         private readonly Stopwatch _stopwatch = new Stopwatch();
 
         /// <summary>
-        /// Starts the time measurement, regardless of calling class.
+        /// Starts or resumes the time measurement, regardless of calling class.
         /// </summary>
         public void StartMeasurement() {
             _stopwatch.Start();

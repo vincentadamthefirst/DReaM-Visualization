@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using Scenery.RoadNetwork;
 using UI;
 using UnityEngine;
@@ -185,13 +186,25 @@ namespace Visualization {
             else if (CurrentTime > MaxSampleTime) CurrentTime = MaxSampleTime;
 
             foreach (var agent in _agents) {
-                StartCoroutine(UpdateAgent(agent));
+                agent.UpdateForTimeStep(CurrentTime, PlayBackwards);
+                //UpdateAgentThread(agent, CurrentTime, PlayBackwards);
+                //StartCoroutine(UpdateAgent(agent));
                 //agent.UpdateForTimeStep(CurrentTime, PlayBackwards);
             }
             
             if (OcclusionManagementOptions.occlusionDetectionMethod == OcclusionDetectionMethod.Shader) 
                 _roadOcclusionManager.ChangeRoadLayers();
             _playbackControl.UpdateCurrentTime(CurrentTime);
+        }
+
+        private Thread UpdateAgentThread(Agent agent, int time, bool backwards) {
+            var t = new Thread(() => UpdateAgent(agent, time, backwards));
+            t.Start();
+            return t;
+        }
+
+        private static void UpdateAgent(Agent agent, int time, bool backwards) {
+            agent.UpdateForTimeStep(time, backwards);
         }
 
         private IEnumerator UpdateAgent(Agent agent) {

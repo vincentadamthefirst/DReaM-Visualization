@@ -11,8 +11,6 @@ namespace Visualization.OcclusionManagement.DetectionMethods {
         private readonly Random _random = new Random(Environment.TickCount);
 
         protected void CastRay(VisualizationElement target) {
-            
-            HandlingMeasurement.StartMeasurement();
             if (!target.IsActive || !GeometryUtility.TestPlanesAABB(
                     ExtendedCamera.CurrentFrustumPlanes, target.AxisAlignedBoundingBox)) {
                 
@@ -27,8 +25,7 @@ namespace Visualization.OcclusionManagement.DetectionMethods {
                 LastHits[target].Clear();
                 return;
             }
-            HandlingMeasurement.PauseMeasurement();
-
+            
             DetectionMeasurement.StartMeasurement();
             var endPoints = GetEndPoints(target);
             var startPoints = GetStartPoints(endPoints);

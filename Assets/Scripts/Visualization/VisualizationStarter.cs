@@ -1,4 +1,6 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using Evaluation;
 using Scenery.RoadNetwork;
 using UI;
@@ -51,7 +53,9 @@ namespace Visualization {
             }
 
             // self destruct after complete import
-            Destroy(this);
+            //Destroy(this);
+            
+            Destroy(_dataMover.gameObject);
         }
 
         [SuppressMessage("ReSharper", "SwitchStatementHandlesSomeKnownEnumValuesWithDefault")]
@@ -83,11 +87,14 @@ namespace Visualization {
                 }
             } else if (_dataMover.QuantitativeEvaluationTypeType == QuantitativeEvaluationType.Nothing) {
                 EvaluationImport(true, true, true);
-                _agentOcclusionManager.SetAllTargets(true);
                 visualizationMaster.Pause = false;
             } else if (_dataMover.QuantitativeEvaluationTypeType == QuantitativeEvaluationType.LabelScene) {
-                EvaluationImport(true, true, true);
-                _agentOcclusionManager.SetAllTargets(true);
+                EvaluationImport(true, false, true);
+                foreach (var sceneLabel in FindObjectsOfType<SceneLabel>()) {
+                    sceneLabel.Activate();
+                }
+
+                StartCoroutine(ExecuteAfterTime(.5f));
                 visualizationMaster.Pause = false;
             } else if (_dataMover.QuantitativeEvaluationTypeType == QuantitativeEvaluationType.LabelScreen) {
                 EvaluationImport(true, false, true);
@@ -98,6 +105,11 @@ namespace Visualization {
                 _agentOcclusionManager.SetAllTargets(true);
                 visualizationMaster.Pause = false;
             }
+        }
+
+        private IEnumerator ExecuteAfterTime(float time) {
+            yield return new WaitForSeconds(time);
+            _agentOcclusionManager.SetAllTargets(true);
         }
 
         private void NormalImport() {
@@ -146,54 +158,16 @@ namespace Visualization {
         /// Sets up the scene for evaluation, can disable agentOcclusion, labelOcclusion, settings
         /// </summary>
         private void EvaluationImport(bool disableAgentOcclusion, bool disableLabelOcclusion, bool disableTargetSelection) {
-            // finding necessary elements in the different components and disabling unused components
-            _settingsController.FindAll();
-            _playbackControl.FindAll();
-            visualizationMaster.FindAll();
-            _agentOcclusionManager.FindAll();
-            _targetController.FindAll();
-            _labelOcclusionManager.FindAll();
+            NormalImport();
+            
+            // disabling settings and target selection (if wanted)
+            _targetController.gameObject.SetActive(!disableTargetSelection);
+            _settingsController.gameObject.SetActive(false);
             
             _settingsController.Disable = true;
             _agentOcclusionManager.Disable = disableAgentOcclusion;
             _targetController.Disable = disableTargetSelection;
             _labelOcclusionManager.Disable = disableLabelOcclusion;
-
-            // setting the OcclusionManagementOptions where they are needed
-            visualizationMaster.OcclusionManagementOptions = _dataMover.occlusionManagementOptions;
-            roadNetworkHolder.OcclusionManagementOptions = _dataMover.occlusionManagementOptions;
-            _agentOcclusionManager.OcclusionManagementOptions = _dataMover.occlusionManagementOptions;
-
-            // setting the Visualization Master
-            _dataMover.SceneryXmlHandler.VisualizationMaster = visualizationMaster;
-            _dataMover.SimulationOutputXmlHandler.VisualizationMaster = visualizationMaster;
-            _dataMover.PedestrianModelsXmlHandler.VisualizationMaster = visualizationMaster;
-            _dataMover.VehicleModelsXmlHandler.VisualizationMaster = visualizationMaster;
-
-            // Starting Model Import
-            _dataMover.VehicleModelsXmlHandler.StartImport();
-            _dataMover.PedestrianModelsXmlHandler.StartImport();
-            
-            // Starting Scenery import
-            _dataMover.SceneryXmlHandler.roadNetworkHolder = roadNetworkHolder;
-            _dataMover.SceneryXmlHandler.StartImport();
-            roadNetworkHolder.ShowSimpleGround(terrain);
-
-            // Starting Simulation Output import
-            _dataMover.SimulationOutputXmlHandler.StartImport();
-
-            // preparing visualization
-            _agentOcclusionManager.Prepare();
-            visualizationMaster.PrepareAgents();
-            _settingsController.SetOcclusionManager(_agentOcclusionManager);
-            _targetController.Prepare();
-
-            // moving all agents
-            visualizationMaster.SmallUpdate();
-            
-            // disabling settings and target selection (if wanted)
-            _targetController.gameObject.SetActive(!disableTargetSelection);
-            _settingsController.gameObject.SetActive(false);
 
             if (disableLabelOcclusion) {
                 foreach (var label in FindObjectsOfType<ScreenLabel>()) {

@@ -1,8 +1,11 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
+using System.IO;
 using Evaluation;
 using Importer.XMLHandlers;
 using SimpleFileBrowser;
 using TMPro;
+using UI.Main_Menu.Notifications;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -10,6 +13,9 @@ using Visualization.OcclusionManagement;
 
 namespace UI.Main_Menu {
     public class MainMenuController : MonoBehaviour {
+
+        // the notification manager
+        public NotificationManager notificationManager;
 
         // dropdown for selecting the evaluation step
         public TMP_Dropdown qualitativeEvaluationDropdown;
@@ -36,6 +42,7 @@ namespace UI.Main_Menu {
         private Button _importButton;
         private Button _settingsButton;
         private Button _evaluationButton;
+        private Button _exitButton;
 
         private Transform _importWindow;
         private Transform _settingsWindow;
@@ -50,6 +57,7 @@ namespace UI.Main_Menu {
             _importButton = transform.Find("Import (Inset)").GetComponent<Button>();
             _settingsButton = transform.Find("Settings (Inset)").GetComponent<Button>();
             _evaluationButton = transform.Find("Evaluation (Inset)").GetComponent<Button>();
+            _exitButton = transform.Find("Exit").GetComponent<Button>();
 
             var parent = transform.parent;
             _importWindow = parent.Find("File Import");
@@ -60,6 +68,7 @@ namespace UI.Main_Menu {
             _importButton.onClick.AddListener(ImportButtonClicked);
             _settingsButton.onClick.AddListener(SettingsButtonClicked);
             _evaluationButton.onClick.AddListener(EvaluationButtonClicked);
+            _exitButton.onClick.AddListener(ExitButtonClicked);
             
             evaluationFolderSelect.onClick.AddListener(OpenFileBrowser);
             
@@ -87,6 +96,10 @@ namespace UI.Main_Menu {
             _settingsWindow.gameObject.SetActive(false);
             _evaluationWindow.gameObject.SetActive(true);
         }
+
+        private void ExitButtonClicked() {
+            Application.Quit();
+        }
         
         private IEnumerator ShowLoadDialogCoroutine() {
             yield return FileBrowser.WaitForLoadDialog(true, false,
@@ -102,6 +115,12 @@ namespace UI.Main_Menu {
         }
 
         private void FpsTest() {
+            if (!Directory.Exists(evaluationFolderInput.text)) {
+                notificationManager.ShowNotification(NotificationType.Error,
+                    "[Quantitative Evaluation] The Base Folder does not exist at the specified location!");
+                return;
+            }
+            
             evaluationOptions.occlusionHandlingMethod = OcclusionHandlingMethod.Transparency;
             evaluationOptions.labelLocation = LabelLocation.Screen;
             
@@ -124,10 +143,6 @@ namespace UI.Main_Menu {
                     evaluationOptions.occlusionDetectionMethod = OcclusionDetectionMethod.RayCast;
                     evaluationOptions.occlusionHandlingMethod = OcclusionHandlingMethod.WireFrame;
                     break;
-                case QuantitativeEvaluationType.Nothing:
-                    evaluationOptions.occlusionDetectionMethod = OcclusionDetectionMethod.Shader;
-                    evaluationOptions.occlusionHandlingMethod = OcclusionHandlingMethod.WireFrame;
-                    break;
                 case QuantitativeEvaluationType.LabelScene:
                     evaluationOptions.occlusionDetectionMethod = OcclusionDetectionMethod.RayCast;
                     evaluationOptions.labelLocation = LabelLocation.World;
@@ -135,6 +150,9 @@ namespace UI.Main_Menu {
                 case QuantitativeEvaluationType.LabelScreen:
                     evaluationOptions.occlusionDetectionMethod = OcclusionDetectionMethod.RayCast;
                     evaluationOptions.labelLocation = LabelLocation.Screen;
+                    break;
+                case QuantitativeEvaluationType.Nothing:
+                    evaluationOptions.occlusionDetectionMethod = OcclusionDetectionMethod.RayCast;
                     break;
                 default:
                     return;
@@ -168,6 +186,12 @@ namespace UI.Main_Menu {
         }
 
         private void QualitativeEvaluation() {
+            if (!Directory.Exists(evaluationFolderInput.text)) {
+                notificationManager.ShowNotification(NotificationType.Error,
+                    "[Qualitative Evaluation] The Base Folder does not exist at the specified location!");
+                return;
+            }
+            
             evaluationOptions.occlusionDetectionMethod = OcclusionDetectionMethod.RayCast;
             evaluationOptions.occlusionHandlingMethod = OcclusionHandlingMethod.Transparency;
             evaluationOptions.labelLocation = LabelLocation.Screen;
@@ -217,15 +241,23 @@ namespace UI.Main_Menu {
         }
 
         private void NormalStart() {
-            var sceneryHandler = fileImportController.GetXmlHandler<SceneryXmlHandler>();
-            var outputHandler = fileImportController.GetXmlHandler<SimulationOutputXmlHandler>();
-            var vehicleHandler = fileImportController.GetXmlHandler<VehicleModelsXmlHandler>();
-            var pedestrianHandler = fileImportController.GetXmlHandler<PedestrianModelsXmlHandler>();
+            XmlHandler sceneryHandler, outputHandler, vehicleHandler, pedestrianHandler;
+            
+            try {
+                sceneryHandler = fileImportController.GetXmlHandler<SceneryXmlHandler>();
+                outputHandler = fileImportController.GetXmlHandler<SimulationOutputXmlHandler>();
+                vehicleHandler = fileImportController.GetXmlHandler<VehicleModelsXmlHandler>();
+                pedestrianHandler = fileImportController.GetXmlHandler<PedestrianModelsXmlHandler>();
+            } catch (ArgumentNullException e) {
+                notificationManager.ShowNotification(NotificationType.Error,
+                    "You need to select a Scenery (.xodr), Output (.xml), Vehicle- and PedestrianModelsCatalog (.xosc)!");
+                return;
+            }
 
-            _dataMover.SceneryXmlHandler = sceneryHandler;
-            _dataMover.SimulationOutputXmlHandler = outputHandler;
-            _dataMover.VehicleModelsXmlHandler = vehicleHandler;
-            _dataMover.PedestrianModelsXmlHandler = pedestrianHandler;
+            _dataMover.SceneryXmlHandler = (SceneryXmlHandler) sceneryHandler;
+            _dataMover.SimulationOutputXmlHandler = (SimulationOutputXmlHandler) outputHandler;
+            _dataMover.VehicleModelsXmlHandler = (VehicleModelsXmlHandler) vehicleHandler;
+            _dataMover.PedestrianModelsXmlHandler = (PedestrianModelsXmlHandler) pedestrianHandler;
 
             mainMenuSettingsController.GetOcclusionManagementOptions();
             _dataMover.occlusionManagementOptions = mainMenuSettingsController.occlusionManagementOptions;

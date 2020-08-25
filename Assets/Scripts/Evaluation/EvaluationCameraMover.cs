@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Visualization.OcclusionManagement;
 
 namespace Evaluation {
     public class EvaluationCameraMover : MonoBehaviour {
@@ -29,7 +30,14 @@ namespace Evaluation {
             cameraTransform.eulerAngles = cameraPositions[0].rotation;
         }
 
+        private bool _firstRun;
+
         private void Update() {
+            if (_firstRun) {
+                FindObjectOfType<TargetController>().SetAllTargets();
+                _firstRun = false;
+            }
+            
             if (_currentPosition > cameraPositions.Count - 2) {
                 // at the end of the movement
                 SceneManager.LoadScene(0); // return to main menu

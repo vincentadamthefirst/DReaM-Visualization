@@ -34,7 +34,7 @@ namespace Visualization.OcclusionManagement.DetectionMethods {
                         target.AxisAlignedBoundingBox)) {
                     // target no longer active or outside of the camera view
 
-                    if (!LastHits.ContainsKey(target)) return;
+                    if (!LastHits.ContainsKey(target)) continue;
 
                     // removing any occluding objects that this agent had
                     foreach (var lastHit in LastHits[target]) {
