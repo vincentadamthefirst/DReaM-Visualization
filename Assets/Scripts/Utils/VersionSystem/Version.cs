@@ -12,7 +12,7 @@ namespace Utils.VersionSystem {
         private readonly string _versionString;
 
         private const string VersionPatternNoAppendix = @"^(\d+\.)+(\d+)$";
-        private const string VersionPatternAppendix = @"^(\d+\.)+(\d+)[a-z]+$";
+        private const string VersionPatternAppendix = @"^(\d+\.)+(\d+)[a-z0-9]+$";
 
         /// <summary>
         /// Takes in a string and tries to convert it into a version.

@@ -1,0 +1,47 @@
+﻿{
+  // MAIN MENU //
+  "scene_0": { 
+    // DASHBOARD //
+    
+    // CARD HEADINGS
+    "hdg_dashboard_card": "Dashboard",
+    "hdg_repeatlast_card": "Repeat Last",
+    "hdg_version_card": "Version",
+    "hdg_settings_card": "Change Settings",
+    "hdg_gethelp_card": "Get Help / Info",
+    
+    // DASHBOARD CARD TEXT
+    "txt_startnew_card": "Opens the file importer to select new files and start the visualization afterwards.",
+    "txt_repatlast_card": "Start the visualization with the files of the last run. The files are based on location on disk.",
+    "txt_settings_card": "Change the settings for the application including <u>occlusion handling</u> and <u>resolution</u> settings.",
+    "txt_help_card": "Open the help / info panel to de-/activate the <u>Tutorial</u> or get information about this program.",
+    
+    // DASHBOARD BUTTONS
+    "btn_import_card": "Import New Files",
+    "btn_repeatlast_card": "Repeat Last",
+    "btn_modifylast_card": "Modify Last",
+    "btn_openchangelog_card": "Open Changelog",
+    "btn_opensettings_card": "Open Settings",
+    "btn_openhelp_card": "Open Help / Info",
+    
+    // CHANGELOGS //
+    
+    // HEADINGS
+    "hdg_changelog": "Changelog",
+    "hdg_newest": "(Newest)",
+    "hdg_version": "Version",
+    
+    // SETTINGS //
+    
+    // HEADINGS
+    "hdg_settings": "Settings",
+    "hdg_graphics": "Graphics",
+    "hdg_occlusion": "Occlusion Management",
+    "hdg_keybinding": "Keybindings"
+    
+    // HELP & INFO //
+    
+    // HEADING
+    "hdg_helpInfo": "Help / Information"
+  },
+}
