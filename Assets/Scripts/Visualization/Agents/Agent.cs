@@ -298,7 +298,7 @@ namespace Visualization.Agents {
         protected abstract void UpdateRotation();
         
         /// <summary>
-        /// The anchor point for this agents label
+        /// The anchor point for this agents labelV
         /// </summary>
         public abstract Vector3 GetAnchorPoint();
 
