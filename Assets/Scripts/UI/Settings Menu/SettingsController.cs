@@ -159,11 +159,11 @@ namespace UI {
         /// To perform a major change in occlusion handling.
         /// </summary>
         private void ChangeOcclusionMajor() {
-            var testA = int.TryParse(_randomPointAmount.text, out var randomPointAmount);
+            var testA = float.TryParse(_randomPointAmount.text.Replace(".", ","), out var randomPointAmount);
 
             if (!testA) {
-                randomPointAmount = 15;
-                _randomPointAmount.SetTextWithoutNotify("15");
+                randomPointAmount = .6f;
+                _randomPointAmount.SetTextWithoutNotify("0,6");
             }
 
             _agentOcclusionManager.OcclusionManagementOptions.nearClipPlaneAsStart = _nearClipPlaneAsStart.isOn;

@@ -40,9 +40,9 @@ namespace Visualization.OcclusionManagement {
         public int rayCastPrecision = 3;
 
         /// <summary>
-        /// Amount of random Points to be sampled for RayCasting
+        /// Amount of random Points to be sampled for RayCasting (percent)
         /// </summary>
-        public int randomPointAmount = 15;
+        public float randomPointAmount = .6f;
         
         // ADDITIONAL GENERAL OPTIONS
         

@@ -68,8 +68,10 @@ namespace Visualization.OcclusionManagement.DetectionMethods {
             HandlingMeasurement.PauseMeasurement();
         }
 
-        private Vector3[] SelectRandom(IEnumerable<Vector3> input) {
-            return input.ToList().OrderBy(x => _random.Next()).Take(OcclusionManagementOptions.randomPointAmount)
+        private Vector3[] SelectRandom(Vector3[] input) {
+            var take = (int) (input.Length * OcclusionManagementOptions.randomPointAmount);
+            Debug.Log("Selecting " + take);
+            return input.ToList().OrderBy(x => _random.Next()).Take(take)
                 .ToArray();
         }
 

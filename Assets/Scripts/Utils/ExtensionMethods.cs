@@ -162,7 +162,7 @@ namespace Utils {
             PlayerPrefs.SetInt("omo_ODM", (int) omo.occlusionDetectionMethod);
             PlayerPrefs.SetInt("omo_OHM", (int) omo.occlusionHandlingMethod);
             
-            PlayerPrefs.SetInt("omo_RPA", omo.randomPointAmount);
+            PlayerPrefs.SetFloat("omo_RPA", omo.randomPointAmount);
             PlayerPrefs.SetFloat("omo_ATV", omo.agentTransparencyValue);
             PlayerPrefs.SetFloat("omo_OTV", omo.objectTransparencyValue);
 

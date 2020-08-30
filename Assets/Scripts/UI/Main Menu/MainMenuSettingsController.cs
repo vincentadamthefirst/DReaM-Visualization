@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.Globalization;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using Utils;
-using Visualization.Labels;
 using Visualization.OcclusionManagement;
 
 namespace UI.Main_Menu {
@@ -138,10 +138,10 @@ namespace UI.Main_Menu {
                 objectTransparency.SetTextWithoutNotify("0,1");
             }
             
-            var testC = int.TryParse(randomPointAmount.text, out omo.randomPointAmount);
+            var testC = float.TryParse(randomPointAmount.text.Replace(".", ","), out omo.randomPointAmount);
             if (!testC) {
-                omo.randomPointAmount = 10;
-                randomPointAmount.SetTextWithoutNotify("10");
+                omo.randomPointAmount = .6f;
+                randomPointAmount.SetTextWithoutNotify("0,6");
             }
 
             omo.nearClipPlaneAsStart = nearClipToggle.isOn;
