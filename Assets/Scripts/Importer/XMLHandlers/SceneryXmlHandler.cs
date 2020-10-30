@@ -7,6 +7,7 @@ using JetBrains.Annotations;
 using Scenery.RoadNetwork;
 using Scenery.RoadNetwork.RoadGeometries;
 using Scenery.RoadNetwork.RoadObjects;
+using Scenery.RoadNetwork.RoadSignals;
 using UnityEngine;
 using ContactPoint = Scenery.RoadNetwork.ContactPoint;
 using Version = Utils.VersionSystem.Version;
@@ -154,6 +155,9 @@ namespace Importer.XMLHandlers {
             
             // creating objects along the road
             CreateRoadObjects(road.Element("objects")?.Elements("object"), roadObject);
+            
+            // creating signals along the road
+            CreateRoadSignals(road.Element("signals")?.Elements("signal"), roadObject);
 
             try {
                 ParseGeometries(road, roadObject);
@@ -167,6 +171,47 @@ namespace Importer.XMLHandlers {
             CreateLaneSections(
                 road.Element("lanes") ??
                 throw new ArgumentMissingException("No lanes given for road " + roadObject.OpenDriveId), roadObject);
+        }
+
+        private void CreateRoadSignals(IEnumerable<XElement> roadSignals, Road road) {
+            if (roadSignals == null) return;
+            foreach (var roadSignal in roadSignals) {
+                var type = roadSignal.Attribute("type")?.Value ?? "0";
+                int.TryParse(type, out var typeInt);
+                
+                if (typeInt == 0) continue;
+                if (Enum.IsDefined(typeof(TrafficSignType), typeInt)) {
+                    var typeEnum = (TrafficSignType) typeInt;
+                    var newObj = roadNetworkHolder.CreateTrafficSign(road);
+                    newObj.Type = typeEnum;
+                    newObj.SubType = roadSignal.Attribute("subtype")?.Value ?? "";
+                    
+                    // TODO combine this code with the code for objects to minimize duplicates
+                    
+                    var orientation = roadSignal.Attribute("orientation")?.Value ?? "none";
+                    newObj.name = roadSignal.Attribute("name")?.Value ?? "roadObject";
+                    newObj.S = float.Parse(roadSignal.Attribute("s")?.Value ?? "0",
+                        CultureInfo.InvariantCulture.NumberFormat);
+                    newObj.T = float.Parse(roadSignal.Attribute("t")?.Value ?? "0",
+                        CultureInfo.InvariantCulture.NumberFormat);
+                    newObj.ZOffset = float.Parse(roadSignal.Attribute("zOffset")?.Value ?? "0",
+                        CultureInfo.InvariantCulture.NumberFormat);
+                    newObj.Heading = float.Parse(roadSignal.Attribute("hdg")?.Value ?? "0",
+                        CultureInfo.InvariantCulture.NumberFormat);
+
+                    switch (orientation) {
+                        case "+":
+                            newObj.Orientation = RoadObjectOrientation.Positive;
+                            break;
+                        case "-":
+                            newObj.Orientation = RoadObjectOrientation.Negative;
+                            break;
+                        default:
+                            newObj.Orientation = RoadObjectOrientation.None;
+                            break;
+                    }
+                }
+            }
         }
 
         private void CreateRoadObjects(IEnumerable<XElement> roadObjects, Road road) {

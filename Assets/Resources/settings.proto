@@ -1,0 +1,68 @@
+syntax = "proto3";
+package settings;
+
+option csharp_namespace = "UI.Settings";
+
+message ApplicationSettings {
+  // version of the settings
+  string version = 1;
+  // last version of the visualization
+  string visualizationVersion = 2;
+  
+  // last used import settings
+  ImportSettings lastImported = 3;
+  
+  // actual settings objects
+  OcclusionHandlingSettings occlusionHandlingSettings = 4;
+  GraphicsSettings graphicSettings = 5;
+  GeneralSettings generalSettings = 7;
+  
+  // all stored import settings
+  repeated ImportSettings storedImportSettings = 6;
+
+  // general settings for the application
+  message GeneralSettings {
+    bool disableUpdateCheck = 1;
+  }
+  
+  // any graphical settings are stored inside this object
+  message GraphicsSettings {
+    uint32 resolutionWidth = 1;
+    uint32 resolutionHeight = 2;
+    uint32 refreshRate = 3;
+    bool isFullscreen = 4;
+  }
+  
+  message OcclusionHandlingSettings {
+    // general occlusion handling settings
+    bool handleOcclusion = 1;
+    bool ignoreFocusObjects = 2;
+
+    // transparency settings
+    float focusObjectTransparency = 3;
+    float distractorTransparency = 4;
+
+    // raycast settings
+    bool sampleRandomPoints = 5;
+    bool nearClipAsStart = 6;
+    float percentageOfPointsSampled = 7;
+  }
+
+  message ImportSettings {
+    // custom name for this configuration
+    string name = 1;
+
+    // if this import was valid the last time
+    bool wasValid = 2;
+
+    // paths to the necessary files
+    string sceneryPath = 3;
+    string scenarioPath = 4;
+    string pedestrianModelsPath = 5;
+    string vehicleModelsPath = 6;
+
+    // optional attached settings
+    OcclusionHandlingSettings occlusionHandlingSettings = 7;
+    GraphicsSettings graphicSettings = 8;
+  }
+}

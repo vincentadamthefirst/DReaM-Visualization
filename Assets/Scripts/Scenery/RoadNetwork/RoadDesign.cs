@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Scenery.RoadNetwork.RoadObjects;
+using Scenery.RoadNetwork.RoadSignals;
 using UnityEngine;
 using Random = System.Random;
 
@@ -46,6 +47,9 @@ namespace Scenery.RoadNetwork {
         
         [Header("Road Object Materials")]
         public List<RoadObjectMaterial> roadObjectMaterials = new List<RoadObjectMaterial>();
+        
+        [Header("Traffic Sign Prefabs")]
+        public List<TrafficSignPrefab> trafficSignPrefabs = new List<TrafficSignPrefab>();
 
         // Random function that might be used
         private Random _random;
@@ -97,6 +101,13 @@ namespace Scenery.RoadNetwork {
 
             return toReturnA ?? toReturnB;
         }
+
+        public TrafficSignPrefab GetTrafficSignPrefab(TrafficSignType type) {
+            if (trafficSignPrefabs.Count(x => x.type == type) != 0) {
+                return trafficSignPrefabs.FirstOrDefault(x => x.type == type);
+            }
+            return null;
+        }
     }
 
     /// <summary>
@@ -132,5 +143,11 @@ namespace Scenery.RoadNetwork {
         public string subType = "";
         public Color color;
         public Material material;
+    }
+
+    [Serializable]
+    public class TrafficSignPrefab {
+        public GameObject prefab;
+        public TrafficSignType type;
     }
 }

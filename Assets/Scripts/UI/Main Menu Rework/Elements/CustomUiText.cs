@@ -17,8 +17,8 @@ namespace UI.Main_Menu_Rework.Elements {
 
         public override void UpdateUiElement() {
             _text = GetComponent<TextMeshProUGUI>();
-            _text.color = applicationDesign.GetColor(color);
-            _text.font = applicationDesign.GetFont(textStyle);
+            _text.color = centralUiController.applicationDesign.GetColor(color);
+            _text.font = centralUiController.applicationDesign.GetFont(textStyle);
         }
     }
 }

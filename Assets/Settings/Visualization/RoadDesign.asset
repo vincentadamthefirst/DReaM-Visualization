@@ -110,3 +110,12 @@ MonoBehaviour:
   - material: {fileID: 2100000, guid: 27122d51c1ffa9e4fa3bc2fe2f564905, type: 2}
     type: 5
     subType: 
+  trafficSignPrefabs:
+  - prefab: {fileID: 6760280118958841856, guid: d115d44a0cf6a984d9088c1ffa8725ad, type: 3}
+    type: 274
+  - prefab: {fileID: 919132149155446097, guid: 6122a0599815dd64093d7343bbad35e7, type: 3}
+    type: 205
+  - prefab: {fileID: 4631760446976050200, guid: 705c37ccee080b1489bf2bc3edb21224, type: 3}
+    type: 301
+  - prefab: {fileID: 4531006397634666016, guid: 023eb60246654904d97e48e5fc441ca8, type: 3}
+    type: 206

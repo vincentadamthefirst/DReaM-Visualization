@@ -1,24 +1,24 @@
 ﻿using System;
 using System.Collections;
-using UI.Main_Menu_Rework.Utils;
+using UI.Main_Menu_Rework.Logic;
 using UnityEngine;
 using UnityEngine.UI;
-using Object = UnityEngine.Object;
 
 namespace UI.Main_Menu_Rework.Elements {
     public abstract class CustomUiElement : MonoBehaviour {
-
-        [Tooltip("Design used for this element")]
-        public ApplicationDesign applicationDesign;
+        // the central UI controller
+        protected CentralUiController centralUiController;
 
         private void Start() {
-            UpdateUiElement();
-            try {
-                LayoutRebuilder.ForceRebuildLayoutImmediate(transform.parent.GetComponent<RectTransform>());
-            } catch (NullReferenceException e) { }
+            PerformUpdate();
         }
 
         private void OnValidate() {
+            PerformUpdate();
+        }
+
+        public void PerformUpdate() {
+            centralUiController = FindObjectOfType<CentralUiController>();
             UpdateUiElement();
             try {
                 LayoutRebuilder.ForceRebuildLayoutImmediate(transform.parent.GetComponent<RectTransform>());

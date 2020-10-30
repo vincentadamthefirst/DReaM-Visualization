@@ -2,6 +2,7 @@
 using System.Linq;
 using Scenery.RoadNetwork.RoadGeometries;
 using Scenery.RoadNetwork.RoadObjects;
+using Scenery.RoadNetwork.RoadSignals;
 using UnityEngine;
 
 namespace Scenery.RoadNetwork {
@@ -60,6 +61,11 @@ namespace Scenery.RoadNetwork {
         /// All RoadObjects along this Road
         /// </summary>
         public List<RoadObject> RoadObjects { get; }  = new List<RoadObject>();
+        
+        /// <summary>
+        /// All TrafficSigns along this Road
+        /// </summary>
+        public List<TrafficSign> TrafficSigns { get; } = new List<TrafficSign>();
         
         public override bool IsDistractor => false;
 
@@ -234,6 +240,8 @@ namespace Scenery.RoadNetwork {
             LaneSections.ForEach(l => l.StartMeshGeneration());
             
             RoadObjects.ForEach(ro => ro.Show());
+            
+            TrafficSigns.ForEach(ts => ts.Show());
 
             var tmp = new List<RoadObject>();
 

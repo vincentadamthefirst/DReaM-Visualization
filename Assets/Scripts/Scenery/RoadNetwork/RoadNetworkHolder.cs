@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Scenery.RoadNetwork.RoadObjects;
+using Scenery.RoadNetwork.RoadSignals;
 using UnityEngine;
 using Visualization.OcclusionManagement;
 
@@ -248,6 +249,25 @@ namespace Scenery.RoadNetwork {
             newRoadObjectSquare.gameObject.isStatic = true;
             
             return newRoadObjectSquare;
+        }
+
+        /// <summary>
+        /// Creates a TrafficSign in the scene and returns it.
+        /// </summary>
+        /// <param name="parentRoad">The parent Road for the object.</param>
+        /// <returns>The generated TrafficSign</returns>
+        public TrafficSign CreateTrafficSign(Road parentRoad) {
+            var newObj = new GameObject {layer = ObjectLayer};
+            newObj.transform.position = Vector3.zero;
+            newObj.transform.rotation = Quaternion.identity;
+            var trafficSign = newObj.AddComponent<TrafficSign>();
+            trafficSign.Parent = parentRoad;
+            trafficSign.RoadDesign = roadDesign;
+            
+            parentRoad.TrafficSigns.Add(trafficSign);
+
+            newObj.isStatic = true;
+            return trafficSign;
         }
     }
 }

@@ -24,9 +24,9 @@ namespace UI.Main_Menu_Rework.Elements {
         public override void UpdateUiElement() {
             _images = GetComponentsInChildren<Image>().ToList();
             _texts = GetComponentsInChildren<TextMeshProUGUI>().ToList();
-            _images.ForEach(x => x.color = applicationDesign.GetColor(imageColor));
-            _texts.ForEach(x => x.color = applicationDesign.GetColor(textColor));
-            _texts.ForEach(x => x.font = applicationDesign.GetFont(textStyle));
+            _images.ForEach(x => x.color = centralUiController.applicationDesign.GetColor(imageColor));
+            _texts.ForEach(x => x.color = centralUiController.applicationDesign.GetColor(textColor));
+            _texts.ForEach(x => x.font = centralUiController.applicationDesign.GetFont(textStyle));
         }
     }
 }

@@ -21,7 +21,7 @@ namespace UI.Main_Menu_Rework.Elements {
 
         public override void UpdateUiElement() {
             _background = GetComponent<Image>();
-            _background.color = applicationDesign.GetColor(color).WithAlpha(opacity);
+            _background.color = centralUiController.applicationDesign.GetColor(color).WithAlpha(opacity);
         }
     }
 }

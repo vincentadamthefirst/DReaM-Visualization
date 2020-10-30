@@ -41,8 +41,8 @@ namespace UI.Main_Menu_Rework.Elements {
             _marker = transform.Find("Marker").GetComponent<Image>();
             _icon = transform.Find("Icon").GetComponent<Image>();
 
-            _baseColor = applicationDesign.GetColor(baseColor);
-            _hoverColor = applicationDesign.GetColor(hoverColor);
+            _baseColor = centralUiController.applicationDesign.GetColor(baseColor);
+            _hoverColor = centralUiController.applicationDesign.GetColor(hoverColor);
 
             SetSelected(isSelected);
         }

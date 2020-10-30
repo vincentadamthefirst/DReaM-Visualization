@@ -35,7 +35,7 @@ namespace Importer {
             // checking if the main directory exists
             if (!Directory.Exists(basePath)) throw new DirectoryNotFoundException("Base directory not found.");
 
-            var files = DirectoryFileSearchRecursive(basePath);
+            var files = DirectoryFileSearchRecursive(basePath, 0, 10);
             foreach (var file in files) {
                 var normalizedFileName = file.ToLower();
                 foreach (var entry in FileStrings) {
@@ -52,10 +52,13 @@ namespace Importer {
             return resultList;
         }
 
-        private IEnumerable<string> DirectoryFileSearchRecursive(string dir) {
+        private IEnumerable<string> DirectoryFileSearchRecursive(string dir, int recursionDepth, int maximumRecursionDepth) {
             var files = Directory.GetFiles(dir).ToList();
+
+            if (recursionDepth > maximumRecursionDepth) return files;
+            
             foreach (var d in Directory.GetDirectories(dir)) {
-                files.AddRange(DirectoryFileSearchRecursive(d));
+                files.AddRange(DirectoryFileSearchRecursive(d, recursionDepth + 1, maximumRecursionDepth));
             }
 
             return files;
