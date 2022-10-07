@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
-using Scenery;
 using UnityEngine;
+using Visualization.SimulationEvents;
 
 namespace Visualization {
     public class SimulationStep {
@@ -41,8 +41,9 @@ namespace Visualization {
         
         /// <summary>
         /// The information of this Agents sensors at this step.
+        /// The information of this Agents sensors at this step.
         /// </summary>
-        public List<SensorInformation> SensorInformation { get; } = new List<SensorInformation>();
+        public Dictionary<string, SensorInformation> SensorInformation { get; } = new Dictionary<string, SensorInformation>();
         
         /// <summary>
         /// The additional information for an agent at this SimulationStep
@@ -53,16 +54,16 @@ namespace Visualization {
         /// The id of the OpenDrive Objects that the agent is currently on, can be a road or junction id
         /// </summary>
         public string OnId { get; set; } = "-1";
+
+        /// <summary>
+        /// List of all events that happen at this time for this agent.
+        /// </summary>
+        public List<SimulationEvent> Events { get; } = new List<SimulationEvent>();
         
         /// <summary>
-        /// The element that the agent is on
+        /// Information that is not further classified and can be displayed in the side panel.
         /// </summary>
-        public VisualizationElement OnElement { get; set; }
-        
-        /// <summary>
-        /// Whether the agent is currently on a junction
-        /// </summary>
-        public bool OnJunction { get; set; }
+        public List<object> UnknownInformation { get; } = new List<object>();
     }
 
     public class SensorInformation {

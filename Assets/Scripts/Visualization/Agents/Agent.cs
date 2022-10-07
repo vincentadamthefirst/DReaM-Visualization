@@ -2,41 +2,33 @@
 using System.Collections.Generic;
 using System.Linq;
 using Scenery;
-using Scenery.RoadNetwork;
+using UI.Main_Menu.Utils;
+using UI.SidePanel;
 using UnityEngine;
 using Utils;
 using Visualization.Labels;
-using Visualization.OcclusionManagement;
 
 namespace Visualization.Agents {
     public abstract class Agent : VisualizationElement {
         /// <summary>
         /// The current SimulationStep Object
         /// </summary>
-        public Dictionary<int, SimulationStep> SimulationSteps { get; } = new Dictionary<int, SimulationStep>();
+        public Dictionary<int, SimulationStep> SimulationSteps { get; set; } = new Dictionary<int, SimulationStep>();
 
         /// <summary>
         /// The model of this agent, this is the object that gets moved.
-        /// It needs to follow these rules:
-        /// 1. Empty GameObject (used for Offset of Center Point)
-        ///     2. The actual model
         /// </summary>
         public GameObject Model { get; set; }
+        
+        /// <summary>
+        /// The id of this agent (in the simulation)
+        /// </summary>
+        public int Id { get; set; }
 
         /// <summary>
         /// The Model Information for this Agent
         /// </summary>
         public ModelInformation ModelInformation { get; set; }
-        
-        /// <summary>
-        /// The RoadNetworkHolder to Perform layer change for certain roads
-        /// </summary>
-        public RoadNetworkHolder RoadNetworkHolder { get; set; }
-        
-        /// <summary>
-        /// The occlusion controller for roads to perform layer change on roads
-        /// </summary>
-        public RoadOcclusionManager RoadOcclusionManager { get; set; }
 
         /// <summary>
         /// The label of this agent
@@ -62,18 +54,13 @@ namespace Visualization.Agents {
         /// The design used in this program run.
         /// </summary>
         public AgentDesigns AgentDesigns { get; set; }
-
-        /// <summary>
-        /// The sensor representing the driver view
-        /// </summary>
-        public AgentSensor DriverView { get; set; }
+        
+        // The sensors for this agent
+        private readonly Dictionary<string, AgentSensor> _agentSensors = new Dictionary<string, AgentSensor>();
 
         // if the agent is deactivated
         protected bool deactivated;
-        
-        /// The step size of one sample time to the next
-        protected int timeStepSize;
-        
+
         /// The global current time since start of the visualization in ms
         protected int globalTimeMs;
 
@@ -82,6 +69,8 @@ namespace Visualization.Agents {
         
         // the minimum time step for this agent
         public int MinTimeStep { get; private set; }
+        
+        public int TimeStepSize { get; set; }
 
         // the delta time to the previous sample
         protected int deltaTMs;
@@ -111,6 +100,10 @@ namespace Visualization.Agents {
         private bool _targetStatusChanged;
 
         public override Bounds AxisAlignedBoundingBox => boundingBox;
+
+        public bool WriteToSidePanel { get; set; }
+
+        private SidePanel _sidePanel;
         
         // the materials for this agents meshes
         private Material[][] _nonOccludedMaterials;
@@ -122,33 +115,27 @@ namespace Visualization.Agents {
         private void Start() {
             renderers = GetComponentsInChildren<Renderer>();
             customPoints = GetComponentInChildren<CustomPoints>();
+            _sidePanel = FindObjectOfType<SidePanel>();
         }
 
         /// <summary>
         /// Prepares this agent
         /// </summary>
         public virtual void Prepare() {
-            MaxTimeStep = SimulationSteps.Max(e => e.Key);
-            MinTimeStep = SimulationSteps.Min(e => e.Key);
+            if (SimulationSteps.Count != 0) {
+                MaxTimeStep = SimulationSteps.Max(e => e.Key);
+                MinTimeStep = SimulationSteps.Min(e => e.Key);
+            } else {
+                MaxTimeStep = -1;
+                MinTimeStep = -1;
+            }
 
             var ordered = SimulationSteps.Values.OrderBy(s => s.Time).ToArray();
             for (var i = 0; i < SimulationSteps.Values.Count - 1; i++) {
                 // setting the next simulation step
                 ordered[i].Next = ordered[i + 1];
                 ordered[i + 1].Previous = ordered[i];
-                
             }
-
-            foreach (var simulationStep in SimulationSteps.Values) {
-                if (simulationStep.OnId != "" && RoadNetworkHolder.Roads.ContainsKey(simulationStep.OnId)) {
-                    var road = RoadNetworkHolder.Roads[simulationStep.OnId];
-
-                    simulationStep.OnElement = road.OnJunction ? road.ParentJunction : (VisualizationElement) road;
-                    simulationStep.OnJunction = road.OnJunction;
-                }
-            }
-
-            timeStepSize = SimulationSteps.Values.ToArray()[1].Time - SimulationSteps.Values.ToArray()[0].Time;
 
             _modelRenderers = GetComponentsInChildren<MeshRenderer>();
             
@@ -168,20 +155,13 @@ namespace Visualization.Agents {
             
             for (var i = 0; i < _modelRenderers.Length; i++) {
                 Material[] tmp;
-
-                if (OcclusionManagementOptions.occlusionHandlingMethod == OcclusionHandlingMethod.Transparency) {
-                    tmp = new Material[_modelRenderers[i].materials.Length];
-                    for (var j = 0; j < _modelRenderers[i].materials.Length; j++) {
-                        tmp[j] = new Material(_nonOccludedMaterials[i][j]);
-                        tmp[j].ChangeToTransparent(OcclusionManagementOptions.agentTransparencyValue);
-                    }
-                } else {
-                    tmp = new Material[_modelRenderers[i].materials.Length];
-                    for (var j = 0; j < _modelRenderers[i].materials.Length; j++) {
-                        tmp[j] = OcclusionManagementOptions.wireFrameMaterial;
-                    }
-                }
                 
+                tmp = new Material[_modelRenderers[i].materials.Length];
+                for (var j = 0; j < _modelRenderers[i].materials.Length; j++) {
+                    tmp[j] = new Material(_nonOccludedMaterials[i][j]);
+                    tmp[j].ChangeToTransparent(settings.minimumAgentOpacity);
+                }
+
                 _occludedMaterials[i] = tmp;
             }
         }
@@ -190,52 +170,75 @@ namespace Visualization.Agents {
         /// Initializes this agents sensors if necessary. Currently only handles the drivers view.
         /// </summary>
         private void SetupSensors() {
-            // TODO extend by adding support for >1 sensor
-            
-            // step zero: initializing (for now only one) AgentSensor
-            var sensorScript = Instantiate(AgentDesigns.sensorPrefab, transform.parent);
-            DriverView = sensorScript;
-            DriverView.FindAll();
-            
-            // step one: is a driver sensor needed?
-            var driverSensorNeeded = SimulationSteps.Values.Any(step => step.SensorInformation.Count > 0);
-            if (!driverSensorNeeded) return; // no sensor, stop execution
-            
-            // step two: filling holes in the simulation steps
-            foreach (var step in SimulationSteps.Values) {
-                if (step.SensorInformation.Count != 0) continue;
-                // this steps information is empty
-                var dummyData = new SensorInformation {Distance = 0, Heading = 0, OpeningAngle = 0};
-                step.SensorInformation.Add(dummyData);
+            // find the amount of sensors this agent needs
+            var uniqueSensorNames = new List<string>();
+            foreach (var sensorInfo in SimulationSteps.Values.SelectMany(step =>
+                step.SensorInformation.Where(sensorInfo => !uniqueSensorNames.Contains(sensorInfo.Key)))) {
+                uniqueSensorNames.Add(sensorInfo.Key);
             }
-            
-            // ordered list of SimulationSteps
+
+            var sensorColors = new[] {
+                new Color(.26f, .83f, .76f, AgentDesigns.sensorBase.color.a),
+                new Color(.94f, .62f, .25f, AgentDesigns.sensorBase.color.a),
+                new Color(.4f, .85f, .38f, AgentDesigns.sensorBase.color.a),
+            };
+
+            // initializing all sensors for this agent
+            for (var i = 0; i < uniqueSensorNames.Count; i++) {
+                var uniqueSensor = uniqueSensorNames[i];
+                var sensorScript = Instantiate(AgentDesigns.sensorPrefab, transform.parent);
+                sensorScript.name = /*name + " - Sensor " +*/ uniqueSensor;
+                _agentSensors.Add(uniqueSensor, sensorScript);
+                sensorScript.FindAll();
+
+                var sensorMat = new Material(AgentDesigns.sensorBase) {
+                    color = i < 3 ? sensorColors[i] : ColorMaterial.color.WithAlpha(AgentDesigns.sensorBase.color.a)
+                    //color = ColorMaterial.color.WithAlpha(AgentDesigns.sensorBase.color.a)
+                };
+                sensorScript.SetMeshMaterial(sensorMat);
+                if (OwnLabel != null) OwnLabel.AddSensor(sensorScript);
+            }
+
+            // ordering the simulation steps
             var ordered = SimulationSteps.Values.OrderBy(s => s.Time).ToArray();
             
-            // step three: check if the sensor data changes between SimulationSteps
+            // ensure that the first step contains all sensors
+            foreach (var uniqueSensor in uniqueSensorNames.Where(uniqueSensor =>
+                !ordered[0].SensorInformation.ContainsKey(uniqueSensor))) {
+                ordered[0].SensorInformation.Add(uniqueSensor, new SensorInformation {
+                    Distance = 0, Heading = 0, OpeningAngle = 0
+                });
+            }
+
+            // filling missing data in the simulation steps & mark if data changes
             for (var i = 0; i < ordered.Length - 1; i++) {
                 var a = ordered[i];
                 var b = ordered[i + 1];
+                
+                // filling missing data
+                var diff = a.SensorInformation.Keys.Except(b.SensorInformation.Keys);
+                foreach (var diffSensor in diff) {
+                    b.SensorInformation.Add(diffSensor, new SensorInformation {
+                        Distance = 0, Heading = 0, OpeningAngle = 0
+                    });
+                }
 
-                for (var j = 0; j < a.SensorInformation.Count; j++) {
-                    if (Math.Abs(a.SensorInformation[j].OpeningAngle - b.SensorInformation[j].OpeningAngle) >
-                        Tolerance) { // opening angles not the same
-                        a.SensorInformation[j].OpeningChangedTowardsNext = true;
-                        b.SensorInformation[j].OpeningChangedTowardsPrevious = true;
+                foreach (var info in a.SensorInformation) {
+                    var curr = info.Value;
+                    var next = b.SensorInformation[info.Key];
+                    if (Math.Abs(curr.OpeningAngle - next.OpeningAngle) > Tolerance) {
+                        curr.OpeningChangedTowardsNext = true;
+                        next.OpeningChangedTowardsPrevious = true;
                     }
                 }
             }
             
-            // step four: set first and last Sensor data in SimulationSteps
-            ordered[0].SensorInformation.ForEach(x => x.OpeningChangedTowardsPrevious = true);
-            ordered[ordered.Length - 1].SensorInformation.ForEach(x => x.OpeningChangedTowardsNext = true);
-            
-            // step five: setting the material
-            var sensorMat = new Material(AgentDesigns.sensorBase) {
-                color = new Color(ColorMaterial.color.r, ColorMaterial.color.g, ColorMaterial.color.b,
-                    AgentDesigns.sensorBase.color.a)
-            };
-            DriverView.SetMeshMaterial(sensorMat);
+            // set first and last Sensor data in SimulationSteps
+            if (ordered.Length != 0) {
+                ordered[0].SensorInformation.Values.ToList().ForEach(x => x.OpeningChangedTowardsPrevious = true);
+                ordered[ordered.Length - 1].SensorInformation.Values.ToList()
+                    .ForEach(x => x.OpeningChangedTowardsNext = true);
+            }
         }
 
         /// <summary>
@@ -250,18 +253,20 @@ namespace Visualization.Agents {
             if (timeStep > MaxTimeStep || timeStep < MinTimeStep) {
                 if (!deactivated) {
                     Deactivate();
-                    OwnLabel.Deactivate();
+                    if (OwnLabel != null) OwnLabel.Deactivate();
                 }
             } else {
                 if (deactivated) {
                     Activate();
-                    OwnLabel.Activate();
+                    if (OwnLabel != null) OwnLabel.Activate();
                 }
             }
 
             if (deactivated) return;
             
-            previous = SimulationSteps[timeStep.RoundDownToMultipleOf(timeStepSize)];
+            // Debug.Log($"Agent {Id}: {TimeStepSize}");
+            
+            previous = SimulationSteps[timeStep.RoundDownToMultipleOf(TimeStepSize)];
 
             if (previous.Next == null) return;
 
@@ -278,19 +283,28 @@ namespace Visualization.Agents {
             UpdateRotation();
 
             if (!isTarget) return;
-            RoadOcclusionManager.AddOnElement(previous.OnElement);
+            
+            // update label
             UpdateLabel();
             
-            // updating the driver view (if there is one)
-            if (previous.SensorInformation.Count != 0) {
-                var driverSensorInfo = previous.SensorInformation[0];
-                if (backwards && driverSensorInfo.OpeningChangedTowardsNext ||
-                    !backwards && driverSensorInfo.OpeningChangedTowardsPrevious || _targetStatusChanged) {
-                    DriverView.UpdateOpeningAngle(driverSensorInfo.OpeningAngle, driverSensorInfo.Distance);
+            // updating the sensors
+            foreach (var info in previous.SensorInformation) {
+                var sensor = _agentSensors[info.Key];
+                if (backwards && info.Value.OpeningChangedTowardsNext ||
+                    !backwards && info.Value.OpeningChangedTowardsPrevious || _targetStatusChanged) {
+                    sensor.UpdateOpeningAngle(info.Value.OpeningAngle, info.Value.Distance);
+                    
+                    if (info.Key == "aeb")
+                        Debug.Log(info.Value.OpeningAngle + " ... " + info.Value.Distance);
                 }
-
-                DriverView.UpdatePositionAndRotation(CurrentPosition + new Vector3(0, 1f, 0), driverSensorInfo.Heading);
+                
+                
+                sensor.UpdatePositionAndRotation(CurrentPosition + new Vector3(0, 1f, 0), info.Value.Heading);
             }
+            
+            // update side panel if needed
+            if (WriteToSidePanel)
+                _sidePanel.UpdateTexts(this, previous.UnknownInformation.ToArray());
         }
 
         protected abstract void UpdatePosition();
@@ -310,28 +324,25 @@ namespace Visualization.Agents {
         private void Deactivate() {
             deactivated = true;
             Model.SetActive(false);
-            DriverView.SetActive(false);
+            foreach (var sensor in _agentSensors.Values) {
+                sensor.SetActive(false);
+            }
         }
 
         private void Activate() {
             deactivated = false;
             Model.SetActive(true);
-            DriverView.SetActive(true);
+            foreach (var sensor in _agentSensors.Values) {
+               sensor.SetActive(true);
+            }
         }
 
         public override void SetIsTarget(bool target) {
             base.SetIsTarget(target);
-            Model.SetLayerRecursive(target && OcclusionManagementOptions.occlusionDetectionMethod ==
-                                    OcclusionDetectionMethod.Shader
-                ? 14
-                : 15);
-            DriverView.SetActive(target);
-            _targetStatusChanged = true;
-
-            if (OwnLabel.GetType().IsSubclassOf(typeof(SceneLabel))) {
-                if (target) OwnLabel.Activate();
-                else OwnLabel.Deactivate();
+            foreach (var sensor in _agentSensors.Values) {
+                sensor.SetActive(target);
             }
+            _targetStatusChanged = true;
         }
         
         public override void HandleHit() {

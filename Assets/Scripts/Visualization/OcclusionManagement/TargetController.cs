@@ -22,6 +22,9 @@ namespace Visualization.OcclusionManagement {
         /// </summary>
         public List<VisualizationElement> Targets { get; } = new List<VisualizationElement>();
 
+        private Agent _sidePanelAgent;
+        private bool _sidePanelEnabled;
+
         /// <summary>
         /// The collider mapping also in use in AgentOcclusionManager
         /// </summary>
@@ -49,7 +52,7 @@ namespace Visualization.OcclusionManagement {
         // the UI element for holding all agent cards
         private RectTransform _agentCardHolder;
 
-        public void SetSettingsOpen(bool value) {
+        public void SetMenuOpen(bool value) {
             _settingsOpen = value;
         }
 
@@ -58,6 +61,7 @@ namespace Visualization.OcclusionManagement {
             _extendedCamera = FindObjectOfType<ExtendedCamera>();
             _agentOcclusionManager = FindObjectOfType<AgentOcclusionManager>();
             _agentCardHolder = transform.GetChild(0).GetChild(1).GetChild(0).GetComponent<RectTransform>();
+            _sidePanelEnabled = PlayerPrefs.GetInt("app_wip_features") > 0;
         }
 
         /// <summary>
@@ -92,6 +96,7 @@ namespace Visualization.OcclusionManagement {
         /// </summary>
         private void CheckMouseClick() {
             if (_settingsOpen) return;
+            if (!_extendedCamera) return;
             if (!Input.GetMouseButtonDown(0)) return;
 
             var ray = _extendedCamera.Camera.ScreenPointToRay(Input.mousePosition);
@@ -114,11 +119,27 @@ namespace Visualization.OcclusionManagement {
                 hitElement.SetIsTarget(false);
                 _agentCardsReverse[(Agent) hitElement].SetIsTarget(false);
                 _agentOcclusionManager.SetTarget((Agent) hitElement, false);
+
+                if (_sidePanelEnabled && (hitElement as Agent).WriteToSidePanel) {
+                    (hitElement as Agent).WriteToSidePanel = false;
+                    if (Targets.Count > 0) {
+                        var newSidePanelWriter = ((Agent)Targets.Last());
+                        newSidePanelWriter.WriteToSidePanel = true;
+                        _sidePanelAgent = newSidePanelWriter;
+                    }
+                }
             } else {
                 Targets.Add(hitElement);
                 hitElement.SetIsTarget(true);
                 _agentCardsReverse[(Agent) hitElement].SetIsTarget(true);
                 _agentOcclusionManager.SetTarget((Agent) hitElement, true);
+
+                if (_sidePanelEnabled) {
+                    if (_sidePanelAgent != null)
+                        _sidePanelAgent.WriteToSidePanel = false;
+                    (hitElement as Agent).WriteToSidePanel = true;
+                    _sidePanelAgent = hitElement as Agent;
+                }
             }
         }
 

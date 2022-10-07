@@ -12,7 +12,7 @@ namespace SimpleFileBrowser
 
 		internal void SetAdapter( IListViewAdapter listView )
 		{
-			this.adapter = listView;
+			adapter = listView;
 		}
 
 		public void OnClick()

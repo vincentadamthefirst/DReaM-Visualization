@@ -1,7 +1,7 @@
 ﻿namespace Importer.XMLHandlers {
     public class ScenarioXmlHandler : XmlHandler {
         public override string GetName() {
-            return "Scenario";
+            return "wip";
         }
 
         public virtual void StartImport() {

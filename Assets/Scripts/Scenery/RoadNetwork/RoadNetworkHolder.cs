@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
 using System.Linq;
 using Scenery.RoadNetwork.RoadObjects;
 using Scenery.RoadNetwork.RoadSignals;
+using UI.Settings;
 using UnityEngine;
-using Visualization.OcclusionManagement;
 
 namespace Scenery.RoadNetwork {
     
@@ -17,23 +17,23 @@ namespace Scenery.RoadNetwork {
         /// <summary>
         /// The Roads in the scene, referenced by their OpenDrive ID
         /// </summary>
-        public Dictionary<string, Road> Roads { get; }  = new Dictionary<string, Road>();
+        public ConcurrentDictionary<string, Road> Roads { get; } = new ConcurrentDictionary<string, Road>();
         
         /// <summary>
         /// The Junctions in the scene, referenced by their OpenDrive ID
         /// </summary>
-        private Dictionary<string, Junction> Junctions { get; } = new Dictionary<string, Junction>();
+        private ConcurrentDictionary<string, Junction> Junctions { get; } = new ConcurrentDictionary<string, Junction>();
 
         /// <summary>
         /// The RoadDesign to use for all scene elements
         /// </summary>
         public RoadDesign roadDesign;
 
-        public OcclusionManagementOptions OcclusionManagementOptions { get; set; }
-
         // integers to set the base layer for roads and objects
         private const int RoadLayer = 17;
         private const int ObjectLayer = 19;
+
+        public ApplicationSettings settings;
 
         /// <summary>
         /// Shows a simple Terrain that is big enough to fit under all scene elements by setting its size and position
@@ -127,13 +127,12 @@ namespace Scenery.RoadNetwork {
             newRoad.gameObject.layer = RoadLayer;
             Roads[openDriveId] = newRoad;
 
-            newRoad.OcclusionManagementOptions = OcclusionManagementOptions;
-
             if (!Junctions.ContainsKey(junctionId)) return newRoad;
             
             Junctions[junctionId].AddRoad(newRoad);
             newRoad.ParentJunction = Junctions[junctionId];
             newRoad.gameObject.isStatic = true;
+            newRoad.settings = settings;
 
             return newRoad;
         }
@@ -148,9 +147,8 @@ namespace Scenery.RoadNetwork {
                 .GetComponent<Lane>();
             newLane.gameObject.layer = RoadLayer;
             newLane.RoadDesign = roadDesign;
-            
-            newLane.OcclusionManagementOptions = OcclusionManagementOptions;
             newLane.gameObject.isStatic = true;
+            newLane.settings = settings;
             
             return newLane;
         }
@@ -165,9 +163,8 @@ namespace Scenery.RoadNetwork {
                 Instantiate(roadDesign.laneSectionPrefab, Vector3.zero, Quaternion.identity, parentRoad.transform)
                     .GetComponent<LaneSection>();
             newLaneSection.gameObject.layer = RoadLayer;
-            
-            newLaneSection.OcclusionManagementOptions = OcclusionManagementOptions;
             newLaneSection.gameObject.isStatic = true;
+            newLaneSection.settings = settings;
             
             return newLaneSection;
         }
@@ -183,9 +180,8 @@ namespace Scenery.RoadNetwork {
             newJunction.OpenDriveId = openDriveId;
             newJunction.gameObject.layer = RoadLayer;
             newJunction.RoadDesign = roadDesign;
-            
-            newJunction.OcclusionManagementOptions = OcclusionManagementOptions;
             newJunction.gameObject.isStatic = true;
+            newJunction.settings = settings;
             
             Junctions[openDriveId] = newJunction;
             return newJunction;
@@ -204,9 +200,8 @@ namespace Scenery.RoadNetwork {
             newRoadMark.RoadDesign = roadDesign;
             newRoadMark.ParentLane = parentLane;
             parentLane.RoadMark = newRoadMark;
-            
-            newRoadMark.OcclusionManagementOptions = OcclusionManagementOptions;
             newRoadMark.gameObject.isStatic = true;
+            newRoadMark.settings = settings;
             
             return newRoadMark;
         }
@@ -224,9 +219,8 @@ namespace Scenery.RoadNetwork {
             newRoadObjectRound.Parent = parentRoad;
             newRoadObjectRound.RoadDesign = roadDesign;
             parentRoad.RoadObjects.Add(newRoadObjectRound);
-            
-            newRoadObjectRound.OcclusionManagementOptions = OcclusionManagementOptions;
             newRoadObjectRound.gameObject.isStatic = true;
+            newRoadObjectRound.settings = settings;
             
             return newRoadObjectRound;
         }
@@ -244,9 +238,8 @@ namespace Scenery.RoadNetwork {
             newRoadObjectSquare.Parent = parentRoad;
             newRoadObjectSquare.RoadDesign = roadDesign;
             parentRoad.RoadObjects.Add(newRoadObjectSquare);
-            
-            newRoadObjectSquare.OcclusionManagementOptions = OcclusionManagementOptions;
             newRoadObjectSquare.gameObject.isStatic = true;
+            newRoadObjectSquare.settings = settings;
             
             return newRoadObjectSquare;
         }
@@ -263,6 +256,7 @@ namespace Scenery.RoadNetwork {
             var trafficSign = newObj.AddComponent<TrafficSign>();
             trafficSign.Parent = parentRoad;
             trafficSign.RoadDesign = roadDesign;
+            trafficSign.settings = settings;
             
             parentRoad.TrafficSigns.Add(trafficSign);
 

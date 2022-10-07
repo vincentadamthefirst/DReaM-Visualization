@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Visualization {
@@ -24,6 +25,6 @@ namespace Visualization {
         /// into the agent-local coordinate system (agent location is point 0,0) for displaying
         /// </summary>
         public Tuple<Vector2, float>[] OtherAgents { get; set; }
-        
+
     }
 }

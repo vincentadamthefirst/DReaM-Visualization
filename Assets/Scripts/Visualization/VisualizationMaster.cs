@@ -1,19 +1,23 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
-using Scenery.RoadNetwork;
+using TMPro;
 using UI;
+using UI.Settings;
+using UI.SidePanel;
+using UI.Visualization;
 using UnityEngine;
 using Visualization.Agents;
+using Visualization.Labels.BasicLabels;
 using Visualization.OcclusionManagement;
 
 namespace Visualization {
     public class VisualizationMaster : MonoBehaviour {
         private PlaybackControl _playbackControl;
         private LabelOcclusionManager _labelOcclusionManager;
-        private RoadOcclusionManager _roadOcclusionManager;
+        private BasicLabelController _basicLabelController;
 
-        public OcclusionManagementOptions OcclusionManagementOptions { get; set; }
+        public ApplicationSettings settings { get; set; }
 
         /// <summary>
         /// The catalog of possible vehicle models, populated by VehicleModelsXmlHandler
@@ -33,6 +37,11 @@ namespace Visualization {
         public AgentDesigns agentDesigns;
 
         public int MaxSampleTime { get; set; }
+        public int MinSampleTime { get; set; }
+        
+        public bool DisableLabels { get; set; }
+        
+        public int SampleStep { get; set; }
         
         public int CurrentTime { get; set; }
         
@@ -49,12 +58,12 @@ namespace Visualization {
             {Width = 0.7f, Length = 0.7f, Height = 1.8f, Center = Vector3.zero};
         
         // all Agents of the current visualization run
-        private readonly List<Agent> _agents = new List<Agent>();
+        public List<Agent> Agents { get; } = new List<Agent>();
 
         public void FindAll() {
-            _roadOcclusionManager = FindObjectOfType<RoadOcclusionManager>();
             _labelOcclusionManager = FindObjectOfType<LabelOcclusionManager>();
             _playbackControl = FindObjectOfType<PlaybackControl>();
+            _basicLabelController = FindObjectOfType<BasicLabelController>();
         }
 
         /// <summary>
@@ -62,16 +71,16 @@ namespace Visualization {
         /// </summary>
         public void PrepareAgents() {
             // setting a color for each agent
-            for (var i = 0; i < _agents.Count; i++) {
-                var c = Color.HSVToRGB(i / (float) _agents.Count, .9f, .7f, false);
+            for (var i = 0; i < Agents.Count; i++) {
+                var c = Color.HSVToRGB(i / (float) Agents.Count, .9f, .7f, false);
                 var agentMaterial = new Material(agentDesigns.vehicleChassisBase) {color = c};
 
-                _agents[i].ColorMaterial = agentMaterial;
+                Agents[i].ColorMaterial = agentMaterial;
             }
             
-            _agents.ForEach(a => a.Prepare());
+            Agents.ForEach(a => a.Prepare());
             
-            _playbackControl.SetTotalTime(MaxSampleTime);
+            _playbackControl.SetTotalTime(MinSampleTime, MaxSampleTime);
         }
 
         /// <summary>
@@ -79,65 +88,84 @@ namespace Visualization {
         /// </summary>
         /// <param name="modelType">The model type of the agent</param>
         /// <returns>The instantiated agent</returns>
-        public VehicleAgent InstantiateVehicleAgent(string modelType) {
-            var vehicleAgent = Instantiate(agentDesigns.vehiclePrefab, transform, true);
-            
+        public Agent InstantiateVehicleAgent(string modelType, int id) {
+            var agentModel = agentDesigns.GetAgentModel(AgentType.Vehicle, modelType);
+            Agent instantiated;
+
+            if (agentModel.modelName.Contains("fallback")) 
+                instantiated = Instantiate(agentDesigns.boxPrefab, transform, true);
+            else 
+                instantiated = Instantiate(agentDesigns.vehiclePrefab, transform, true);
+
             // adding the RoadNetworkHolder
-            vehicleAgent.RoadNetworkHolder = FindObjectOfType<RoadNetworkHolder>();
-            vehicleAgent.RoadOcclusionManager = _roadOcclusionManager;
-            vehicleAgent.OcclusionManagementOptions = OcclusionManagementOptions;
-            vehicleAgent.AgentDesigns = agentDesigns;
+            instantiated.settings = settings;
+            instantiated.AgentDesigns = agentDesigns;
+            instantiated.TimeStepSize = SampleStep;
             
             // retrieving prefab for 3d model
             var model = Instantiate(agentDesigns.GetAgentModel(AgentType.Vehicle, modelType).model,
-                vehicleAgent.transform, true);
-            _agents.Add(vehicleAgent);
-            vehicleAgent.Model = model;
+                instantiated.transform, true);
+            Agents.Add(instantiated);
+            instantiated.Model = model;
+            
+            // adding basic ID label
+            var idLabel = Resources.Load<IdLabel>("Prefabs/UI/Visualization/Labels/IdLabel");
+            var idLabelObject = Instantiate(idLabel, model.transform);
+            idLabelObject.name = "IdLabel";
+            idLabelObject.GetComponent<TMP_Text>().SetText($"Agent {id}");
+            idLabelObject.gameObject.SetActive(false);
+            idLabelObject.MainCamera = Camera.main;
+            _basicLabelController.AddLabel(idLabelObject);
 
             // adding label
-            if (OcclusionManagementOptions.labelLocation == LabelLocation.Screen) {
+            if (!DisableLabels) {
                 var label = Instantiate(agentDesigns.vehicleScreenLabel, _labelOcclusionManager.transform);
-                label.Agent = vehicleAgent;
+                label.Agent = instantiated;
                 label.LabelOcclusionManager = _labelOcclusionManager;
-                label.AgentCamera = vehicleAgent.Model.transform.Find("Camera").GetComponent<Camera>();
+                label.AgentCamera = instantiated.Model.transform.Find("Camera").GetComponent<Camera>();
                 _labelOcclusionManager.AddLabel(label);
-                vehicleAgent.OwnLabel = label;
+                instantiated.OwnLabel = label;
             } else {
-                var label = Instantiate(agentDesigns.vehicleSceneLabel, transform);
-                label.AgentCamera = vehicleAgent.Model.transform.Find("Camera").GetComponent<Camera>();
-                vehicleAgent.OwnLabel = label;
-                label.FindLabels();
+                Destroy(instantiated.Model.transform.Find("Camera").gameObject);
             }
 
             // retrieving model information
-            vehicleAgent.ModelInformation = VehicleModelCatalog.ContainsKey(modelType)
+            instantiated.ModelInformation = VehicleModelCatalog.ContainsKey(modelType)
                 ? VehicleModelCatalog[modelType]
                 : _basicVehicle;
 
-            return vehicleAgent;
+            return instantiated;
         }
-        
+
         /// <summary>
         /// Initializes a new pedestrian agent and returns a reference to it.
         /// </summary>
         /// <returns>The instantiated agent</returns>
-        public PedestrianAgent InstantiatePedestrian(string modelType) {
+        public PedestrianAgent InstantiatePedestrian(string modelType, int id) {
             var pedestrianAgent = Instantiate(agentDesigns.pedestrianPrefab, transform, true);
             
             // adding the RoadNetworkHolder
-            pedestrianAgent.RoadNetworkHolder = FindObjectOfType<RoadNetworkHolder>();
-            pedestrianAgent.RoadOcclusionManager = _roadOcclusionManager;
-            pedestrianAgent.OcclusionManagementOptions = OcclusionManagementOptions;
+            pedestrianAgent.settings = settings;
             pedestrianAgent.AgentDesigns = agentDesigns;
+            pedestrianAgent.TimeStepSize = SampleStep;
             
             // retrieving prefab for 3d model
-            var model = Instantiate(agentDesigns.GetAgentModel(AgentType.Pedestrian, "pedestrian").model,
+            var model = Instantiate(agentDesigns.GetAgentModel(AgentType.Pedestrian, modelType).model,
                 pedestrianAgent.transform, true);
-            _agents.Add(pedestrianAgent);
+            Agents.Add(pedestrianAgent);
             pedestrianAgent.Model = model;
+            
+            // adding basic ID label
+            var idLabel = Resources.Load<IdLabel>("Prefabs/UI/Visualization/Labels/IdLabel");
+            var idLabelObject = Instantiate(idLabel, model.transform);
+            idLabelObject.name = "IdLabel";
+            idLabelObject.GetComponent<TMP_Text>().SetText($"Agent {id}");
+            idLabelObject.gameObject.SetActive(false);
+            idLabelObject.MainCamera = Camera.main;
+            _basicLabelController.AddLabel(idLabelObject);
 
             // adding label TODO use other Label then vehicle!
-            if (OcclusionManagementOptions.labelLocation == LabelLocation.Screen) {
+            if (!DisableLabels) {
                 var label = Instantiate(agentDesigns.pedestrianScreenLabel, _labelOcclusionManager.transform);
                 label.Agent = pedestrianAgent;
                 label.LabelOcclusionManager = _labelOcclusionManager;
@@ -145,10 +173,7 @@ namespace Visualization {
                 _labelOcclusionManager.AddLabel(label);
                 pedestrianAgent.OwnLabel = label;
             } else {
-                var label = Instantiate(agentDesigns.pedestrianSceneLabel, transform);
-                label.AgentCamera = pedestrianAgent.Model.transform.Find("Camera").GetComponent<Camera>();
-                pedestrianAgent.OwnLabel = label;
-                label.FindLabels();
+                Destroy(pedestrianAgent.Model.transform.Find("Camera").gameObject);
             }
 
             // retrieving model information
@@ -163,12 +188,10 @@ namespace Visualization {
             if (CurrentTime < 0) CurrentTime = 0;
             else if (CurrentTime > MaxSampleTime) CurrentTime = MaxSampleTime;
 
-            foreach (var agent in _agents) {
+            foreach (var agent in Agents) {
                 agent.UpdateForTimeStep(CurrentTime, PlayBackwards);
             }
             
-            if (OcclusionManagementOptions.occlusionDetectionMethod == OcclusionDetectionMethod.Shader) 
-                _roadOcclusionManager.ChangeRoadLayers();
             _playbackControl.UpdateCurrentTime(CurrentTime);
         }
 
@@ -185,15 +208,13 @@ namespace Visualization {
             if (CurrentTime < 0) CurrentTime = 0;
             else if (CurrentTime > MaxSampleTime) CurrentTime = MaxSampleTime;
 
-            foreach (var agent in _agents) {
+            foreach (var agent in Agents) {
                 agent.UpdateForTimeStep(CurrentTime, PlayBackwards);
                 //UpdateAgentThread(agent, CurrentTime, PlayBackwards);
                 //StartCoroutine(UpdateAgent(agent));
                 //agent.UpdateForTimeStep(CurrentTime, PlayBackwards);
             }
             
-            if (OcclusionManagementOptions.occlusionDetectionMethod == OcclusionDetectionMethod.Shader) 
-                _roadOcclusionManager.ChangeRoadLayers();
             _playbackControl.UpdateCurrentTime(CurrentTime);
         }
 

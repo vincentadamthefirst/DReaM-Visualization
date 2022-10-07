@@ -33,6 +33,16 @@ namespace Scenery.RoadNetwork {
         }
 
         /// <summary>
+        /// Generates a simple mesh for a lane and disregards the lane type. Used for conflict areas.
+        /// </summary>
+        public static void GenerateSimpleMeshForLane(ref Mesh mesh, Lane lane, float startS, float endS) {
+            GenerateDrivingMeshForLane(ref mesh, lane, startS, endS, true);
+            
+            mesh.RecalculateBounds();
+            mesh.RecalculateNormals();
+        }
+
+        /// <summary>
         /// Main method to generate a Mesh for a sidewalk.
         /// </summary>
         /// <param name="mesh">A reference to the Mesh that will be populated</param>
@@ -237,31 +247,37 @@ namespace Scenery.RoadNetwork {
         /// </summary>
         /// <param name="mesh">A reference to the Mesh that will be populated</param>
         /// <param name="lane">The Lane for which to generate the Mesh for</param>
-        private static void GenerateDrivingMeshForLane(ref Mesh mesh, Lane lane) {
+        /// <param name="startS"></param>
+        /// <param name="endS"></param>
+        /// <param name="overrideClosing">override check for closing the mesh towards the next one</param>
+        private static void GenerateDrivingMeshForLane(ref Mesh mesh, Lane lane, float startS = 0, float endS = -1, bool overrideClosing = false) {
             if (lane.Parent.CompletelyOnLineSegment && lane.IsConstantWidth())
-                GenerateDrivingMeshStraightForLane(ref mesh, lane);
+                GenerateDrivingMeshStraightForLane(ref mesh, lane, startS, endS);
             else 
-                GenerateDrivingMeshNormalForLane(ref mesh, lane);
-            
+                GenerateDrivingMeshNormalForLane(ref mesh, lane, startS, endS);
+
+            if (overrideClosing) return;
             if (lane.RoadDesign.closeMeshToNextMesh) CloseDrivingMeshForLane(ref mesh, lane);
         }
-        
+
         /// <summary>
         /// Generates a Mesh for a straight Lane (only 4 points for the entire Mesh).
         /// </summary>
         /// <param name="mesh">A reference to the Mesh that will be populated</param>
         /// <param name="lane">The Lane for which to generate the Mesh for</param>
-        private static void GenerateDrivingMeshStraightForLane(ref Mesh mesh, Lane lane) {
+        /// <param name="startS"></param>
+        /// <param name="endS"></param>
+        private static void GenerateDrivingMeshStraightForLane(ref Mesh mesh, Lane lane, float startS = 0, float endS = -1) {
             var ls = lane.Parent; // lane section of the current lane
             var m = lane.Multiplier; // side multiplier
-            var s = lane.Parent.Length; // distance to cover with mesh
+            var s = endS < 0 ? lane.Parent.Length : endS; // distance to cover with mesh
             var ld = lane.LaneDirection; // direction of the lane
 
-            var nw0 = m * lane.InnerNeighbor.EvaluateWidth(0);
-            var lw0 = m * lane.EvaluateWidth(0);
+            var nw0 = m * lane.InnerNeighbor.EvaluateWidth(startS);
+            var lw0 = m * lane.EvaluateWidth(startS);
 
             var ps = new[] {
-                ls.EvaluatePoint(0, nw0), ls.EvaluatePoint(0, lw0),
+                ls.EvaluatePoint(startS, nw0), ls.EvaluatePoint(startS, lw0),
                 ls.EvaluatePoint(s, nw0), ls.EvaluatePoint(s, lw0),
             };
 
@@ -275,13 +291,15 @@ namespace Scenery.RoadNetwork {
             mesh.uv = uvs;
             mesh.triangles = ld == LaneDirection.Right ? ts : TriangleDirectionChange(ts);
         }
-        
+
         /// <summary>
         /// Generates a normal Mesh for a Lane by sampling the Lane width along the s coordinate in given steps.
         /// </summary>
         /// <param name="mesh">A reference to the Mesh that will be populated</param>
         /// <param name="lane">The Lane for which to generate the Mesh for</param>
-        private static void GenerateDrivingMeshNormalForLane(ref Mesh mesh, Lane lane) {
+        /// <param name="startS"></param>
+        /// <param name="endS"></param>
+        private static void GenerateDrivingMeshNormalForLane(ref Mesh mesh, Lane lane, float startS = 0, float endS = -1) {
             var ps = new List<Vector3>();
             var uvs = new List<Vector2>();
             var ts = new List<int>();
@@ -290,13 +308,13 @@ namespace Scenery.RoadNetwork {
             var p = rd.samplePrecision; // precision for sampling
             var ls = lane.Parent; // lane section of the current lane
             var m = lane.Multiplier; // side multiplier
-            var s = lane.Parent.Length; // distance to cover with mesh
+            var s = endS < 0 ? lane.Parent.Length : endS; // distance to cover with mesh
             var ld = lane.LaneDirection; // direction of the lane
             var mw = lane.GetMaxWidthSelf(p); // max width of the current lane
 
             //var upper = lane.RoadDesign.closeMeshToNextMesh ? s - s / (2 * p) : s;
-            var upper = s;
-            for (var i = 0f; i <= upper; i += s / p) {
+
+            for (var i = startS; i <= s; i += s / p) {
                 var w0 = m * lane.InnerNeighbor.EvaluateWidth(i);
                 var w1 = m * lane.EvaluateWidth(i);
 

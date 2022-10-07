@@ -10,10 +10,6 @@
             CastRay(Targets[_lastTarget]);
 
             _lastTarget++;
-            
-            // ending the measurement, gets started inside of 'CastRay()'
-            DetectionMeasurement.EndMeasurement();
-            HandlingMeasurement.EndMeasurement();
         }
     }
 }

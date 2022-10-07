@@ -25,8 +25,7 @@ namespace Visualization.OcclusionManagement.DetectionMethods {
                 LastHits[target].Clear();
                 return;
             }
-            
-            DetectionMeasurement.StartMeasurement();
+
             var endPoints = GetEndPoints(target);
             var startPoints = GetStartPoints(endPoints);
             
@@ -46,9 +45,7 @@ namespace Visualization.OcclusionManagement.DetectionMethods {
                     newHits.Add(hitObject);
                 }
             }
-            DetectionMeasurement.PauseMeasurement();
 
-            HandlingMeasurement.StartMeasurement();
             var lastHits = new HashSet<VisualizationElement>(LastHits[target]);
 
             var actualNewHits = new HashSet<VisualizationElement>(newHits);
@@ -65,17 +62,17 @@ namespace Visualization.OcclusionManagement.DetectionMethods {
             }
 
             LastHits[target] = newHits;
-            HandlingMeasurement.PauseMeasurement();
         }
 
         private Vector3[] SelectRandom(IEnumerable<Vector3> input) {
-            return input.ToList().OrderBy(x => _random.Next()).Take(OcclusionManagementOptions.randomPointAmount)
+            return input.ToList().OrderBy(x => _random.Next()).Take(2)
                 .ToArray();
         }
 
         private Vector3[] GetEndPoints(VisualizationElement target) {
             var basePoints = target.GetReferencePoints();
-            return OcclusionManagementOptions.sampleRandomPoints ? SelectRandom(basePoints) : basePoints;
+            return basePoints;
+            // TODO return OcclusionManagementOptions.sampleRandomPoints ? SelectRandom(basePoints) : basePoints;
         }
 
         private Vector3[] GetStartPoints(Vector3[] endPoints) {
@@ -83,8 +80,10 @@ namespace Visualization.OcclusionManagement.DetectionMethods {
             for (var i = 0; i < endPoints.Length; i++) {
                 var result = ExtendedCamera.Camera.WorldToScreenPoint(endPoints[i]);
                 result.y = Screen.height - result.y;
-                toReturn[i] = ExtendedCamera.Camera.ScreenToWorldPoint(new Vector3(result.x, result.y,
-                    OcclusionManagementOptions.nearClipPlaneAsStart ? ExtendedCamera.Camera.nearClipPlane : 0));
+                // TODO really use near clip plane?
+                toReturn[i] =
+                    ExtendedCamera.Camera.ScreenToWorldPoint(new Vector3(result.x, result.y,
+                        ExtendedCamera.Camera.nearClipPlane));
             }
             return toReturn;
         }

@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using Utils;
-using Visualization.OcclusionManagement;
 
 namespace Scenery.RoadNetwork.RoadObjects {
     public class RoadObjectSquare : RoadObject {
@@ -45,7 +44,7 @@ namespace Scenery.RoadNetwork.RoadObjects {
                 newChild.name = name;
                 newChild.Width = Width;
                 newChild.Length = Length;
-                newChild.OcclusionManagementOptions = OcclusionManagementOptions;
+                newChild.settings = settings;
                 newChild.Show();
             }
 
@@ -100,13 +99,9 @@ namespace Scenery.RoadNetwork.RoadObjects {
         }
 
         public override void SetupOccludedMaterials() {
-            if (OcclusionManagementOptions.occlusionHandlingMethod == OcclusionHandlingMethod.Transparency) {
-                _occludedMaterial = new Material(_nonOccludedMaterial);
-                _occludedMaterial.ChangeToTransparent(OcclusionManagementOptions.objectTransparencyValue *
+            _occludedMaterial = new Material(_nonOccludedMaterial);
+                _occludedMaterial.ChangeToTransparent(settings.minimumObjectOpacity *
                                                       (RoadObjectType == RoadObjectType.Tree ? .5f : 1f));
-            } else {
-                _occludedMaterial = OcclusionManagementOptions.wireFrameMaterial;
-            }
         }
 
         private void ShowPlane(Material material) {

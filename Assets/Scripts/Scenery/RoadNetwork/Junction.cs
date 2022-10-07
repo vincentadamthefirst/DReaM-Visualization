@@ -95,18 +95,31 @@ namespace Scenery.RoadNetwork {
         /// Lanes downwards.
         /// </summary>
         public void DisplaceAllLanesAndRoadMarks() {
-            var allLanes = new List<Lane>();
+            // var allLanes = new List<Lane>();
+            // foreach (var section in Roads.SelectMany(road => road.Value.LaneSections)) {
+            //     allLanes.AddRange(section.LaneIdMappings.Select(entry => entry.Value));
+            // }
+
+            var allLanes = new Dictionary<LaneType, List<Lane>>();
             foreach (var section in Roads.SelectMany(road => road.Value.LaneSections)) {
-                allLanes.AddRange(section.LaneIdMappings.Select(entry => entry.Value));
+                var lanes = section.LaneIdMappings.Values.ToList();
+                foreach (var lane in lanes) {
+                    if (!allLanes.ContainsKey(lane.LaneType))
+                        allLanes.Add(lane.LaneType, new List<Lane>());
+                    allLanes[lane.LaneType].Add(lane);
+                }
             }
 
-            var ordered = allLanes.OrderBy(l => l.LaneType )
-                .ThenByDescending(l => l.Parent.CompletelyOnLineSegment).ToList();
-
-            for (var i = 0; i < ordered.Count; i++) {
-                ordered[i].transform.position -= new Vector3(0, i * RoadDesign.offsetHeight, 0);
+            var keys = allLanes.Keys.ToList();
+            for (var i = 0; i < keys.Count; i++) {
+                allLanes[keys[i]].ForEach(x => x.transform.position -= new Vector3(0, i * RoadDesign.offsetHeight, 0));
                 LowestPoint = i * RoadDesign.offsetHeight;
             }
+
+            // for (var i = 0; i < ordered.Count; i++) {
+            //     ordered[i].transform.position -= new Vector3(0, i * RoadDesign.offsetHeight, 0);
+            //     LowestPoint = i * RoadDesign.offsetHeight;
+            // }
 
             var allRoadMarks = new List<RoadMark>();
             foreach (var section in Roads.SelectMany(road => road.Value.LaneSections)) {

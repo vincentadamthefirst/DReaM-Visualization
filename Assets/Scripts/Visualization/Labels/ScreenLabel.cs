@@ -9,7 +9,6 @@ using Color = UnityEngine.Color;
 
 namespace Visualization.Labels {
     public class ScreenLabel : Label {
-
         public RectTransform LabelMainObject { get; private set; }
         
         public Agent Agent { get; set; }
@@ -31,6 +30,9 @@ namespace Visualization.Labels {
         private TextMeshProUGUI _crossingPhase;
         private TextMeshProUGUI _scanAoi;
         private TextMeshProUGUI _gazeType;
+
+        private RectTransform _sensors;
+        private List<AgentSensor> _sensorList = new List<AgentSensor>();
 
         /// <summary>
         /// Called on program start, retrieves the necessary objects to display information
@@ -61,8 +63,11 @@ namespace Visualization.Labels {
             _position = LabelMainObject.GetChild(2).GetChild(0).GetChild(1).GetComponent<TextMeshProUGUI>();
             _velocity = LabelMainObject.GetChild(2).GetChild(1).GetChild(1).GetComponent<TextMeshProUGUI>();
             _acceleration = LabelMainObject.GetChild(2).GetChild(2).GetChild(1).GetComponent<TextMeshProUGUI>();
+
+            _sensors = LabelMainObject.GetChild(2).GetChild(3).GetComponent<RectTransform>();
             
-            // TODO add sensors
+            if (_sensorList.Count == 0)
+                _sensors.gameObject.SetActive(false);
         }
         
         public override void UpdateStrings(params string[] parameters) {
@@ -149,6 +154,17 @@ namespace Visualization.Labels {
 
         public void UpdateLabel() {
             AnchorScreenPosition = LabelOcclusionManager.WorldToScreenPoint(Agent.GetAnchorPoint());
+        }
+
+        public override void AddSensor(AgentSensor sensor) {
+            _sensors = transform.GetChild(0).GetChild(2).GetChild(3).GetComponent<RectTransform>();
+            
+            _sensorList.Add(sensor);
+            var newSensorToggle = Instantiate(Agent.AgentDesigns.sensorTogglePrefab);
+            newSensorToggle.transform.SetParent(_sensors, false);
+            newSensorToggle.transform.GetChild(1).GetComponent<Text>().text = sensor.name;
+            newSensorToggle.onValueChanged.AddListener(sensor.SetOn);
+            newSensorToggle.SetIsOnWithoutNotify(true);
         }
     }
 }

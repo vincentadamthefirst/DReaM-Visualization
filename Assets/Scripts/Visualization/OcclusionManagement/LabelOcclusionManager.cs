@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using Evaluation;
 using UnityEngine;
 using UnityEngine.UI;
 using Utils;
@@ -10,9 +9,6 @@ using Visualization.Labels;
 
 namespace Visualization.OcclusionManagement {
     public class LabelOcclusionManager : MonoBehaviour {
-        
-        public ExecutionMeasurement ExecutionMeasurement { get; set; }
-        
         public RectTransform labelObject;
 
         public Image pointerPrefab;
@@ -22,7 +18,7 @@ namespace Visualization.OcclusionManagement {
         /// <summary>
         /// All Labels that are managed by this OcclusionManager
         /// </summary>
-        private readonly List<ScreenLabel> _allLabels = new List<ScreenLabel>();
+        public List<ScreenLabel> AllLabels { get; } = new List<ScreenLabel>();
         
         // information about the screen
         private const float MaxHeight = 1080f;
@@ -58,7 +54,10 @@ namespace Visualization.OcclusionManagement {
         }
 
         public void DisableAllLabels() {
-            _allLabels.ForEach(x => x.Deactivate());
+            AllLabels.ForEach(x => {
+                x.UpdateLabel();
+                x.Deactivate();
+            });
         }
 
         private void RecalculateParameters() {
@@ -76,22 +75,19 @@ namespace Visualization.OcclusionManagement {
         }
 
         private void LateUpdate() {
-            _allLabels.ForEach(x => x.UpdateLabel());
+            if (Disable) return;
+            AllLabels.ForEach(x => x.UpdateLabel());
             
-            ExecutionMeasurement.StartMeasurement();
             if (Time.frameCount % 3 != 0) {
-                ExecutionMeasurement.EndMeasurement();
                 return; // reduce the load by only updating every 5 frames
             }
             if (Disable) {
-                ExecutionMeasurement.EndMeasurement();
                 DisableAllLabels();
                 Destroy(this);
                 return; // disable this process
             }
             
             PickActiveLabels();
-            ExecutionMeasurement.EndMeasurement();
         }
 
         [SuppressMessage("ReSharper", "PossibleMultipleEnumeration")]
@@ -106,7 +102,7 @@ namespace Visualization.OcclusionManagement {
             // 4. taking the first _maxLabelsPerSide labels (these will be displayed)
             // 5. ordering those labels by their y-value (bottom to top of the screen)
             // 6. converting the enumerable to a list
-            var leftLabelsActive = _allLabels
+            var leftLabelsActive = AllLabels
                 .Where(l => l.Agent.IsTarget() && l.AnchorScreenPosition.x < 0 && l.Agent.Model.activeSelf &&
                             GeometryUtility.TestPlanesAABB(frustumPlanes, new Bounds(l.Agent.GetAnchorPoint(), Vector3.one * .05f)) &&
                             Vector2.Distance(Vector2.zero, l.AnchorScreenPosition) <= _detectionRadius)
@@ -115,7 +111,7 @@ namespace Visualization.OcclusionManagement {
                 .OrderBy(l => l.AnchorScreenPosition.y).ToList();
 
             // see the left label ordering, done the same way
-            var rightLabelsActive = _allLabels
+            var rightLabelsActive = AllLabels
                 .Where(l => l.Agent.IsTarget() && l.AnchorScreenPosition.x >= 0 && l.Agent.Model.activeSelf &&
                             GeometryUtility.TestPlanesAABB(frustumPlanes, new Bounds(l.Agent.GetAnchorPoint(), Vector3.one * .05f)) &&
                             Vector2.Distance(Vector2.zero, l.AnchorScreenPosition) <= _detectionRadius)
@@ -123,7 +119,7 @@ namespace Visualization.OcclusionManagement {
                 .ThenBy(l => Mathf.Abs(l.AnchorScreenPosition.y)).Take(_maxLabelsPerSide)
                 .OrderBy(l => l.AnchorScreenPosition.y).ToList();
 
-            var pointsInactive = _allLabels.Except(leftLabelsActive).Except(rightLabelsActive);
+            var pointsInactive = AllLabels.Except(leftLabelsActive).Except(rightLabelsActive);
 
             foreach (var screenLabel in pointsInactive) {
                 screenLabel.Deactivate();
@@ -208,7 +204,7 @@ namespace Visualization.OcclusionManagement {
         }
 
         public void AddLabel(ScreenLabel label) {
-            _allLabels.Add(label);
+            AllLabels.Add(label);
             var newPointer= Instantiate(pointerPrefab, _pointerHolder);
             label.Pointer = newPointer;
         }

@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using Utils;
-using Visualization.OcclusionManagement;
 
 namespace Scenery.RoadNetwork.RoadObjects {
     
@@ -50,7 +49,7 @@ namespace Scenery.RoadNetwork.RoadObjects {
                 newChild.RoadDesign = RoadDesign;
                 newChild.name = name;
                 newChild.Radius = Radius;
-                newChild.OcclusionManagementOptions = OcclusionManagementOptions;
+                newChild.settings = settings;
                 newChild.Show();
             }
 
@@ -103,19 +102,12 @@ namespace Scenery.RoadNetwork.RoadObjects {
 
             for (var i = 0; i < _modelRenderers.Length; i++) {
                 Material[] tmp;
-
-                if (OcclusionManagementOptions.occlusionHandlingMethod == OcclusionHandlingMethod.Transparency) {
-                    tmp = new Material[_modelRenderers[i].materials.Length];
-                    for (var j = 0; j < _modelRenderers[i].materials.Length; j++) {
-                        tmp[j] = new Material(_nonOccludedMaterials[i][j]);
-                        tmp[j].ChangeToTransparent(OcclusionManagementOptions.objectTransparencyValue *
-                                                   (RoadObjectType == RoadObjectType.Tree ? .5f : 1f));
-                    }
-                } else {
-                    tmp = new Material[_modelRenderers[i].materials.Length];
-                    for (var j = 0; j < _modelRenderers[i].materials.Length; j++) {
-                        tmp[j] = OcclusionManagementOptions.wireFrameMaterial;
-                    }
+                
+                tmp = new Material[_modelRenderers[i].materials.Length];
+                for (var j = 0; j < _modelRenderers[i].materials.Length; j++) {
+                    tmp[j] = new Material(_nonOccludedMaterials[i][j]);
+                    tmp[j].ChangeToTransparent(settings.minimumObjectOpacity *
+                                               (RoadObjectType == RoadObjectType.Tree ? .5f : 1f));
                 }
                 
                 _occludedMaterials[i] = tmp;

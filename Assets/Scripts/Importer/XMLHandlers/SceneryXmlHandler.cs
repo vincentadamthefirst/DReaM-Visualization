@@ -20,7 +20,7 @@ namespace Importer.XMLHandlers {
         private int _roadIdCounter;
 
         public override string GetName() {
-            return "Scenery";
+            return "scene";
         }
 
         public virtual void StartImport() {
@@ -57,6 +57,7 @@ namespace Importer.XMLHandlers {
             var junctionElements = xmlDocument.Root?.Elements("junction");
 
             if (junctionElements != null) {
+                //Parallel.ForEach(junctionElements, CreateJunction);
                 foreach (var junction in junctionElements) {
                     CreateJunction(junction);
                 }
@@ -64,10 +65,12 @@ namespace Importer.XMLHandlers {
                 // TODO error handling
             }
 
-            if (roadElements != null)
+            if (roadElements != null) {
+                //Parallel.ForEach(roadElements, CreateRoad);
                 foreach (var road in roadElements) {
                     CreateRoad(road);
                 }
+            }
             else {
                 // TODO Error handling
             }

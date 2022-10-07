@@ -173,19 +173,26 @@ namespace Scenery.RoadNetwork {
         /// <summary>
         /// Starts the Mesh generation for this Lane.
         /// </summary>
-        public void GenerateMesh() {
-            Multiplier = LaneDirection == LaneDirection.Right || LaneDirection == LaneDirection.Center ? -1 : 1;
+        public void GenerateAndSetMesh() {
             if (LaneDirection == LaneDirection.Center) return;
             if (LaneType == LaneType.None) return;
-
-            var mesh = new Mesh();
-            RoadHelper.GenerateMeshForLane(ref mesh, this);
+            
+            var mesh = GenerateMesh();
 
             GetComponent<MeshFilter>().mesh = mesh;
             
             AddMaterials();
 
             RoadMark.GenerateMesh();
+        }
+
+        public Mesh GenerateMesh() {
+            Multiplier = LaneDirection == LaneDirection.Right || LaneDirection == LaneDirection.Center ? -1 : 1;
+
+            var mesh = new Mesh();
+            RoadHelper.GenerateMeshForLane(ref mesh, this);
+
+            return mesh;
         }
 
         /// <summary>
@@ -224,11 +231,11 @@ namespace Scenery.RoadNetwork {
             } else {
                 var lm = RoadDesign.GetLaneMaterial(LaneType);
                 var material = new Material(lm.material);
-                var p = material.GetTextureScale(BaseMap);
-                var v = new Vector2( GetMaxWidthSelf(RoadDesign.samplePrecision) * p.x, Parent.Length * p.y);
-                material.SetTextureScale(BumpMap, v);
-                material.SetTextureScale(BaseMap, v);
-                material.SetTextureScale(OcclusionMap, v);
+                // var p = material.GetTextureScale(BaseMap);
+                // var v = new Vector2( GetMaxWidthSelf(RoadDesign.samplePrecision) * p.x, Parent.Length * p.y);
+                // material.SetTextureScale(BumpMap, v);
+                // material.SetTextureScale(BaseMap, v);
+                // material.SetTextureScale(OcclusionMap, v);
                 material.SetColor(BaseColor, lm.color);
                 meshRenderer.material = material;
             }

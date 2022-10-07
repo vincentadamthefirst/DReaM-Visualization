@@ -284,7 +284,7 @@ namespace SimpleFileBrowser
 		private bool canvasDimensionsChanged;
 
 		// Required in RefreshFiles() function
-		private UnityEngine.EventSystems.PointerEventData nullPointerEventData;
+		private PointerEventData nullPointerEventData;
 		#endregion
 
 		#region Properties
@@ -465,7 +465,7 @@ namespace SimpleFileBrowser
 			windowTR = (RectTransform) window.transform;
 
 			ItemHeight = ( (RectTransform) itemPrefab.transform ).sizeDelta.y;
-			nullPointerEventData = new UnityEngine.EventSystems.PointerEventData( null );
+			nullPointerEventData = new PointerEventData( null );
 
 #if !UNITY_EDITOR && ( UNITY_ANDROID || UNITY_IOS || UNITY_WSA || UNITY_WSA_10_0 )
 			DEFAULT_PATH = Application.persistentDataPath;

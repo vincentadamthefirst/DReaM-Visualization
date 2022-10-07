@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Runtime.Serialization;
 using System.Xml.Linq;
 using Visualization;
@@ -8,23 +9,35 @@ namespace Importer.XMLHandlers {
 
     public abstract class XmlHandler {
         private Version _fileVersion;
-        protected string filePath;
+        private string _filePath;
         protected XDocument xmlDocument;
         
         public VisualizationMaster VisualizationMaster { get; set; }
 
         public void SetFilePath(string path) {
-            filePath = path;
-            xmlDocument = XDocument.Load(filePath);
+            _filePath = path;
+            xmlDocument = XDocument.Load(_filePath);
         }
 
         public string GetFilePath() {
-            return filePath;
+            return _filePath;
         }
 
         public abstract string GetName();
 
         public abstract string GetDetails();
+        
+        protected static float GetFloat(XElement element, string name, float fallback = 0) {
+            return float.Parse(element.Attribute(name)?.Value ?? $"{fallback}", CultureInfo.InvariantCulture);
+        }
+
+        protected static string GetString(XElement element, string name, string fallback = "NONE") {
+            return element.Attribute(name)?.Value ?? fallback;
+        }
+
+        protected static int GetInt(XElement element, string name, int fallback = 0) {
+            return int.Parse(element.Attribute(name)?.Value ?? $"{fallback}");
+        }
     }
 
     [Serializable]

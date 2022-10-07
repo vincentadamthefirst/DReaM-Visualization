@@ -1,5 +1,5 @@
-﻿using UnityEngine;
-using Visualization.OcclusionManagement;
+﻿using UI.Settings;
+using UnityEngine;
 
 namespace Scenery {
     public abstract class VisualizationElement : MonoBehaviour {
@@ -8,11 +8,6 @@ namespace Scenery {
         /// The OpenDrive Id of this object, can be null if this object is not an OpenDrive object.
         /// </summary>
         public string OpenDriveId { get; set; }
-        
-        /// <summary>
-        /// The currently applied options for managing occlusions.
-        /// </summary>
-        public OcclusionManagementOptions OcclusionManagementOptions { get; set; }
 
         /// <summary>
         /// The actual world anchor of the object. This might differ from the anchor of the object the script is on
@@ -31,6 +26,8 @@ namespace Scenery {
         public virtual bool IsActive => true;
 
         public virtual Bounds AxisAlignedBoundingBox => new Bounds();
+
+        public ApplicationSettings settings;
 
         // Properties for materials
         protected static readonly int BumpMap = Shader.PropertyToID("_BumpMap");
@@ -67,15 +64,8 @@ namespace Scenery {
         /// </summary>
         /// <returns></returns>
         public virtual Vector3[] GetReferencePoints() {
-            switch (OcclusionManagementOptions.pointSource) {
-                case PointSource.Custom:
-                    return GetReferencePointsCustom();
-                case PointSource.RendererBounds:
-                    return GetReferencePointsRenderer();
-                case PointSource.Other:
-                default:
-                    return new Vector3[0];
-            }
+            //return GetReferencePointsCustom();
+            return GetReferencePointsRenderer();
         }
         
         public virtual void SetIsTarget(bool target) {

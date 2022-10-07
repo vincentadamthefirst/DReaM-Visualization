@@ -5,7 +5,7 @@ using Visualization.Agents;
 namespace Importer.XMLHandlers {
     public class VehicleModelsXmlHandler : XmlHandler {
         public override string GetName() {
-            return "Veh. Models";
+            return "veh";
         }
 
         public virtual void StartImport() {
@@ -25,21 +25,23 @@ namespace Importer.XMLHandlers {
                 // chassis information 
                 var boundingBox = vehicle.Element("BoundingBox");
                 var center = boundingBox?.Element("Center");
-                var dimension = boundingBox?.Element("Dimension");
+                var dimension = boundingBox?.Element("Dimensions");
 
                 var centerPoint =
                     new Vector3(
                         float.Parse(center?.Attribute("x")?.Value ?? "0",
                             CultureInfo.InvariantCulture.NumberFormat),
-                        0,
+                        float.Parse(center?.Attribute("z")?.Value ?? "0",
+                            CultureInfo.InvariantCulture.NumberFormat),
                         float.Parse(center?.Attribute("y")?.Value ?? "0",
-                            CultureInfo.InvariantCulture.NumberFormat));
+                            CultureInfo.InvariantCulture.NumberFormat)
+                        );
 
                 var width = float.Parse(dimension?.Attribute("width")?.Value ?? "2",
                     CultureInfo.InvariantCulture.NumberFormat);
                 var length = float.Parse(dimension?.Attribute("length")?.Value ?? "5",
                     CultureInfo.InvariantCulture.NumberFormat);
-                var height = float.Parse(dimension?.Attribute("width")?.Value ?? "1.8",
+                var height = float.Parse(dimension?.Attribute("height")?.Value ?? "1.8",
                     CultureInfo.InvariantCulture.NumberFormat);
                 
                 // wheel information

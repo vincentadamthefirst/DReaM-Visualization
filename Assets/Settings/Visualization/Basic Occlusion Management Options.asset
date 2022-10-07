@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Basic Occlusion Management Options
   m_EditorClassIdentifier: 
   labelLocation: 0
-  occlusionDetectionMethod: 1
-  occlusionHandlingMethod: 0
+  occlusionDetectionMethod: 0
+  occlusionHandlingMethod: 1
   sampleRandomPoints: 0
   nearClipPlaneAsStart: 1
   rayCastPrecision: 3
@@ -22,7 +22,7 @@ MonoBehaviour:
   pointSource: 0
   useCombinedBoundingBox: 1
   preCheckViewFrustum: 1
-  objectTransparencyValue: 0.1
-  agentTransparencyValue: 0.18
+  objectTransparencyValue: 0.05
+  agentTransparencyValue: 0.1
   staggeredCheck: 1
-  wireFrameMaterial: {fileID: 2100000, guid: f3ae08bd39007874a86a0285d96e797d, type: 2}
+  wireFrameMaterial: {fileID: 2100000, guid: 6fe846931234b7440a0b863e4a274c33, type: 2}

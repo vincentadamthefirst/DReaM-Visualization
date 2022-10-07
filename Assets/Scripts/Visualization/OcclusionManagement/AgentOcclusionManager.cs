@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Evaluation;
 using Scenery;
 using Scenery.RoadNetwork.RoadObjects;
 using UI;
+using UI.Settings;
+using UI.Visualization;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
 using Utils;
@@ -22,17 +23,7 @@ namespace Visualization.OcclusionManagement {
         public ForwardRendererData aotRendererData;
         public List<ScriptableRendererFeature> shaderFeatures;
         public List<ScriptableRendererFeature> normalFeatures;
-        
-        /// <summary>
-        /// The class measuring the handling time for this manager.
-        /// </summary>
-        public ExecutionMeasurement DetectionMeasurement { get; set; }
-        
-        /// <summary>
-        /// The class measuring the detection time for this manager.
-        /// </summary>
-        public ExecutionMeasurement HandlingMeasurement { get; set; }
-        
+
         /// <summary>
         /// If the occlusion management should be disabled.
         /// </summary>
@@ -41,7 +32,7 @@ namespace Visualization.OcclusionManagement {
         /// <summary>
         /// The settings to be used for occlusion management.
         /// </summary>
-        public OcclusionManagementOptions OcclusionManagementOptions { get; set; }
+        public ApplicationSettings Settings { get; set; }
         
         // the currently used OcclusionDetector
         private OcclusionDetector _occlusionDetector;
@@ -60,13 +51,7 @@ namespace Visualization.OcclusionManagement {
         private TargetController _targetController;
 
         // the settings panel controller
-        private SettingsController _settingsController;
-
-        // the types of the occlusion detectors to be initialized
-        private static readonly Type[][] OcclusionDetectors = {
-            new [] {typeof(RayCastDetectorNormal), typeof(RayCastDetectorStaggered)}, 
-            new [] {typeof(PolygonDetectorNormal), typeof(PolygonDetectorStaggered)}
-        };
+        private VisualizationMenu _visualizationMenu;
 
         /// <summary>
         /// Finds all necessary objects in the scene. This method has to be called BEFORE any other method.
@@ -74,7 +59,7 @@ namespace Visualization.OcclusionManagement {
         public void FindAll() {
             _extendedCamera = FindObjectOfType<ExtendedCamera>();
             _targetController = FindObjectOfType<TargetController>();
-            _settingsController = FindObjectOfType<SettingsController>();
+            _visualizationMenu = FindObjectOfType<VisualizationMenu>();
         }
 
         /// <summary>
@@ -88,46 +73,29 @@ namespace Visualization.OcclusionManagement {
                 }
             }
             
-            if (OcclusionManagementOptions.occlusionDetectionMethod == OcclusionDetectionMethod.Shader) {
-                aotRendererData.rendererFeatures.Clear();
-                aotRendererData.rendererFeatures.AddRange(shaderFeatures);
-                aotRendererData.opaqueLayerMask = LayerMask.GetMask("Default", "agents_base", "scenery_objects",
-                    "scenery_road", "scenery_signs", "Water", "Ignore Raycast", "UI", "TransparentFX", "Terrain");
-                
-                // disabling the occlusion management in code
-                Disable = true;
-            } else {
-                aotRendererData.rendererFeatures.Clear();
-                aotRendererData.opaqueLayerMask = LayerMask.GetMask("Default", "agents_base", "scenery_objects",
-                    "scenery_road", "scenery_signs", "Water", "Ignore Raycast", "UI", "TransparentFX", "Terrain", "agent_targets", "scenery_targets");
+            aotRendererData.rendererFeatures.Clear();
+            aotRendererData.opaqueLayerMask = LayerMask.GetMask("Default", "agents_base", "scenery_objects",
+                "scenery_road", "scenery_signs", "Water", "Ignore Raycast", "UI", "TransparentFX", "Terrain", "agent_targets", "scenery_targets");
 
-                _occlusionDetector = (OcclusionDetector) Activator.CreateInstance(
-                    OcclusionDetectors[(int) OcclusionManagementOptions.occlusionDetectionMethod][
-                        OcclusionManagementOptions.staggeredCheck ? 1 : 0]);
-                
-                // setting the base parameters
-                _occlusionDetector.ExtendedCamera = _extendedCamera;
-                _occlusionDetector.OcclusionManagementOptions = OcclusionManagementOptions;
+            _occlusionDetector = (OcclusionDetector)Activator.CreateInstance(typeof(RayCastDetectorNormal));
             
-                _occlusionDetector.ColliderMapping = _colliderMapping;
+            // setting the base parameters
+            _occlusionDetector.ExtendedCamera = _extendedCamera;
+            _occlusionDetector.ColliderMapping = _colliderMapping;
 
-                // forwarding the measurement objects to the new occlusion detector
-                _occlusionDetector.DetectionMeasurement = DetectionMeasurement;
-                _occlusionDetector.HandlingMeasurement = HandlingMeasurement;
-
-                foreach (var visualizationElement in _allElements) {
-                    // adding all VisualizationElements
-                    if (!visualizationElement.IsDistractor) continue;
-                    _occlusionDetector.DistractorCounts[visualizationElement] = 0;
-                }
-
-                foreach (var target in _targetController.Targets) {
-                    _occlusionDetector.SetTarget(target, true);
-                }
-                
-                // enabling the occlusion management 
-                Disable = false;
+            foreach (var visualizationElement in _allElements) {
+                // adding all VisualizationElements
+                if (!visualizationElement.IsDistractor) continue;
+                _occlusionDetector.DistractorCounts[visualizationElement] = 0;
             }
+
+            foreach (var target in _targetController.Targets) {
+                _occlusionDetector.SetTarget(target, true);
+            }
+            
+            // enabling the occlusion management 
+            Disable = false;
+            
         }
 
         /// <summary>
@@ -136,14 +104,13 @@ namespace Visualization.OcclusionManagement {
         private void OnDestroy() {
             aotRendererData.rendererFeatures.Clear();
             aotRendererData.rendererFeatures.AddRange(shaderFeatures);
+            Settings.StoreToPrefs();
         }
 
         /// <summary>
         /// Method called when there is a minor update to the settings. Only Changes the method of handling occlusion.
         /// </summary>
         public void MinorUpdate() {
-            if (OcclusionManagementOptions.occlusionDetectionMethod == OcclusionDetectionMethod.Shader) return;
-            
             var toChange = new List<VisualizationElement>();
             foreach (var entry in _occlusionDetector.DistractorCounts) {
                 entry.Key.HandleNonHit();
@@ -177,11 +144,11 @@ namespace Visualization.OcclusionManagement {
             // adding the objects to the settings
             foreach (var visualizationElement in _allElements) {
                 if (visualizationElement.GetType().IsSubclassOf(typeof(RoadObject))) {
-                    _settingsController.Elements.Add(visualizationElement);
+                    _visualizationMenu.Elements.Add(visualizationElement);
                 }
             }
             
-            _settingsController.Rebuild();
+            _visualizationMenu.Rebuild();
             
             MajorUpdate();
         }
@@ -192,8 +159,6 @@ namespace Visualization.OcclusionManagement {
         /// <param name="element">The Agent of which to change the target status</param>
         /// <param name="isTarget">The new target status</param>
         public void SetTarget(Agent element, bool isTarget) {
-            if (OcclusionManagementOptions.occlusionDetectionMethod == OcclusionDetectionMethod.Shader) return;
-            
             _occlusionDetector.SetTarget(element, isTarget);
         }
 
@@ -202,13 +167,6 @@ namespace Visualization.OcclusionManagement {
         /// </summary>
         /// <param name="targetStatus">The new target status for all agents</param>
         public void SetAllTargets(bool targetStatus) {
-            if (OcclusionManagementOptions.occlusionDetectionMethod == OcclusionDetectionMethod.Shader) {
-                foreach (var agent in FindObjectsOfType<Agent>()) {
-                    agent.SetIsTarget(targetStatus);
-                }
-                return;
-            }
-
             foreach (var agent in FindObjectsOfType<Agent>()) {
                 agent.SetIsTarget(true);
                 _occlusionDetector.SetTarget(agent, true);

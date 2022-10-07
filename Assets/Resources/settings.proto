@@ -24,29 +24,6 @@ message ApplicationSettings {
   message GeneralSettings {
     bool disableUpdateCheck = 1;
   }
-  
-  // any graphical settings are stored inside this object
-  message GraphicsSettings {
-    uint32 resolutionWidth = 1;
-    uint32 resolutionHeight = 2;
-    uint32 refreshRate = 3;
-    bool isFullscreen = 4;
-  }
-  
-  message OcclusionHandlingSettings {
-    // general occlusion handling settings
-    bool handleOcclusion = 1;
-    bool ignoreFocusObjects = 2;
-
-    // transparency settings
-    float focusObjectTransparency = 3;
-    float distractorTransparency = 4;
-
-    // raycast settings
-    bool sampleRandomPoints = 5;
-    bool nearClipAsStart = 6;
-    float percentageOfPointsSampled = 7;
-  }
 
   message ImportSettings {
     // custom name for this configuration
@@ -65,4 +42,27 @@ message ApplicationSettings {
     OcclusionHandlingSettings occlusionHandlingSettings = 7;
     GraphicsSettings graphicSettings = 8;
   }
+}
+
+// any graphical settings are stored inside this object
+message GraphicsSettings {
+  uint32 resolutionWidth = 1;
+  uint32 resolutionHeight = 2;
+  uint32 refreshRate = 3;
+  bool isFullscreen = 4;
+}
+
+message OcclusionHandlingSettings {
+  // general occlusion handling settings
+  bool handleOcclusion = 1;
+  bool ignoreFocusObjects = 2;
+
+  // transparency settings
+  float focusObjectTransparency = 3;
+  float distractorTransparency = 4;
+
+  // raycast settings
+  bool sampleRandomPoints = 5;
+  bool nearClipAsStart = 6;
+  float percentageOfPointsSampled = 7;
 }

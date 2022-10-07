@@ -6,7 +6,7 @@ namespace Importer.XMLHandlers {
     public class PedestrianModelsXmlHandler : XmlHandler {
 
         public override string GetName() {
-            return "Ped. Models";
+            return "ped";
         }
 
         public virtual void StartImport() {
@@ -15,9 +15,9 @@ namespace Importer.XMLHandlers {
         
         private void ImportPedestrianModels() {
             var catalog = xmlDocument.Root?.Element("Catalog") ??
-                          throw new ArgumentMissingException("AgentModelsCatalog has not <Catalog> entry.");
+                          throw new ArgumentMissingException("PedestrianModelsCatalog has not <Catalog> entry.");
 
-            foreach (var vehicle in catalog.Elements("Vehicle")) {
+            foreach (var vehicle in catalog.Elements("Pedestrian")) {
                 var name = vehicle.Attribute("name")?.Value ?? "-1";
                 if (name == "-1") continue;
                 
@@ -38,7 +38,7 @@ namespace Importer.XMLHandlers {
                     CultureInfo.InvariantCulture.NumberFormat);
                 var length = float.Parse(dimension?.Attribute("length")?.Value ?? "0.7",
                     CultureInfo.InvariantCulture.NumberFormat);
-                var height = float.Parse(dimension?.Attribute("width")?.Value ?? "1.8",
+                var height = float.Parse(dimension?.Attribute("height")?.Value ?? "1.8",
                     CultureInfo.InvariantCulture.NumberFormat);
 
                 var info = new PedestrianModelInformation() {

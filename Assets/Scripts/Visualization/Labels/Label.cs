@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using Visualization.Agents;
 
 namespace Visualization.Labels {
     public abstract class Label : MonoBehaviour {
@@ -60,5 +61,7 @@ namespace Visualization.Labels {
         /// Deactivate this label
         /// </summary>
         public abstract void Deactivate();
+
+        public abstract void AddSensor(AgentSensor sensor);
     }
 }

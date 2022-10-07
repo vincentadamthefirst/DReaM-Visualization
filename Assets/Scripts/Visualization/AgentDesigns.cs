@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UI;
 using Visualization.Agents;
 using Visualization.Labels;
 
@@ -12,11 +13,11 @@ namespace Visualization {
         [Header("Prefabs")] 
         public PedestrianAgent pedestrianPrefab;
         public VehicleAgent vehiclePrefab;
-        public VehicleSceneLabel vehicleSceneLabel;
-        public PedestrianSceneLabel pedestrianSceneLabel;
         public VehicleScreenLabel vehicleScreenLabel;
         public PedestrianScreenLabel pedestrianScreenLabel;
         public AgentSensor sensorPrefab;
+        public Toggle sensorTogglePrefab;
+        public BoxAgent boxPrefab;
         
         [Header("AgentModels")]
         public List<AgentModel> agentModels = new List<AgentModel>();
@@ -32,8 +33,7 @@ namespace Visualization {
             if (models.Count() != 0) {
                 return models.First();
             } else {
-                return null;
-                // TODO return basic cube
+                return agentType == AgentType.Vehicle ? GetAgentModel(agentType, "fallback") : agentModels[0];
             }
         }
     }

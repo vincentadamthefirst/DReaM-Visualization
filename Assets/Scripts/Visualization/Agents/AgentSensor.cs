@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace Visualization.Agents {
     
@@ -11,6 +12,9 @@ namespace Visualization.Agents {
         private Transform _child;
         private MeshFilter _meshFilter;
         private MeshRenderer _meshRenderer;
+
+        private bool _active = false;
+        private bool _on = true;
 
         /// <summary>
         /// Method to retrieve all necessary objects for this sensor (its child object and mesh rendering components)
@@ -36,7 +40,7 @@ namespace Visualization.Agents {
         /// <param name="globalRotation">the global rotation of this sensors view frustum</param>
         public void UpdatePositionAndRotation(Vector3 position, float globalRotation) {
             _child.position = position;
-            _child.rotation = Quaternion.Euler(0, (-globalRotation +  + Mathf.PI / 2f) * Mathf.Rad2Deg, 0);
+            _child.rotation = Quaternion.Euler(0, (-globalRotation) * Mathf.Rad2Deg, 0);
         }
 
         /// <summary>
@@ -46,21 +50,54 @@ namespace Visualization.Agents {
         /// <param name="distance">The new sensor viewing distance in units (meters)</param>
         public void UpdateOpeningAngle(float angleRadians, float distance) {
             var newMesh = new Mesh();
-            var height = Mathf.Sin(angleRadians / 2f) * distance;
-            newMesh.vertices = new[]
-                {Vector3.zero, new Vector3(height, 0, distance), new Vector3(-height, 0, distance)};
-            newMesh.triangles = new[] {0, 2, 1};
+
+            var currentAngle = -angleRadians / 2f;
             
+            var verts = new List<Vector3> { Vector3.zero };
+            var tris = new List<int>();
+
+            for (var i = 0; i < 11; i++) {
+                var x = distance * Mathf.Cos(currentAngle);
+                var y = distance * Mathf.Sin(currentAngle);
+                verts.Add(new Vector3(x, 0, y));
+                if (i != 0)
+                    tris.AddRange(new [] {0, verts.Count - 1, verts.Count - 2});
+
+                currentAngle += angleRadians / 10;
+            }
+
+            newMesh.vertices = verts.ToArray();
+            newMesh.triangles = tris.ToArray();
+
             newMesh.RecalculateNormals();
             _meshFilter.mesh = newMesh;
+
+
+            // var newMesh = new Mesh();
+            // var height = Mathf.Sin(angleRadians / 2f) * distance;
+            // newMesh.vertices = new[]
+            //     {Vector3.zero, new Vector3(height, 0, distance), new Vector3(-height, 0, distance)};
+            // newMesh.triangles = new[] {0, 2, 1};
+            //
+            // newMesh.RecalculateNormals();
+            // _meshFilter.mesh = newMesh;
         }
 
         /// <summary>
-        /// Sets the child object active or not. Used to hide the mesh in the scene.
+        /// De-/activates the display of this sensor. Overwritten by Active.
         /// </summary>
-        /// <param name="active">The new active status of the child object.</param>
+        public void SetOn(bool on) {
+            _on = on;
+            UpdateVisibility();
+        }
+
         public void SetActive(bool active) {
-            _child.GetChild(0).gameObject.SetActive(active);
+            _active = active;
+            UpdateVisibility();
+        }
+
+        private void UpdateVisibility() {
+            _child.GetChild(0).gameObject.SetActive(_active && _on);
         }
     }
 }

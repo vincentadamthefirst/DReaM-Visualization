@@ -22,5 +22,10 @@ namespace Visualization {
         /// If the agent is currently braking
         /// </summary>
         public bool Brake { get; set; }
+        
+        /// <summary>
+        /// If the AEB is currently active
+        /// </summary>
+        public bool AEBActive { get; set; }
     }
 }

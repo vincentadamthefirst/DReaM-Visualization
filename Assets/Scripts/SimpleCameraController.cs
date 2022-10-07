@@ -111,7 +111,7 @@ public class SimpleCameraController : MonoBehaviour {
     /// Sets information on the state of the settings panel.
     /// </summary>
     /// <param name="value">If the settings panel has been opened</param>
-    public void SetSettingsOpen(bool value) {
+    public void SetMenuOpen(bool value) {
         _settingsOpen = value;
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;

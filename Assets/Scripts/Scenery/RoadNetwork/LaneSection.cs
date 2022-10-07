@@ -116,11 +116,11 @@ namespace Scenery.RoadNetwork {
         /// Starts the mesh generation for this LaneSections children Lanes.
         /// </summary>
         public void StartMeshGeneration() {
-            CenterLane.GenerateMesh();
+            CenterLane.GenerateAndSetMesh();
             CenterLane.RoadMark.GenerateMesh();
             
             foreach (var entry in LaneIdMappings) {
-                entry.Value.GenerateMesh();
+                entry.Value.GenerateAndSetMesh();
             }
         }
 
