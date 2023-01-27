@@ -66,8 +66,6 @@ namespace Scenery.RoadNetwork {
         /// All TrafficSigns along this Road
         /// </summary>
         public List<TrafficSign> TrafficSigns { get; } = new List<TrafficSign>();
-        
-        public override bool IsDistractor => false;
 
         /// <summary>
         /// Adds a new RoadGeometry to this Road and sorts the list based on s value.
@@ -143,7 +141,7 @@ namespace Scenery.RoadNetwork {
 
                 var lastLaneSection = LaneSections.Last();
 
-                foreach (var conn in successor.GetAllConnectionForIncomingRoad(OpenDriveId)) {
+                foreach (var conn in successor.GetAllConnectionForIncomingRoad(Id)) {
                     var successorRoad = successor.Roads[conn.ConnectingRoadOdId];
                     var nextLaneSection = conn.ContactPoint == ContactPoint.Start
                         ? successorRoad.LaneSections[0]
@@ -164,41 +162,6 @@ namespace Scenery.RoadNetwork {
                     }
                 }
             }
-        }
-
-        /// <summary>
-        /// Sets the layer for all Lanes that belong to this Road, does NOT set the layer of any RoadObjects.
-        /// </summary>
-        /// <param name="layer">The new layer</param>
-        public override void SetLayer(int layer) {
-            gameObject.layer = layer;
-            foreach (var laneSection in LaneSections) {
-                laneSection.LeftLanes.ForEach(l => l.gameObject.layer = layer);
-                laneSection.CenterLane.gameObject.layer = layer;
-                laneSection.RightLanes.ForEach(l => l.gameObject.layer = layer);
-            }
-        }
-
-        /// <summary>
-        /// Scenery will not be handled on occlusion, ignore
-        /// </summary>
-        public override void HandleHit() {
-            // Ignore
-        }
-
-        /// <summary>
-        /// Scenery will not be handled on occlusion, ignore
-        /// </summary>
-        public override void HandleNonHit() {
-            // Ignore
-        }
-
-        protected override Vector3[] GetReferencePointsRenderer() {
-            return new Vector3[0]; // assume scenery is never target, Ignore
-        }
-
-        protected override Vector3[] GetReferencePointsCustom() {
-            return new Vector3[0]; // assume scenery is never target, Ignore
         }
 
         /// <summary>
@@ -294,5 +257,7 @@ namespace Scenery.RoadNetwork {
             
             return geometry.EvaluateHeading(globalS - geometry.SStart);
         }
+
+        public override ElementOrigin ElementOrigin => ElementOrigin.OpenDrive;
     }
 }

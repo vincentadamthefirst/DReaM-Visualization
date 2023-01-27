@@ -123,7 +123,7 @@ namespace Scenery.RoadNetwork {
         public Road CreateRoad(string openDriveId, string junctionId) {
             var newRoad = Instantiate(roadDesign.roadPrefab, Vector3.zero, Quaternion.identity, transform)
                 .GetComponent<Road>();
-            newRoad.OpenDriveId = openDriveId;
+            newRoad.Id = openDriveId;
             newRoad.gameObject.layer = RoadLayer;
             Roads[openDriveId] = newRoad;
 
@@ -177,7 +177,7 @@ namespace Scenery.RoadNetwork {
         public Junction CreateJunction(string openDriveId) {
             var newJunction = Instantiate(roadDesign.junctionPrefab, Vector3.zero, Quaternion.identity, transform)
                 .GetComponent<Junction>();
-            newJunction.OpenDriveId = openDriveId;
+            newJunction.Id = openDriveId;
             newJunction.gameObject.layer = RoadLayer;
             newJunction.RoadDesign = roadDesign;
             newJunction.gameObject.isStatic = true;

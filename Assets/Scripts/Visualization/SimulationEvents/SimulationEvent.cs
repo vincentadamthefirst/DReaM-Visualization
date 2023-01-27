@@ -17,7 +17,7 @@
         /// </summary>
         public int TimeStep { get; set; }
         
-        public int AgentId { get; set; }
+        public string AgentId { get; set; }
         public SimulationEventType EventType { get; set; }
     }
 }

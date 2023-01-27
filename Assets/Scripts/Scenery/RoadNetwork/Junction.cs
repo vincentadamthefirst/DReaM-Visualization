@@ -29,46 +29,12 @@ namespace Scenery.RoadNetwork {
         /// </summary>
         public List<Connection> Connections { get; } = new List<Connection>();
 
-        public override bool IsDistractor => false;
-
-        /// <summary>
-        /// Sets the layer for this Junction by setting the layer for all Roads belonging to this Junction.
-        /// </summary>
-        /// <param name="layer">The new layer for all Roads</param>
-        public override void SetLayer(int layer) {
-            foreach (var road in Roads) {
-                road.Value.SetLayer(layer);
-            }
-        }
-
-        /// <summary>
-        /// Scenery will not be handled on occlusion, ignore
-        /// </summary>
-        public override void HandleHit() {
-            // Ignore
-        }
-
-        /// <summary>
-        /// Scenery will not be handled on occlusion, ignore
-        /// </summary>
-        public override void HandleNonHit() {
-            // Ignore
-        }
-
-        protected override Vector3[] GetReferencePointsRenderer() {
-            return new Vector3[0]; // assume scenery is never target, Ignore
-        }
-
-        protected override Vector3[] GetReferencePointsCustom() {
-            return new Vector3[0]; // assume scenery is never target, Ignore
-        }
-
         /// <summary>
         /// Adds a Road to this Junction
         /// </summary>
         /// <param name="road">The road object to be added</param>
         public void AddRoad(Road road) {
-            Roads.Add(road.OpenDriveId, road);
+            Roads.Add(road.Id, road);
         }
 
         /// <summary>
@@ -133,6 +99,8 @@ namespace Scenery.RoadNetwork {
                 ordered2[i].transform.position += new Vector3(0, i * RoadDesign.offsetHeight, 0);
             }
         }
+
+        public override ElementOrigin ElementOrigin => ElementOrigin.OpenDrive;
     }
 
     /// <summary>

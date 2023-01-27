@@ -58,7 +58,7 @@ namespace Visualization.POIs {
 
             var newObj = new GameObject {
                 transform = {
-                    name = $"ConflictArea {roadA.OpenDriveId} & {roadB.OpenDriveId}",
+                    name = $"ConflictArea {roadA.Id} & {roadB.Id}",
                     parent = transform
                 }
             };
@@ -119,22 +119,22 @@ namespace Visualization.POIs {
 
                     BuildConflictArea(roadA, roadB, conflictArea, currentIndex / (float)totalCount);
 
-                    if (!newJunctionGroup.RoadAGroups.Any(x => x.roadAText.text == roadA.OpenDriveId)) {
+                    if (!newJunctionGroup.RoadAGroups.Any(x => x.roadAText.text == roadA.Id)) {
                         var newRoadAGroup = Instantiate(roadAGroupPrefab, container);
-                        newRoadAGroup.InitializeData(roadA.OpenDriveId);
+                        newRoadAGroup.InitializeData(roadA.Id);
                         newRoadAGroup.Parent = newJunctionGroup;
                         newJunctionGroup.RoadAGroups.Add(newRoadAGroup);
                     }
 
-                    var roadAGroup = newJunctionGroup.RoadAGroups.First(x => x.roadAText.text == roadA.OpenDriveId);
-                    if (!roadAGroup.RoadBGroups.Any(x => x.roadBText.text == roadB.OpenDriveId)) {
+                    var roadAGroup = newJunctionGroup.RoadAGroups.First(x => x.roadAText.text == roadA.Id);
+                    if (!roadAGroup.RoadBGroups.Any(x => x.roadBText.text == roadB.Id)) {
                         var newRoadBGroup = Instantiate(roadBGroupPrefab, container);
-                        newRoadBGroup.InitializeData(roadB.OpenDriveId);
+                        newRoadBGroup.InitializeData(roadB.Id);
                         newRoadBGroup.Parent = roadAGroup;
                         roadAGroup.RoadBGroups.Add(newRoadBGroup);
                     }
 
-                    var roadBGroup = roadAGroup.RoadBGroups.First(x => x.roadBText.text == roadB.OpenDriveId);
+                    var roadBGroup = roadAGroup.RoadBGroups.First(x => x.roadBText.text == roadB.Id);
 
                     var newLaneToLane = Instantiate(laneToLaneConflictAreaPrefab, container);
                     newLaneToLane.InitializeData(conflictArea);

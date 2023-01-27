@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 namespace Visualization.Labels.BasicLabels {
     public class BasicLabelController : MonoBehaviour {
 
-        private readonly List<IdLabel> _idLabels = new List<IdLabel>();
+        private readonly List<IdLabel> _idLabels = new();
 
         private void Update() {
             if (Input.GetKeyDown(KeyCode.F2)) {

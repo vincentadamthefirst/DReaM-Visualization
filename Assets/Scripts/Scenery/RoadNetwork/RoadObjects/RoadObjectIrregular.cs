@@ -4,9 +4,7 @@
     /// Not yet implemented class for irregular OpenDrive objects.
     /// </summary>
     public class RoadObjectIrregular : RoadObject {
-        
-        public override bool IsDistractor => true;
-        
+
         private void Repeat() {
             throw new System.NotImplementedException();
         }
@@ -19,11 +17,17 @@
             throw new System.NotImplementedException();
         }
 
-        public override void HandleHit() {
+        public override ElementOrigin ElementOrigin => ElementOrigin.OpenDrive;
+        
+        public override void OcclusionStart() {
             throw new System.NotImplementedException();
         }
 
-        public override void HandleNonHit() {
+        public override void OcclusionEnd() {
+            throw new System.NotImplementedException();
+        }
+
+        public override void SetupOccludedMaterials() {
             throw new System.NotImplementedException();
         }
     }

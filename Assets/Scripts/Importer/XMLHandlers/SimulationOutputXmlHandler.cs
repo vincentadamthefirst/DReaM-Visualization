@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.XPath;
+using Scenery;
 using UnityEngine;
 using Visualization;
 using Visualization.Agents;
@@ -14,7 +15,7 @@ using Visualization.SimulationEvents;
 namespace Importer.XMLHandlers {
     
     public  class XmlAgent {
-        public int Id { get; set; }
+        public string Id { get; set; }
         public string AgentGroup { get; set; }
             
         public string AgentTypeString { get; set; }
@@ -34,7 +35,7 @@ namespace Importer.XMLHandlers {
 
     public class SimulationOutputXmlHandler : XmlHandler {
 
-        private Dictionary<int, XmlAgent> _xmlAgents;
+        private Dictionary<string, XmlAgent> _xmlAgents;
 
         private Dictionary<int, List<SimulationEvent>> _events = new Dictionary<int, List<SimulationEvent>>();
 
@@ -84,7 +85,7 @@ namespace Importer.XMLHandlers {
         }
 
         public virtual void StartImport() {
-            _xmlAgents = new Dictionary<int, XmlAgent>();
+            _xmlAgents = new Dictionary<string, XmlAgent>();
             
             FindRunResult();
 
@@ -209,9 +210,8 @@ namespace Importer.XMLHandlers {
                     if (agentIdAttribute == null) {
                         continue;
                     }
-
-                    var id = int.Parse(agentIdAttribute.Value);
-                    newEvent.AgentId = id;
+                    
+                    newEvent.AgentId = agentIdAttribute.Value;
                 }
                 
                 if (_events.ContainsKey(timeStep))
@@ -235,7 +235,7 @@ namespace Importer.XMLHandlers {
                 }
                 
                 xmlAgent.ActualAgent.Id = xmlAgent.Id;
-                xmlAgent.ActualAgent.OpenDriveId = xmlAgent.Id + "";
+                ((VisualizationElement)xmlAgent.ActualAgent).Id = xmlAgent.Id + "";
                 xmlAgent.ActualAgent.SimulationSteps = xmlAgent.SimulationSteps;
             }
         }
@@ -330,13 +330,13 @@ namespace Importer.XMLHandlers {
 
             foreach (var agent in agents) {
                 var newAgent = new XmlAgent {
-                    Id = GetInt(agent, "Id", -1),
+                    Id = GetString(agent, "Id", "-1"),
                     AgentGroup = agent.Attribute("AgentTypeGroupName")?.Value ?? "none",
                     AgentTypeString = agent.Attribute("AgentTypeName")?.Value ?? "none",
                     ModelType = agent.Attribute("VehicleModelType")?.Value ?? "none"
                 };
                 
-                if (newAgent.Id < 0)
+                if (newAgent.Id == "-1")
                     throw new ArgumentException($"Agent Ids must be non-negative integers. (agent {agent.Attribute("id")?.Value})");
 
                 if (_xmlAgents.ContainsKey(newAgent.Id))
@@ -356,7 +356,7 @@ namespace Importer.XMLHandlers {
                 if (elementSplit.Length != 2)
                     throw new ArgumentException("Header is not formatted correctly.");
 
-                var agentId = int.Parse(elementSplit[0].Replace(" ", ""));
+                var agentId = int.Parse(elementSplit[0].Replace(" ", "")) + "";
                 var paramName = elementSplit[1].Replace(" ", "");
                 
                 _xmlAgents[agentId].ValuePositions.Add(paramName, i);
@@ -403,9 +403,9 @@ namespace Importer.XMLHandlers {
                 var text = sampleSplit[agent.ValuePositions[unknownDataName]];
 
                 if (Regex.IsMatch(text, @"[0-9]+.[0-9]+")) {
-                    step.UnknownInformation.Add(float.Parse(text, CultureInfo.InvariantCulture.NumberFormat));
+                    step.UnclassifiedInformation.Add(float.Parse(text, CultureInfo.InvariantCulture.NumberFormat));
                 } else {
-                    step.UnknownInformation.Add(text);
+                    step.UnclassifiedInformation.Add(text);
                 }
             }
 

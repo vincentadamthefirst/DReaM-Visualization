@@ -1,5 +1,4 @@
 ﻿using TMPro;
-using UI.Main_Menu.Utils;
 
 namespace UI.SidePanel {
     

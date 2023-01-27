@@ -1,0 +1,25 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/RuntimeMenu.uss?fileID=7433441132597879392&amp;guid=65dcfc7471c2a9b429db1e2e89d0c77b&amp;type=3#RuntimeMenu" />
+    <ui:VisualElement name="Header" style="border-bottom-width: 2px; border-bottom-color: rgb(0, 0, 0); padding-left: 10px; padding-right: 10px; padding-top: 10px; padding-bottom: 10px;">
+        <ui:VisualElement name="MainHeader" style="flex-direction: row; justify-content: space-between;">
+            <ui:Label text="DReaM Visualization" display-tooltip-when-elided="true" name="MainTitle" style="-unity-font-definition: url(&apos;project://database/Assets/Graphics/Fonts/Roboto-Bold%20SDF.asset?fileID=11400000&amp;guid=0895c2d2857e94a45849ce7f3e142a00&amp;type=2#Roboto-Bold SDF&apos;); font-size: 20px;" />
+            <ui:Label text="Version 1.0.0" display-tooltip-when-elided="true" name="Version" style="-unity-font-definition: url(&apos;project://database/Assets/Graphics/Fonts/Roboto-Light%20SDF.asset?fileID=11400000&amp;guid=529084a1d10d5c948b7013bfbd17ca4c&amp;type=2#Roboto-Light SDF&apos;); -unity-font-style: normal;" />
+        </ui:VisualElement>
+        <ui:Label text="Runtime Menu" display-tooltip-when-elided="true" name="SubTitle" style="font-size: 16px;" />
+    </ui:VisualElement>
+    <ui:VisualElement name="Lower" style="flex-direction: row; height: 400px;">
+        <ui:VisualElement name="Buttons" style="-unity-font: resource(&apos;&apos;); border-right-width: 2px; border-right-color: rgb(0, 0, 0); padding-left: 10px; padding-right: 10px; padding-top: 10px; padding-bottom: 10px;">
+            <ui:Button text="Settings" display-tooltip-when-elided="true" name="SettingsButton" class="runtime-menu-button" />
+            <ui:Button text="Conflict Areas" display-tooltip-when-elided="true" name="ConflictAreasButton" focusable="true" class="runtime-menu-button" style="-unity-font-definition: url(&apos;project://database/Assets/Graphics/Fonts/Roboto-Regular%20SDF.asset?fileID=11400000&amp;guid=846d13e80e1322e459a2cf34a7a55008&amp;type=2#Roboto-Regular SDF&apos;);" />
+            <ui:Button text="Stopping Points" display-tooltip-when-elided="true" name="StoppingPointsButton" class="runtime-menu-button" style="-unity-font-definition: url(&apos;project://database/Assets/Graphics/Fonts/Roboto-Regular%20SDF.asset?fileID=11400000&amp;guid=846d13e80e1322e459a2cf34a7a55008&amp;type=2#Roboto-Regular SDF&apos;);" />
+            <ui:Button text="Scene Objects" display-tooltip-when-elided="true" name="SceneObjectsButton" class="runtime-menu-button" style="-unity-font-definition: url(&apos;project://database/Assets/Graphics/Fonts/Roboto-Regular%20SDF.asset?fileID=11400000&amp;guid=846d13e80e1322e459a2cf34a7a55008&amp;type=2#Roboto-Regular SDF&apos;);" />
+            <ui:Button text="Main Menu" display-tooltip-when-elided="true" name="MainMenuButton" class="runtime-menu-button" style="-unity-font-definition: url(&apos;project://database/Assets/Graphics/Fonts/Roboto-Regular%20SDF.asset?fileID=11400000&amp;guid=846d13e80e1322e459a2cf34a7a55008&amp;type=2#Roboto-Regular SDF&apos;); background-color: rgb(140, 77, 19);" />
+            <ui:Button text="Exit Visualization" display-tooltip-when-elided="true" name="ExitButton" class="runtime-menu-button" style="-unity-font-definition: url(&apos;project://database/Assets/Graphics/Fonts/Roboto-Regular%20SDF.asset?fileID=11400000&amp;guid=846d13e80e1322e459a2cf34a7a55008&amp;type=2#Roboto-Regular SDF&apos;); background-color: rgb(132, 43, 43);" />
+        </ui:VisualElement>
+        <ui:VisualElement name="Content">
+            <ui:VisualElement name="Settings" class="runtime-menu-content-panel" style="min-width: 500px;">
+                <ui:ListView />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

@@ -1,6 +1,4 @@
-﻿using System;
-using TMPro;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Visualization.Labels.BasicLabels {
     public class IdLabel : MonoBehaviour {

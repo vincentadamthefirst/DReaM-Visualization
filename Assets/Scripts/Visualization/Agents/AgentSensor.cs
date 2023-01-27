@@ -2,6 +2,29 @@
 using UnityEngine;
 
 namespace Visualization.Agents {
+
+    /**
+     * Setup information for a sensor.
+     */
+    public struct SensorSetup {
+        // 2D offset relative to the center of the agent
+        public Vector2 inAgentOffset;
+        // color of this sensor
+        public Color color;
+    }
+
+    /**
+     * Per time step data
+     */
+    public struct SensorData {
+        // opening angle of this sensor
+        public float openingAngle;
+        // direction this sensor is looking at
+        public float direction;
+        // distance that this sensor covers
+        public float distance;
+    }
+    
     
     /// <summary>
     /// Class representing a sensor in the scene. Has a child object containing the actual mesh representing the sensor

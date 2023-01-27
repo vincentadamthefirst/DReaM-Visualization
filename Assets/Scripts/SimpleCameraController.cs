@@ -175,14 +175,14 @@ public class SimpleCameraController : MonoBehaviour {
         // The camera should follow an agent
         if (LockedOnAgentIsSet) {
             var offsetVector2 = new Vector2(20, 0);
-            offsetVector2.RotateRadians(LockedOnAgent.CurrentRotation + Mathf.PI);
+            offsetVector2.RotateRadians(LockedOnAgent.DynamicData.Rotation + Mathf.PI);
 
-            var modelPosition = LockedOnAgent.Model.transform.position;
+            var modelPosition = LockedOnAgent.StaticData.Model.transform.position;
             transform.position = new Vector3(offsetVector2.x, 30, offsetVector2.y) +
                                  modelPosition;
             
             var secondOffsetVector = new Vector2(.5f, 0);
-            secondOffsetVector.RotateRadians(LockedOnAgent.CurrentRotation + Mathf.PI - Mathf.PI / 2f);
+            secondOffsetVector.RotateRadians(LockedOnAgent.DynamicData.Rotation + Mathf.PI - Mathf.PI / 2f);
             
             transform.LookAt(modelPosition + new Vector3(secondOffsetVector.x, 0, secondOffsetVector.y));
             return;

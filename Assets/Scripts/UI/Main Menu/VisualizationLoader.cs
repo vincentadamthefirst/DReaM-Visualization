@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using Min_Max_Slider;
 using UnityEngine;
 using UnityEngine.SceneManagement;

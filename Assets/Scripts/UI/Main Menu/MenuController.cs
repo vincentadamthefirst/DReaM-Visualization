@@ -4,7 +4,6 @@ using TMPro;
 using UI.Main_Menu.Notifications;
 using UI.Main_Menu.Settings;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace UI.Main_Menu {

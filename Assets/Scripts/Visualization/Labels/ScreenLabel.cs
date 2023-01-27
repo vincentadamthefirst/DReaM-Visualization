@@ -32,7 +32,7 @@ namespace Visualization.Labels {
         private TextMeshProUGUI _gazeType;
 
         private RectTransform _sensors;
-        private List<AgentSensor> _sensorList = new List<AgentSensor>();
+        private List<AgentSensor> _sensorList = new();
 
         /// <summary>
         /// Called on program start, retrieves the necessary objects to display information
@@ -153,15 +153,15 @@ namespace Visualization.Labels {
         }
 
         public void UpdateLabel() {
-            AnchorScreenPosition = LabelOcclusionManager.WorldToScreenPoint(Agent.GetAnchorPoint());
+            AnchorScreenPosition = LabelOcclusionManager.WorldToScreenPoint(Agent.DynamicData.Position3D);
         }
 
         public override void AddSensor(AgentSensor sensor) {
             _sensors = transform.GetChild(0).GetChild(2).GetChild(3).GetComponent<RectTransform>();
             
             _sensorList.Add(sensor);
-            var newSensorToggle = Instantiate(Agent.AgentDesigns.sensorTogglePrefab);
-            newSensorToggle.transform.SetParent(_sensors, false);
+            var sensorToggle = Resources.Load<Toggle>("Prefabs/UI/Visualization/Labels/SensorToggle");
+            var newSensorToggle = Instantiate(sensorToggle, _sensors, false);
             newSensorToggle.transform.GetChild(1).GetComponent<Text>().text = sensor.name;
             newSensorToggle.onValueChanged.AddListener(sensor.SetOn);
             newSensorToggle.SetIsOnWithoutNotify(true);

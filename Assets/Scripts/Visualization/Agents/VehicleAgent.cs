@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Scenery;
 using UnityEngine;
 using Utils;
-using Visualization.Labels.BasicLabels;
 using Visualization.SimulationEvents;
 
 namespace Visualization.Agents {
@@ -31,16 +31,16 @@ namespace Visualization.Agents {
 
         public override void Prepare() { 
             // coloring the chassis
-            _chassis = Model.transform.Find("chassis");
+            _chassis = StaticData.Model.transform.Find("chassis");
             _modelMeshRenderer = _chassis.GetComponent<MeshRenderer>();
-            _modelMeshRenderer.material = ColorMaterial;
+            _modelMeshRenderer.material = StaticData.ColorMaterial;
             
             base.Prepare();
 
             // offsetting the agent model inside its parent
-            _chassis.transform.localPosition += new Vector3(ModelInformation.Center.x, 0, ModelInformation.Center.z);
+            _chassis.transform.localPosition += new Vector3(StaticData.ModelInformation.Center.x, 0, StaticData.ModelInformation.Center.z);
 
-            _chassis.SetTotalSize(ModelInformation.Width, ModelInformation.Height, ModelInformation.Length);
+            _chassis.SetTotalSize(StaticData.ModelInformation.Width, StaticData.ModelInformation.Height, StaticData.ModelInformation.Length);
 
             // getting all wheel information
             _wheelFrontLeft = _chassis.GetChild(0);
@@ -48,7 +48,7 @@ namespace Visualization.Agents {
             _wheelRearLeft = _chassis.GetChild(2);
             _wheelRearRight = _chassis.GetChild(3);
 
-            var diameter = ((VehicleModelInformation) ModelInformation).WheelDiameter;
+            var diameter = ((VehicleModelInformation) StaticData.ModelInformation).WheelDiameter;
             
             _wheelFrontLeft.SetTotalSize(diameter, .3f, diameter);
             _wheelFrontRight.SetTotalSize(diameter, .3f, diameter);
@@ -79,42 +79,42 @@ namespace Visualization.Agents {
                 }
             }
             
-            // preparing the label
-            if (OwnLabel != null) {
-                OwnLabel.SetStrings(gameObject.name.Split(new[] { " [" }, StringSplitOptions.None)[0]);
-                OwnLabel.SetFloats(ModelInformation.Height + 1.4f);
-                OwnLabel.SetColors(ColorMaterial.color);
-            }
+            // // preparing the label
+            // if (OwnLabel != null) {
+            //     OwnLabel.SetStrings(gameObject.name.Split(new[] { " [" }, StringSplitOptions.None)[0]);
+            //     OwnLabel.SetFloats(ModelInformation.Height + 1.4f);
+            //     OwnLabel.SetColors(ColorMaterial.color);
+            // }
 
             try {
-                var idLabel = Model.transform.Find("IdLabel");
-                idLabel.transform.localPosition = new Vector3(0, ModelInformation.Height + .5f, 0);
+                var idLabel = StaticData.Model.transform.Find("IdLabel");
+                idLabel.transform.localPosition = new Vector3(0, StaticData.ModelInformation.Height + .5f, 0);
             } catch (Exception) {
                 // ignored
             }
 
-            boundingBox = new Bounds(new Vector3(0, ModelInformation.Height / 2f, 0),
-                new Vector3(ModelInformation.Width, ModelInformation.Height, ModelInformation.Length));
+            boundingBox = new Bounds(new Vector3(0, StaticData.ModelInformation.Height / 2f, 0),
+                new Vector3(StaticData.ModelInformation.Width, StaticData.ModelInformation.Height, StaticData.ModelInformation.Length));
         }
 
         protected override void UpdatePosition() {
             var nextPositionPointer = new Vector2(deltaS, 0);
-            nextPositionPointer.RotateRadians(previous.Rotation);
+            nextPositionPointer.RotateRadians(DynamicData.ActiveSimulationStep.Rotation);
 
-            Model.transform.position = new Vector3(previous.Position.x + nextPositionPointer.x, 0,
-                previous.Position.y + nextPositionPointer.y);
+            StaticData.Model.transform.position = new Vector3(DynamicData.ActiveSimulationStep.Position.x + nextPositionPointer.x, 0,
+                DynamicData.ActiveSimulationStep.Position.y + nextPositionPointer.y);
             
             UpdateWheelRotation();
             UpdateIndicators();
             UpdateBrakes();
             
-            CurrentPosition = Model.transform.GetChild(0).position;
-            boundingBox.center = CurrentPosition;
+            DynamicData.Position3D = StaticData.Model.transform.GetChild(0).position;
+            boundingBox.center = DynamicData.Position3D;
         }
 
         private void UpdateWheelRotation() {
             var rot = (deltaS / _wheelCircumference * 360f) / 4f;
-            rot += ((AdditionalVehicleInformation) previous.AdditionalInformation).WheelRotation;
+            rot += ((AdditionalVehicleInformation) DynamicData.ActiveSimulationStep.AdditionalInformation).WheelRotation;
             rot %= 360f;
 
             _wheelFrontLeft.localRotation = Quaternion.Euler(0, 180, 90);
@@ -130,7 +130,7 @@ namespace Visualization.Agents {
 
         private void UpdateBrakes() {
             var material = _modelMeshRenderer.materials;
-            material[4] = ((AdditionalVehicleInformation) previous.AdditionalInformation).Brake
+            material[4] = ((AdditionalVehicleInformation) DynamicData.ActiveSimulationStep.AdditionalInformation).Brake
                 ? brakeOnMaterial
                 : brakeOffMaterial;
             _modelMeshRenderer.materials = material;
@@ -152,7 +152,7 @@ namespace Visualization.Agents {
             var to = _wasIndicatorOn ? indicatorOffMaterial : indicatorOnMaterial;
             // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
             var materials = _modelMeshRenderer.materials;
-            switch (((AdditionalVehicleInformation) previous.AdditionalInformation).IndicatorState) {
+            switch (((AdditionalVehicleInformation) DynamicData.ActiveSimulationStep.AdditionalInformation).IndicatorState) {
                 case IndicatorState.None:
                     materials[2] = indicatorOffMaterial;
                     materials[7] = indicatorOffMaterial;
@@ -175,86 +175,84 @@ namespace Visualization.Agents {
         }
 
         protected override void UpdateRotation() {
-            _currentHdg = deltaTMs * ((previous.Next.Rotation - previous.Rotation) / 100) + previous.Rotation;
-            Model.transform.rotation = Quaternion.Euler(0, -_currentHdg * Mathf.Rad2Deg, 0);
+            _currentHdg = deltaTMs * ((DynamicData.ActiveSimulationStep.Next.Rotation - DynamicData.ActiveSimulationStep.Rotation) / 100) + DynamicData.ActiveSimulationStep.Rotation;
+            StaticData.Model.transform.rotation = Quaternion.Euler(0, -_currentHdg * Mathf.Rad2Deg, 0);
 
-            CurrentRotation = _currentHdg;
+            DynamicData.Rotation = _currentHdg;
         }
 
-        public override Vector3 GetAnchorPoint() {
-            var position = Model.transform.position;
-            return new Vector3(position.x, ModelInformation.Height, position.z);
-        }
-
-        protected override void UpdateLabel() {
-            if (OwnLabel == null)
-                return; // TODO replace this method with a listener in the label itself (the label asks for data)
-            
-            var avi = previous.AdditionalInformation as AdditionalVehicleInformation;
-
-            var modelPosition = Model.transform.position;
-            OwnLabel.UpdateFloats(modelPosition.x, modelPosition.z, previous.Velocity, previous.Acceleration);
-            OwnLabel.UpdateStrings(avi.CrossingPhase, avi.ScanAoI, avi.GlanceType);
-            OwnLabel.UpdatePositions(avi.OtherAgents);
-            OwnLabel.UpdateIntegers(avi.Brake ? 1 : 0,
-                avi.IndicatorState == IndicatorState.Left || avi.IndicatorState == IndicatorState.Warn ? 1 : 0,
-                avi.IndicatorState == IndicatorState.Right || avi.IndicatorState == IndicatorState.Warn ? 1 : 0,
-                avi.AEBActive ? 1 : 0);
-        }
-
-        protected override Vector3[] GetReferencePointsRenderer() {
-            var points = new List<Vector3>();
-            
-            if (renderers.Length == 0) return points.ToArray();
-            
-            var completeBounds = new Bounds();
-            foreach (var r in renderers) {
-                completeBounds.Encapsulate(r.bounds);
-            }
-
-            var ext = completeBounds.extents;
-            var tr = Model.transform.localToWorldMatrix;
-                
-            // adding global points to the list, first the lower 4 points of the box, then the upper 4 points,
-            // ordered counter clockwise
-
-            points.Add(tr.MultiplyPoint3x4(new Vector3(-ext.x / 2f, -ext.y / 2f, ext.z / 2f)));
-            points.Add(tr.MultiplyPoint3x4(new Vector3(ext.x / 2f, -ext.y / 2f, ext.z / 2f)));
-            points.Add(tr.MultiplyPoint3x4(new Vector3(ext.x / 2f, -ext.y / 2f, -ext.z / 2f)));
-            points.Add(tr.MultiplyPoint3x4(new Vector3(-ext.x / 2f, -ext.y / 2f, -ext.z / 2f)));
-                
-            points.Add(tr.MultiplyPoint3x4(new Vector3(-ext.x / 2f, ext.y / 2f, ext.z / 2f)));
-            points.Add(tr.MultiplyPoint3x4(new Vector3(ext.x / 2f, ext.y / 2f, ext.z / 2f)));
-            points.Add(tr.MultiplyPoint3x4(new Vector3(ext.x / 2f, ext.y / 2f, -ext.z / 2f)));
-            points.Add(tr.MultiplyPoint3x4(new Vector3(-ext.x / 2f, ext.y / 2f, -ext.z / 2f)));
-            
-            return points.ToArray();
-        }
-
-        // private void OnDrawGizmos() {
-        //     Gizmos.color = ColorMaterial.color;
-        //     foreach (var point in GetReferencePointsCustom()) {
-        //         Gizmos.DrawSphere(point, .1f);
-        //     }
+        // public override Vector3 GetAnchorPoint() {
+        //     var position = Model.transform.position;
+        //     return new Vector3(position.x, ModelInformation.Height, position.z);
         // }
 
-        protected override Vector3[] GetReferencePointsCustom() {
-            if (customPoints == null || customPoints.customPoints == null) {
-                Debug.Log($"Uh-Oh: Agent {Id}");
-            }
+        // protected override void UpdateLabel() {
+        //     if (OwnLabel == null)
+        //         return; // TODO replace this method with a listener in the label itself (the label asks for data)
+        //     
+        //     var avi = previous.AdditionalInformation as AdditionalVehicleInformation;
+        //
+        //     var modelPosition = Model.transform.position;
+        //     OwnLabel.UpdateFloats(modelPosition.x, modelPosition.z, previous.Velocity, previous.Acceleration);
+        //     OwnLabel.UpdateStrings(avi.CrossingPhase, avi.ScanAoI, avi.GlanceType);
+        //     OwnLabel.UpdatePositions(avi.OtherAgents);
+        //     OwnLabel.UpdateIntegers(avi.Brake ? 1 : 0,
+        //         avi.IndicatorState == IndicatorState.Left || avi.IndicatorState == IndicatorState.Warn ? 1 : 0,
+        //         avi.IndicatorState == IndicatorState.Right || avi.IndicatorState == IndicatorState.Warn ? 1 : 0,
+        //         avi.AEBActive ? 1 : 0);
+        // }
+
+        protected override Vector3[] GetReferencePointsRenderer() {
+            return new[] { transform.position }; // TODO
             
-            var toReturn = new Vector3[customPoints.customPoints.Count];
-            var tr2 = Model.transform.localToWorldMatrix;
-            for (var i = 0; i < toReturn.Length; i++) {
-                var tmp = customPoints.customPoints[i];
-                toReturn[i] =
-                    tr2.MultiplyPoint3x4(
-                        new Vector3(tmp.x * _chassis.lossyScale.x, tmp.y * _chassis.lossyScale.y,
-                            tmp.z * _chassis.lossyScale.z) + ModelInformation.Center);
-
-            }
-
-            return toReturn;
+            // var points = new List<Vector3>();
+            //
+            // if (renderers.Length == 0) return points.ToArray();
+            //
+            // var completeBounds = new Bounds();
+            // foreach (var r in renderers) {
+            //     completeBounds.Encapsulate(r.bounds);
+            // }
+            //
+            // var ext = completeBounds.extents;
+            // var tr = Model.transform.localToWorldMatrix;
+            //     
+            // // adding global points to the list, first the lower 4 points of the box, then the upper 4 points,
+            // // ordered counter clockwise
+            //
+            // points.Add(tr.MultiplyPoint3x4(new Vector3(-ext.x / 2f, -ext.y / 2f, ext.z / 2f)));
+            // points.Add(tr.MultiplyPoint3x4(new Vector3(ext.x / 2f, -ext.y / 2f, ext.z / 2f)));
+            // points.Add(tr.MultiplyPoint3x4(new Vector3(ext.x / 2f, -ext.y / 2f, -ext.z / 2f)));
+            // points.Add(tr.MultiplyPoint3x4(new Vector3(-ext.x / 2f, -ext.y / 2f, -ext.z / 2f)));
+            //     
+            // points.Add(tr.MultiplyPoint3x4(new Vector3(-ext.x / 2f, ext.y / 2f, ext.z / 2f)));
+            // points.Add(tr.MultiplyPoint3x4(new Vector3(ext.x / 2f, ext.y / 2f, ext.z / 2f)));
+            // points.Add(tr.MultiplyPoint3x4(new Vector3(ext.x / 2f, ext.y / 2f, -ext.z / 2f)));
+            // points.Add(tr.MultiplyPoint3x4(new Vector3(-ext.x / 2f, ext.y / 2f, -ext.z / 2f)));
+            //
+            // return points.ToArray();
         }
+
+        protected override Vector3[] GetReferencePointsCustom() {
+            return new[] { transform.position }; // TODO
+            // if (customPoints == null || customPoints.customPoints == null) {
+            //     Debug.Log($"Uh-Oh: Agent {Id}");
+            // }
+            //
+            // var toReturn = new Vector3[customPoints.customPoints.Count];
+            // var tr2 = Model.transform.localToWorldMatrix;
+            // for (var i = 0; i < toReturn.Length; i++) {
+            //     var tmp = customPoints.customPoints[i];
+            //     toReturn[i] =
+            //         tr2.MultiplyPoint3x4(
+            //             new Vector3(tmp.x * _chassis.lossyScale.x, tmp.y * _chassis.lossyScale.y,
+            //                 tmp.z * _chassis.lossyScale.z) + ModelInformation.Center);
+            //
+            // }
+            //
+            // return toReturn;
+        }
+
+        public override ElementOrigin ElementOrigin => ElementOrigin.OpenDrive;
     }
 }

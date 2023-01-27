@@ -1,36 +1,45 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Scenery;
 using UnityEngine;
-using Random = System.Random;
 
 namespace Visualization.OcclusionManagement.DetectionMethods {
-    public abstract class RayCastDetector : OcclusionDetector {
+    /**
+     * Implementation of a simple staggered raycast detector.
+     * At each frame a new target is handled. The workload is therefore spread across multiple frames and has less
+     * impact on the application performance.
+     */
+    public class RayCastDetector : OcclusionDetector {
+        private int _lastTarget;
 
-        private readonly Random _random = new Random(Environment.TickCount);
+        public override void Trigger() {
+            if (Targets.Count == 0) return;
+            if (_lastTarget > Targets.Count - 1) _lastTarget = 0;
 
-        protected void CastRay(VisualizationElement target) {
-            if (!target.IsActive || !GeometryUtility.TestPlanesAABB(
-                    ExtendedCamera.CurrentFrustumPlanes, target.AxisAlignedBoundingBox)) {
-                
-                if (!LastHits.ContainsKey(target)) return;
-                
-                foreach (var lastHit in LastHits[target]) {
-                    if (DecreaseDistractorEntry(lastHit)) {
-                        lastHit.HandleNonHit();
-                    }
+            CastRay(Targets[_lastTarget]);
+
+            _lastTarget++;
+        }
+
+        private void CastRay(TargetableElement element) {
+            if (!element.IsTarget || !GeometryUtility.TestPlanesAABB(
+                    ExtendedCamera.CurrentFrustumPlanes, element.AABB)) {
+                // the element is no longer a target or in the view frustum of the camera
+                foreach (var currentOccluder in OccludersForTarget[element].Where(DecreaseOcclusionOccurence)) {
+                    currentOccluder.OcclusionEnd();
                 }
-                
-                LastHits[target].Clear();
+
+                // clear the list of occluders for this element
+                OccludersForTarget[element].Clear();
                 return;
             }
 
-            var endPoints = GetEndPoints(target);
+            var endPoints = GetEndPoints(element);
             var startPoints = GetStartPoints(endPoints);
             
-            var newHits = new HashSet<VisualizationElement>();
+            var newHits = new HashSet<OccluderElement>();
 
+            // finding all occluders whose colliders are currently hit
             for (var i = 0; i < startPoints.Length; i++) {
                 var directionVector = endPoints[i] - startPoints[i];
                 var distance = Vector3.Distance(startPoints[i], endPoints[i]);
@@ -39,40 +48,34 @@ namespace Visualization.OcclusionManagement.DetectionMethods {
                 var currentHits = Physics.RaycastAll(startPoints[i], directionVector, distance);
 
                 foreach (var hit in currentHits) {
-                    var hitObject = ColliderMapping[hit.collider];
-                    if (hitObject == null || hitObject.IsTarget()) continue;
-                    
-                    newHits.Add(hitObject);
+                    var hitOccluder = hit.collider.transform.parent.GetComponent<OccluderElement>();
+                    if (hitOccluder == null) continue;
+                    newHits.Add(hitOccluder);
                 }
             }
 
-            var lastHits = new HashSet<VisualizationElement>(LastHits[target]);
+            // the occluders of the previous step
+            var lastHits = new HashSet<OccluderElement>(OccludersForTarget[element]);
 
-            var actualNewHits = new HashSet<VisualizationElement>(newHits);
+            // what elements are actual new occluders
+            var actualNewHits = new HashSet<OccluderElement>(newHits);
             actualNewHits.ExceptWith(lastHits);
-
-            foreach (var hitObject in actualNewHits.Where(IncreaseDistractorEntry)) {
-                hitObject.HandleHit();
+            foreach (var hitObject in actualNewHits.Where(IncreaseOcclusionOccurence)) {
+                hitObject.OcclusionStart();
             }
 
+            // what elements are no longer occluders
             lastHits.ExceptWith(newHits);
-
-            foreach (var noLongerHitObject in lastHits.Where(DecreaseDistractorEntry)) {
-                noLongerHitObject.HandleNonHit();
+            foreach (var noLongerHitObject in lastHits.Where(DecreaseOcclusionOccurence)) {
+                noLongerHitObject.OcclusionEnd();
             }
 
-            LastHits[target] = newHits;
+            OccludersForTarget[element] = newHits;
         }
 
-        private Vector3[] SelectRandom(IEnumerable<Vector3> input) {
-            return input.ToList().OrderBy(x => _random.Next()).Take(2)
-                .ToArray();
-        }
-
-        private Vector3[] GetEndPoints(VisualizationElement target) {
+        private Vector3[] GetEndPoints(TargetableElement target) {
             var basePoints = target.GetReferencePoints();
             return basePoints;
-            // TODO return OcclusionManagementOptions.sampleRandomPoints ? SelectRandom(basePoints) : basePoints;
         }
 
         private Vector3[] GetStartPoints(Vector3[] endPoints) {

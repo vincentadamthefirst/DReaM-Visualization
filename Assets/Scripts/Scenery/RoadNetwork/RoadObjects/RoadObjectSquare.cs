@@ -13,10 +13,6 @@ namespace Scenery.RoadNetwork.RoadObjects {
 
         private Material _nonOccludedMaterial;
         private Material _occludedMaterial;
-        
-        public override bool IsDistractor => true;
-
-        public override Bounds AxisAlignedBoundingBox => _modelRenderer.bounds;
 
         private Vector3[] _referencePoints;
         
@@ -98,6 +94,19 @@ namespace Scenery.RoadNetwork.RoadObjects {
             MaybeDelete();
         }
 
+        public void SetLayer(int layer) {
+            throw new System.NotImplementedException();
+        }
+
+        public override void OcclusionStart() {
+            if (RoadObjectType == RoadObjectType.CrossWalk || RoadObjectType == RoadObjectType.ParkingSpace) return;
+            _modelRenderer.material = _occludedMaterial;
+        }
+
+        public override void OcclusionEnd() {
+            _modelRenderer.material = _nonOccludedMaterial;
+        }
+
         public override void SetupOccludedMaterials() {
             _occludedMaterial = new Material(_nonOccludedMaterial);
                 _occludedMaterial.ChangeToTransparent(settings.minimumObjectOpacity *
@@ -149,17 +158,6 @@ namespace Scenery.RoadNetwork.RoadObjects {
             return true;
         }
 
-        public override void HandleHit() {
-            if (RoadObjectType == RoadObjectType.CrossWalk || RoadObjectType == RoadObjectType.ParkingSpace) return;
-            _modelRenderer.material = _occludedMaterial;
-        }
-
-        public override void HandleNonHit() {
-            _modelRenderer.material = _nonOccludedMaterial;
-        }
-
-        public override Vector3[] GetReferencePoints() {
-            return _referencePoints;
-        }
+        public override ElementOrigin ElementOrigin => ElementOrigin.OpenDrive;
     }
 }

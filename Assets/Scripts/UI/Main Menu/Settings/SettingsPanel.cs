@@ -12,7 +12,7 @@ namespace UI.Main_Menu.Settings {
         public int spacing;
         public int startSpacing;
 
-        private readonly Dictionary<string, Setting> _settings = new Dictionary<string, Setting>();
+        private readonly Dictionary<string, Setting> _settings = new();
 
         public void AddCheckBox(string settingName, string text, bool defaultValue = false, string parent = null) {
             var checkBox = Resources.Load<CheckBox>("Prefabs/UI/Settings/SettingsCheckBox");

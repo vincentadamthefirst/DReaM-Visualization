@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Visualization.Agents {
     public class CustomPoints : MonoBehaviour {
 
-        public List<Vector3> customPoints = new List<Vector3>();
+        public List<Vector3> customPoints = new();
 
         /// <summary>
         /// Draw the points for debugging in the scene

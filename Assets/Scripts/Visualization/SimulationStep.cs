@@ -3,6 +3,7 @@ using UnityEngine;
 using Visualization.SimulationEvents;
 
 namespace Visualization {
+
     public class SimulationStep {
         /// <summary>
         /// The next SimulationStep, might be null if this is the last step.
@@ -63,7 +64,7 @@ namespace Visualization {
         /// <summary>
         /// Information that is not further classified and can be displayed in the side panel.
         /// </summary>
-        public List<object> UnknownInformation { get; } = new List<object>();
+        public List<object> UnclassifiedInformation { get; } = new List<object>();
     }
 
     public class SensorInformation {

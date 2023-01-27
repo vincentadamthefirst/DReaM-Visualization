@@ -51,14 +51,6 @@ namespace Scenery.RoadNetwork.RoadSignals {
         /// </summary>
         public Road Parent { get; set; }
 
-        public override void HandleHit() {
-            // TODO
-        }
-
-        public override void HandleNonHit() {
-            // TODO
-        }
-
         public override void Show() {
             transform.parent = Parent.transform;
 
@@ -90,6 +82,20 @@ namespace Scenery.RoadNetwork.RoadSignals {
                     break;
                     throw new ArgumentOutOfRangeException();
             }
+        }
+
+        public override ElementOrigin ElementOrigin => ElementOrigin.OpenDrive;
+
+        public override void OcclusionStart() {
+            throw new NotImplementedException();
+        }
+
+        public override void OcclusionEnd() {
+            throw new NotImplementedException();
+        }
+
+        public override void SetupOccludedMaterials() {
+            throw new NotImplementedException();
         }
     }
 }

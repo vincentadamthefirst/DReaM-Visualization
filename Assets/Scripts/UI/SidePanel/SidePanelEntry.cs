@@ -1,5 +1,4 @@
-﻿using System;
-using TMPro;
+﻿using TMPro;
 using UI.Main_Menu.Utils;
 using UnityEngine;
 using UnityEngine.UI;

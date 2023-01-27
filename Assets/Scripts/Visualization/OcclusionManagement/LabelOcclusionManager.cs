@@ -103,8 +103,8 @@ namespace Visualization.OcclusionManagement {
             // 5. ordering those labels by their y-value (bottom to top of the screen)
             // 6. converting the enumerable to a list
             var leftLabelsActive = AllLabels
-                .Where(l => l.Agent.IsTarget() && l.AnchorScreenPosition.x < 0 && l.Agent.Model.activeSelf &&
-                            GeometryUtility.TestPlanesAABB(frustumPlanes, new Bounds(l.Agent.GetAnchorPoint(), Vector3.one * .05f)) &&
+                .Where(l => l.Agent.IsTarget && l.AnchorScreenPosition.x < 0 && l.Agent.StaticData.Model.activeSelf &&
+                            GeometryUtility.TestPlanesAABB(frustumPlanes, new Bounds(l.Agent.DynamicData.Position3D, Vector3.one * .05f)) &&
                             Vector2.Distance(Vector2.zero, l.AnchorScreenPosition) <= _detectionRadius)
                 .OrderBy(l => Vector2.Distance(Vector2.zero, l.AnchorScreenPosition))
                 .ThenBy(l => Mathf.Abs(l.AnchorScreenPosition.y)).Take(_maxLabelsPerSide)
@@ -112,8 +112,8 @@ namespace Visualization.OcclusionManagement {
 
             // see the left label ordering, done the same way
             var rightLabelsActive = AllLabels
-                .Where(l => l.Agent.IsTarget() && l.AnchorScreenPosition.x >= 0 && l.Agent.Model.activeSelf &&
-                            GeometryUtility.TestPlanesAABB(frustumPlanes, new Bounds(l.Agent.GetAnchorPoint(), Vector3.one * .05f)) &&
+                .Where(l => l.Agent.IsTarget && l.AnchorScreenPosition.x >= 0 && l.Agent.StaticData.Model.activeSelf &&
+                            GeometryUtility.TestPlanesAABB(frustumPlanes, new Bounds(l.Agent.DynamicData.Position3D, Vector3.one * .05f)) &&
                             Vector2.Distance(Vector2.zero, l.AnchorScreenPosition) <= _detectionRadius)
                 .OrderBy(l => Vector2.Distance(Vector2.zero, l.AnchorScreenPosition))
                 .ThenBy(l => Mathf.Abs(l.AnchorScreenPosition.y)).Take(_maxLabelsPerSide)

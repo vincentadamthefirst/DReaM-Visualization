@@ -12,44 +12,20 @@ namespace Visualization.OcclusionManagement {
 
         public AgentCard agentCardPrefab;
         
-        /// <summary>
-        /// If the controller functionality should be disabled
-        /// </summary>
-        public bool Disable { get; set; }
-        
-        /// <summary>
-        /// The current Targets
-        /// </summary>
-        public List<VisualizationElement> Targets { get; } = new List<VisualizationElement>();
-
         private Agent _sidePanelAgent;
         private bool _sidePanelEnabled;
 
-        /// <summary>
-        /// The collider mapping also in use in AgentOcclusionManager
-        /// </summary>
-        public Dictionary<Collider, VisualizationElement> ColliderMapping { get; set; } =
-            new Dictionary<Collider, VisualizationElement>();
-
-        // dictionary containing all agent cards
-        private Dictionary<AgentCard, Agent> _agentCards = new Dictionary<AgentCard, Agent>();
-        
-        // reverse dictionary for agent cards
-        private Dictionary<Agent, AgentCard> _agentCardsReverse = new Dictionary<Agent, AgentCard>();
+        private Dictionary<AgentCard, Agent> _agentCards = new();
+        private Dictionary<Agent, AgentCard> _agentCardsReverse = new();
 
         // the layer mask to perform raycasts for agent selection with
         private LayerMask _layerMask;
         
         // if the settings are open
         private bool _settingsOpen;
-
-        // the extended camera script
+        
         private ExtendedCamera _extendedCamera;
-
-        // the occlusion manager
         private AgentOcclusionManager _agentOcclusionManager;
-
-        // the UI element for holding all agent cards
         private RectTransform _agentCardHolder;
 
         public void SetMenuOpen(bool value) {
@@ -68,7 +44,6 @@ namespace Visualization.OcclusionManagement {
         /// Checks for mouse clicks.
         /// </summary>
         private void Update() {
-            if (Disable) return;
             CheckMouseClick();
         }
 
@@ -76,17 +51,18 @@ namespace Visualization.OcclusionManagement {
         /// Used to find all agents in the scene and display their information.
         /// </summary>
         public void Prepare() {
-            var agents = FindObjectsOfType<Agent>().ToList()
-                .OrderBy(x => int.Parse(x.OpenDriveId));
+            var agents = FindObjectsOfType<Agent>().ToList().OrderBy(x => int.Parse(x.Id));
             foreach (var agent in agents) {
-                var newCard = Instantiate(agentCardPrefab, _agentCardHolder);
-                newCard.Parent = _agentCardHolder;
-                newCard.SetColor(agent.ColorMaterial.color);
-                newCard.SetText(agent.name.Split(new [] {" ["}, StringSplitOptions.None)[0]);
-                newCard.SetIsTarget(false);
-                newCard.TargetController = this;
-                _agentCards.Add(newCard, agent);
-                _agentCardsReverse.Add(agent, newCard);
+                Debug.LogError("THE AGENTCARD PREFAB DOES NOT EXIST YET, SKIPPING");
+                var agentCard = Resources.Load<AgentCard>("Prefabs/UI/Visualization/AgentCard");
+                var newObject = Instantiate(agentCard, _agentCardHolder);
+                newObject.Parent = _agentCardHolder;
+                newObject.Agent = agent;
+                // register necessary events for this card
+                newObject.CardClicked += HandleCardClick;
+                agent.TargetStatusChanged += newObject.TargetStatusChanged;
+                _agentCards.Add(newObject, agent);
+                _agentCardsReverse.Add(agent, newObject);
             }
         }
 
@@ -102,83 +78,62 @@ namespace Visualization.OcclusionManagement {
             var ray = _extendedCamera.Camera.ScreenPointToRay(Input.mousePosition);
             if (!Physics.Raycast(ray, out var hit, _layerMask)) return;
 
-            var hitElement = ColliderMapping[hit.collider];
+            var hitElement = _agentOcclusionManager.AllColliders[hit.collider];
             if (!hitElement.GetType().IsSubclassOf(typeof(Agent))) return;
+            
+            hitElement.Clicked();
             
             if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) {
                 // snap the camera to the agent
-
                 _extendedCamera.CameraController.LockedOnAgent = (Agent) hitElement;
                 _extendedCamera.CameraController.LockedOnAgentIsSet = true;
-                
                 return;
             }
-            
-            if (Targets.Contains(hitElement)) {
-                Targets.Remove(hitElement);
-                hitElement.SetIsTarget(false);
-                _agentCardsReverse[(Agent) hitElement].SetIsTarget(false);
-                _agentOcclusionManager.SetTarget((Agent) hitElement, false);
 
-                if (_sidePanelEnabled && (hitElement as Agent).WriteToSidePanel) {
-                    (hitElement as Agent).WriteToSidePanel = false;
-                    if (Targets.Count > 0) {
-                        var newSidePanelWriter = ((Agent)Targets.Last());
-                        newSidePanelWriter.WriteToSidePanel = true;
-                        _sidePanelAgent = newSidePanelWriter;
-                    }
-                }
-            } else {
-                Targets.Add(hitElement);
-                hitElement.SetIsTarget(true);
-                _agentCardsReverse[(Agent) hitElement].SetIsTarget(true);
-                _agentOcclusionManager.SetTarget((Agent) hitElement, true);
-
-                if (_sidePanelEnabled) {
-                    if (_sidePanelAgent != null)
-                        _sidePanelAgent.WriteToSidePanel = false;
-                    (hitElement as Agent).WriteToSidePanel = true;
-                    _sidePanelAgent = hitElement as Agent;
+            if (hitElement is TargetableElement element) {
+                if (element.IsTarget) {
+                    element.IsTarget = false;
+                    
+                    // TODO enable side Panel writing
+                    
+                    // if (_sidePanelEnabled && (hitElement as Agent).WriteToSidePanel) {
+                    //     (hitElement as Agent).WriteToSidePanel = false;
+                    //     if (Targets.Count > 0) {
+                    //         var newSidePanelWriter = ((Agent)Targets.Last());
+                    //         newSidePanelWriter.WriteToSidePanel = true;
+                    //         _sidePanelAgent = newSidePanelWriter;
+                    //     }
+                    // }
+                } else {
+                    element.IsTarget = true;
+                    
+                    //
+                    //
+                    // if (_sidePanelEnabled) {
+                    //     if (_sidePanelAgent != null)
+                    //         _sidePanelAgent.WriteToSidePanel = false;
+                    //     (hitElement as Agent).WriteToSidePanel = true;
+                    //     _sidePanelAgent = hitElement as Agent;
+                    // }
                 }
             }
         }
 
         /// <summary>
-        /// When a card is clicked this method is called.
+        /// When a card is clicked this method is called (invoked).
         /// </summary>
-        public void HandleCardClick(AgentCard card) {
+        private void HandleCardClick(object sender, EventArgs args) {
+            var card = (AgentCard) sender;
+            
             if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) {
                 // snap the camera to the agent
-
-                _extendedCamera.CameraController.LockedOnAgent = _agentCards[card];
+                _extendedCamera.CameraController.LockedOnAgent = card.Agent;
                 _extendedCamera.CameraController.LockedOnAgentIsSet = true;
-                
                 return;
             }
             
             var clicked = _agentCards[card];
-            
-            if (Targets.Contains(clicked)) {
-                Targets.Remove(clicked);
-                clicked.SetIsTarget(false);
-                card.SetIsTarget(false);
-                _agentOcclusionManager.SetTarget(clicked, false);
-            } else {
-                Targets.Add(clicked);
-                clicked.SetIsTarget(true);
-                card.SetIsTarget(true);
-                _agentOcclusionManager.SetTarget(clicked, true);
-            }
-        }
-
-
-        public void SetAllTargets() {
-            foreach (var entry in _agentCardsReverse) {
-                Targets.Add(entry.Key);
-                entry.Key.SetIsTarget(true);
-                entry.Value.SetIsTarget(true);
-                _agentOcclusionManager.SetTarget(entry.Key, true);
-            }
+            clicked.IsTarget = !_agentOcclusionManager.Targets.Contains(clicked);
         }
     }
 }

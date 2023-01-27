@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using TMPro;
-using UI;
 using UI.Settings;
-using UI.SidePanel;
 using UI.Visualization;
 using UnityEngine;
 using Visualization.Agents;
@@ -75,7 +73,7 @@ namespace Visualization {
                 var c = Color.HSVToRGB(i / (float) Agents.Count, .9f, .7f, false);
                 var agentMaterial = new Material(agentDesigns.vehicleChassisBase) {color = c};
 
-                Agents[i].ColorMaterial = agentMaterial;
+                Agents[i].StaticData.ColorMaterial = agentMaterial;
             }
             
             Agents.ForEach(a => a.Prepare());
@@ -88,7 +86,7 @@ namespace Visualization {
         /// </summary>
         /// <param name="modelType">The model type of the agent</param>
         /// <returns>The instantiated agent</returns>
-        public Agent InstantiateVehicleAgent(string modelType, int id) {
+        public Agent InstantiateVehicleAgent(string modelType, string id) {
             var agentModel = agentDesigns.GetAgentModel(AgentType.Vehicle, modelType);
             Agent instantiated;
 
@@ -99,14 +97,13 @@ namespace Visualization {
 
             // adding the RoadNetworkHolder
             instantiated.settings = settings;
-            instantiated.AgentDesigns = agentDesigns;
-            instantiated.TimeStepSize = SampleStep;
-            
+            instantiated.Master = this;
+
             // retrieving prefab for 3d model
             var model = Instantiate(agentDesigns.GetAgentModel(AgentType.Vehicle, modelType).model,
                 instantiated.transform, true);
             Agents.Add(instantiated);
-            instantiated.Model = model;
+            instantiated.StaticData.Model = model;
             
             // adding basic ID label
             var idLabel = Resources.Load<IdLabel>("Prefabs/UI/Visualization/Labels/IdLabel");
@@ -118,19 +115,20 @@ namespace Visualization {
             _basicLabelController.AddLabel(idLabelObject);
 
             // adding label
-            if (!DisableLabels) {
-                var label = Instantiate(agentDesigns.vehicleScreenLabel, _labelOcclusionManager.transform);
-                label.Agent = instantiated;
-                label.LabelOcclusionManager = _labelOcclusionManager;
-                label.AgentCamera = instantiated.Model.transform.Find("Camera").GetComponent<Camera>();
-                _labelOcclusionManager.AddLabel(label);
-                instantiated.OwnLabel = label;
-            } else {
-                Destroy(instantiated.Model.transform.Find("Camera").gameObject);
-            }
+            // FIXME
+            // if (!DisableLabels) {
+            //     var label = Instantiate(agentDesigns.vehicleScreenLabel, _labelOcclusionManager.transform);
+            //     label.Agent = instantiated;
+            //     label.LabelOcclusionManager = _labelOcclusionManager;
+            //     label.AgentCamera = instantiated.Model.transform.Find("Camera").GetComponent<Camera>();
+            //     _labelOcclusionManager.AddLabel(label);
+            //     instantiated.OwnLabel = label;
+            // } else {
+                Destroy(instantiated.StaticData.Model.transform.Find("Camera").gameObject);
+            // }
 
             // retrieving model information
-            instantiated.ModelInformation = VehicleModelCatalog.ContainsKey(modelType)
+            instantiated.StaticData.ModelInformation = VehicleModelCatalog.ContainsKey(modelType)
                 ? VehicleModelCatalog[modelType]
                 : _basicVehicle;
 
@@ -141,19 +139,18 @@ namespace Visualization {
         /// Initializes a new pedestrian agent and returns a reference to it.
         /// </summary>
         /// <returns>The instantiated agent</returns>
-        public PedestrianAgent InstantiatePedestrian(string modelType, int id) {
+        public PedestrianAgent InstantiatePedestrian(string modelType, string id) {
             var pedestrianAgent = Instantiate(agentDesigns.pedestrianPrefab, transform, true);
             
             // adding the RoadNetworkHolder
             pedestrianAgent.settings = settings;
-            pedestrianAgent.AgentDesigns = agentDesigns;
-            pedestrianAgent.TimeStepSize = SampleStep;
+            pedestrianAgent.Master = this;
             
             // retrieving prefab for 3d model
             var model = Instantiate(agentDesigns.GetAgentModel(AgentType.Pedestrian, modelType).model,
                 pedestrianAgent.transform, true);
             Agents.Add(pedestrianAgent);
-            pedestrianAgent.Model = model;
+            pedestrianAgent.StaticData.Model = model;
             
             // adding basic ID label
             var idLabel = Resources.Load<IdLabel>("Prefabs/UI/Visualization/Labels/IdLabel");
@@ -165,19 +162,20 @@ namespace Visualization {
             _basicLabelController.AddLabel(idLabelObject);
 
             // adding label TODO use other Label then vehicle!
-            if (!DisableLabels) {
-                var label = Instantiate(agentDesigns.pedestrianScreenLabel, _labelOcclusionManager.transform);
-                label.Agent = pedestrianAgent;
-                label.LabelOcclusionManager = _labelOcclusionManager;
-                label.AgentCamera = pedestrianAgent.Model.transform.Find("Camera").GetComponent<Camera>();
-                _labelOcclusionManager.AddLabel(label);
-                pedestrianAgent.OwnLabel = label;
-            } else {
-                Destroy(pedestrianAgent.Model.transform.Find("Camera").gameObject);
-            }
+            // FIXME re-enable
+            // if (!DisableLabels) {
+            //     var label = Instantiate(agentDesigns.pedestrianScreenLabel, _labelOcclusionManager.transform);
+            //     label.Agent = pedestrianAgent;
+            //     label.LabelOcclusionManager = _labelOcclusionManager;
+            //     label.AgentCamera = pedestrianAgent.Model.transform.Find("Camera").GetComponent<Camera>();
+            //     _labelOcclusionManager.AddLabel(label);
+            //     pedestrianAgent.OwnLabel = label;
+            // } else {
+                Destroy(pedestrianAgent.StaticData.Model.transform.Find("Camera").gameObject);
+            // }
 
             // retrieving model information
-            pedestrianAgent.ModelInformation = PedestrianModelCatalog.ContainsKey(modelType)
+            pedestrianAgent.StaticData.ModelInformation = PedestrianModelCatalog.ContainsKey(modelType)
                 ? PedestrianModelCatalog[modelType]
                 : _basicPedestrian;
             

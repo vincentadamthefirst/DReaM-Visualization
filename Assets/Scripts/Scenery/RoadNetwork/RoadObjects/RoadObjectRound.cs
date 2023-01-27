@@ -21,10 +21,6 @@ namespace Scenery.RoadNetwork.RoadObjects {
         private float _additionalMultiplier = 1f;
 
         private Mesh _colliderMesh;
-        
-        public override bool IsDistractor => true;
-        
-        public override Bounds AxisAlignedBoundingBox => _colliderMesh.bounds;
 
         private void Repeat() {
             if (RepeatParameters == null) return;
@@ -95,6 +91,22 @@ namespace Scenery.RoadNetwork.RoadObjects {
             SetupOccludedMaterials();
 
             AddCollider();
+        }
+
+        public void SetLayer(int layer) {
+            throw new System.NotImplementedException();
+        }
+
+        public override void OcclusionStart() {
+            for (var i = 0; i < _modelRenderers.Length; i++) {
+                _modelRenderers[i].materials = _occludedMaterials[i];
+            }
+        }
+
+        public override void OcclusionEnd() {
+            for (var i = 0; i < _modelRenderers.Length; i++) {
+                _modelRenderers[i].materials = _nonOccludedMaterials[i];
+            }
         }
 
         public override void SetupOccludedMaterials() {
@@ -232,20 +244,6 @@ namespace Scenery.RoadNetwork.RoadObjects {
             coll.sharedMesh = _colliderMesh;
         }
 
-        public override void HandleHit() {
-            for (var i = 0; i < _modelRenderers.Length; i++) {
-                _modelRenderers[i].materials = _occludedMaterials[i];
-            }
-        }
-
-        public override void HandleNonHit() {
-            for (var i = 0; i < _modelRenderers.Length; i++) {
-                _modelRenderers[i].materials = _nonOccludedMaterials[i];
-            }
-        }
-
-        public override Vector3[] GetReferencePoints() {
-            return _colliderMesh.vertices;
-        }
+        public override ElementOrigin ElementOrigin => ElementOrigin.OpenDrive;
     }
 }
