@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using TMPro;
@@ -46,6 +47,8 @@ namespace Visualization {
         public bool PlayBackwards { get; set; }
 
         public bool Pause { get; set; } = true;
+        
+        public event EventHandler<int> TimeChanged;
 
         // fallback vehicle model
         private readonly VehicleModelInformation _basicVehicle = new VehicleModelInformation
@@ -205,30 +208,13 @@ namespace Visualization {
 
             if (CurrentTime < 0) CurrentTime = 0;
             else if (CurrentTime > MaxSampleTime) CurrentTime = MaxSampleTime;
+            TimeChanged?.Invoke(this, CurrentTime);
 
             foreach (var agent in Agents) {
                 agent.UpdateForTimeStep(CurrentTime, PlayBackwards);
-                //UpdateAgentThread(agent, CurrentTime, PlayBackwards);
-                //StartCoroutine(UpdateAgent(agent));
-                //agent.UpdateForTimeStep(CurrentTime, PlayBackwards);
             }
             
             _playbackControl.UpdateCurrentTime(CurrentTime);
-        }
-
-        private Thread UpdateAgentThread(Agent agent, int time, bool backwards) {
-            var t = new Thread(() => UpdateAgent(agent, time, backwards));
-            t.Start();
-            return t;
-        }
-
-        private static void UpdateAgent(Agent agent, int time, bool backwards) {
-            agent.UpdateForTimeStep(time, backwards);
-        }
-
-        private IEnumerator UpdateAgent(Agent agent) {
-            agent.UpdateForTimeStep(CurrentTime, PlayBackwards);
-            yield return null;
         }
     }
 }

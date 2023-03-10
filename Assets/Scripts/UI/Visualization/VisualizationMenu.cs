@@ -23,7 +23,7 @@ namespace UI.Visualization {
         private PlaybackControl _playbackControl;
         private TargetController _targetController;
         
-        public List<VisualizationElement> Elements { get; } = new List<VisualizationElement>();
+        public List<VisualizationElement> Elements { get; } = new();
         
         protected override void AfterButtonSetup() {
             mainMenuButton.onClick.AddListener(UnloadVisualization);

@@ -7,6 +7,10 @@
         Vehicle, Pedestrian
     }
 
+    public enum AgentTypeDetail {
+        Unknown, Car, Truck, Bike, Motorcycle, Pedestrian
+    }
+
     /// <summary>
     /// TODO implement all
     /// </summary>

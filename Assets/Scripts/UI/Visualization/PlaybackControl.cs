@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using TMPro;
+using Unity.VectorGraphics;
 using UnityEngine;
 using UnityEngine.UI;
 using Visualization;
@@ -10,16 +12,12 @@ namespace UI.Visualization {
 
     [Serializable]
     public struct PlaybackButtonData {
-        public Image playPauseButtonImage;
-        public Image directionButtonImage;
-
         public Sprite pauseSymbol;
         public Sprite playSymbol;
-
-        public Sprite backwardSymbol;
-        public Sprite forwardSymbol;
+        public Sprite forwardBackwardSymbol;
     }
     
+    [SuppressMessage("ReSharper", "Unity.PerformanceCriticalCodeInvocation")]
     public class PlaybackControl : MonoBehaviour {
         [Header("Text Elements")]
         public TextMeshProUGUI totalTime;
@@ -29,12 +27,15 @@ namespace UI.Visualization {
         public Slider timeSlider;
         public Button playPause;
         public Button playDirection;
-
+        
         [Header("Button Info")] 
         public PlaybackButtonData buttonData;
         
         private VisualizationMaster _visualizationMaster;
         private RectTransform _selfTransform;
+        
+        public event EventHandler<bool> PauseStatusChanged;
+        public event EventHandler<bool> PlayBackwardsStatusChanged;
 
         public bool Disable { get; set; }
 
@@ -100,19 +101,19 @@ namespace UI.Visualization {
 
         private void PlayPauseChanged() {
             _visualizationMaster.Pause = !_visualizationMaster.Pause;
-            buttonData.playPauseButtonImage.sprite = _visualizationMaster.Pause
+            playPause.GetComponentInChildren<SVGImage>().sprite = _visualizationMaster.Pause
                 ? buttonData.playSymbol
                 : buttonData.pauseSymbol;
+            PauseStatusChanged?.Invoke(this, _visualizationMaster.Pause);
         }
 
         private void PlayDirectionChanged() {
             _visualizationMaster.PlayBackwards = !_visualizationMaster.PlayBackwards;
-            buttonData.directionButtonImage.sprite = _visualizationMaster.PlayBackwards
-                ? buttonData.forwardSymbol
-                : buttonData.backwardSymbol;
+            playDirection.transform.SetLocalPositionAndRotation(playDirection.transform.localPosition, Quaternion.Euler(0, 0, _visualizationMaster.PlayBackwards ? 0 : 180));
+            PlayBackwardsStatusChanged?.Invoke(this, _visualizationMaster.PlayBackwards);
         }
 
-        public void TimeSliderValueChanged(float current) {
+        private void TimeSliderValueChanged(float current) {
             _visualizationMaster.CurrentTime = Mathf.RoundToInt(current);
             if (_visualizationMaster.Pause) {
                 _visualizationMaster.SmallUpdate();

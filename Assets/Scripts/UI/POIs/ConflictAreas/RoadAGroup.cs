@@ -12,7 +12,7 @@ namespace UI.POIs.ConflictAreas {
 
         public List<RoadBGroup> RoadBGroups { get; } = new List<RoadBGroup>();
 
-        public JunctionGroup Parent { get; set; }
+        public IntersectionGroup Parent { get; set; }
         
         private bool _matchesCurrentSearch = false;
 

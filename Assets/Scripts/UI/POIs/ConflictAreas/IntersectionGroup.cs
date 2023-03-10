@@ -1,20 +1,21 @@
 ﻿using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace UI.POIs.ConflictAreas {
-    public class JunctionGroup : MonoBehaviour {
-        public TMP_Text junctionText;
+    public class IntersectionGroup : MonoBehaviour {
+        public TMP_Text intersectionText;
         
         public Toggle toggle;
 
-        public List<RoadAGroup> RoadAGroups { get; } = new List<RoadAGroup>();
+        public List<RoadAGroup> RoadAGroups { get; } = new();
         
-        private bool _matchesCurrentSearch = false;
+        private bool _matchesCurrentSearch;
 
-        public void InitializeData(string junction) {
-            junctionText.text = junction;
+        public void InitializeData(string intersection) {
+            intersectionText.text = intersection;
         }
 
         public void ToggleChange() {
@@ -22,7 +23,7 @@ namespace UI.POIs.ConflictAreas {
         }
 
         public bool Search(string search) {
-            if (junctionText.text == search) {
+            if (intersectionText.text == search) {
                 foreach (var rag in RoadAGroups) {
                     rag.ActivateAll();
                 }

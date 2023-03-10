@@ -14,10 +14,10 @@ namespace Visualization.POIs {
         public float endSa;
         public float startSb;
         public float endSb;
-        
+
         public string roadIdA;
         public int laneIdA;
-        
+
         public string roadIdB;
         public int laneIdB;
 
@@ -27,24 +27,17 @@ namespace Visualization.POIs {
 
     public class ConflictAreaVisualizer : MonoBehaviour {
 
-        [Header("UI Elements")] 
-        public JunctionGroup junctionGroupPrefab;
-        public RoadAGroup roadAGroupPrefab;
-        public RoadBGroup roadBGroupPrefab;
-        public LaneToLaneConflictArea laneToLaneConflictAreaPrefab;
-        public RectTransform container;
+        [Header("UI Elements")] public RectTransform container;
         public TMP_InputField searchInput;
 
-        public Dictionary<string, List<ConflictArea>> ConflictAreaMapping { get; set; } =
-            new Dictionary<string, List<ConflictArea>>();
+        public Dictionary<string, List<ConflictArea>> ConflictAreaMapping { get; set; } = new();
 
         public Material conflictAreaMaterial;
 
-        private List<JunctionGroup> _junctionGroups = new List<JunctionGroup>();
+        private readonly List<IntersectionGroup> _junctionGroups = new();
 
         // (current road -> (other road -> (current lane, other lanes)))
-        private readonly Dictionary<string, Dictionary<string, Dictionary<int, List<ConflictArea>>>> _mapping =
-            new Dictionary<string, Dictionary<string, Dictionary<int, List<ConflictArea>>>>();
+        // private readonly Dictionary<string, Dictionary<string, Dictionary<int, List<ConflictArea>>>> _mapping = new();
 
         private void BuildConflictArea(Road roadA, Road roadB, ConflictArea area, float colorLerp) {
             var laneA = roadA.LaneSections[0].LaneIdMappings["" + area.laneIdA];
@@ -74,21 +67,21 @@ namespace Visualization.POIs {
             mesh2.subMeshCount = 2;
             mesh2.SetTriangles(meshA.triangles, 0);
             mesh2.SetTriangles(meshB.triangles.Select(x => x + meshA.vertices.Length).ToArray(), 1);
-            
+
             mesh2.Optimize();
             mesh2.RecalculateBounds();
             mesh2.RecalculateNormals();
-            
+
             var col2 = Color.HSVToRGB(colorLerp, .9f, .7f, false);
             area.color = col2;
 
             var mat2 = new Material(conflictAreaMaterial) {
                 color = col2.WithAlpha(.2f)
             };
-            meshRenderer.materials = new [] {mat2, mat2};
+            meshRenderer.materials = new[] { mat2, mat2 };
 
             meshFilter.mesh = mesh2;
-            
+
             newObj.SetActive(false);
             area.obj = newObj;
 
@@ -110,6 +103,9 @@ namespace Visualization.POIs {
             var currentIndex = 0;
 
             foreach (var junction in ConflictAreaMapping) {
+                var junctionGroupPrefab =
+                    Resources.Load<IntersectionGroup>(
+                        "Prefabs/UI/Visualization/RuntimeMenu/ConflictAreas/IntersectionGroup");
                 var newJunctionGroup = Instantiate(junctionGroupPrefab, container);
                 newJunctionGroup.InitializeData(junction.Key);
 
@@ -119,7 +115,9 @@ namespace Visualization.POIs {
 
                     BuildConflictArea(roadA, roadB, conflictArea, currentIndex / (float)totalCount);
 
-                    if (!newJunctionGroup.RoadAGroups.Any(x => x.roadAText.text == roadA.Id)) {
+                    if (newJunctionGroup.RoadAGroups.All(x => x.roadAText.text != roadA.Id)) {
+                        var roadAGroupPrefab =
+                            Resources.Load<RoadAGroup>("Prefabs/UI/Visualization/RuntimeMenu/ConflictAreas/RoadAGroup");
                         var newRoadAGroup = Instantiate(roadAGroupPrefab, container);
                         newRoadAGroup.InitializeData(roadA.Id);
                         newRoadAGroup.Parent = newJunctionGroup;
@@ -127,7 +125,9 @@ namespace Visualization.POIs {
                     }
 
                     var roadAGroup = newJunctionGroup.RoadAGroups.First(x => x.roadAText.text == roadA.Id);
-                    if (!roadAGroup.RoadBGroups.Any(x => x.roadBText.text == roadB.Id)) {
+                    if (roadAGroup.RoadBGroups.All(x => x.roadBText.text != roadB.Id)) {
+                        var roadBGroupPrefab =
+                            Resources.Load<RoadBGroup>("Prefabs/UI/Visualization/RuntimeMenu/ConflictAreas/RoadBGroup");
                         var newRoadBGroup = Instantiate(roadBGroupPrefab, container);
                         newRoadBGroup.InitializeData(roadB.Id);
                         newRoadBGroup.Parent = roadAGroup;
@@ -136,7 +136,9 @@ namespace Visualization.POIs {
 
                     var roadBGroup = roadAGroup.RoadBGroups.First(x => x.roadBText.text == roadB.Id);
 
-                    var newLaneToLane = Instantiate(laneToLaneConflictAreaPrefab, container);
+                    var laneToLaneConflictArea = Resources.Load<LaneToLaneConflictArea>(
+                        "Prefabs/UI/Visualization/RuntimeMenu/ConflictAreas/LaneToLaneConflictArea");
+                    var newLaneToLane = Instantiate(laneToLaneConflictArea, container);
                     newLaneToLane.InitializeData(conflictArea);
                     newLaneToLane.Parent = roadBGroup;
                     roadBGroup.ConflictAreas.Add(newLaneToLane);
@@ -148,7 +150,7 @@ namespace Visualization.POIs {
             }
 
             LayoutRebuilder.ForceRebuildLayoutImmediate(container);
-            
+
             // scroll up
             container.parent.parent.GetComponent<ScrollRect>().verticalNormalizedPosition = 1f;
         }
@@ -162,9 +164,8 @@ namespace Visualization.POIs {
 
         public void StartSearch() {
             ClearSearch();
-            foreach (var jg in _junctionGroups) {
-                if (!jg.Search(searchInput.text))
-                    jg.gameObject.SetActive(false);
+            foreach (var jg in _junctionGroups.Where(jg => !jg.Search(searchInput.text))) {
+                jg.gameObject.SetActive(false);
             }
         }
     }

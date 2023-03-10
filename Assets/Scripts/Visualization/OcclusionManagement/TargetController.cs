@@ -4,14 +4,12 @@ using System.Linq;
 using Scenery;
 using UI;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Utils;
 using Visualization.Agents;
 
 namespace Visualization.OcclusionManagement {
     public class TargetController : MonoBehaviour {
-
-        public AgentCard agentCardPrefab;
-        
         private Agent _sidePanelAgent;
         private bool _sidePanelEnabled;
 
@@ -26,7 +24,7 @@ namespace Visualization.OcclusionManagement {
         
         private ExtendedCamera _extendedCamera;
         private AgentOcclusionManager _agentOcclusionManager;
-        private RectTransform _agentCardHolder;
+        public RectTransform agentCardHolder;
 
         public void SetMenuOpen(bool value) {
             _settingsOpen = value;
@@ -36,7 +34,6 @@ namespace Visualization.OcclusionManagement {
             _layerMask = LayerMask.GetMask("agent_targets", "agents_base");
             _extendedCamera = FindObjectOfType<ExtendedCamera>();
             _agentOcclusionManager = FindObjectOfType<AgentOcclusionManager>();
-            _agentCardHolder = transform.GetChild(0).GetChild(1).GetChild(0).GetComponent<RectTransform>();
             _sidePanelEnabled = PlayerPrefs.GetInt("app_wip_features") > 0;
         }
 
@@ -53,14 +50,16 @@ namespace Visualization.OcclusionManagement {
         public void Prepare() {
             var agents = FindObjectsOfType<Agent>().ToList().OrderBy(x => int.Parse(x.Id));
             foreach (var agent in agents) {
-                Debug.LogError("THE AGENTCARD PREFAB DOES NOT EXIST YET, SKIPPING");
                 var agentCard = Resources.Load<AgentCard>("Prefabs/UI/Visualization/AgentCard");
-                var newObject = Instantiate(agentCard, _agentCardHolder);
-                newObject.Parent = _agentCardHolder;
+                var newObject = Instantiate(agentCard, agentCardHolder);
+
+                newObject.Parent = agentCardHolder;
                 newObject.Agent = agent;
                 // register necessary events for this card
                 newObject.CardClicked += HandleCardClick;
                 agent.TargetStatusChanged += newObject.TargetStatusChanged;
+                
+                newObject.CustomAwake();
                 _agentCards.Add(newObject, agent);
                 _agentCardsReverse.Add(agent, newObject);
             }

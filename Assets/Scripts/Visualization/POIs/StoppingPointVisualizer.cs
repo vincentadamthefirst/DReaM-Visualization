@@ -4,6 +4,7 @@ using JetBrains.Annotations;
 using UI.Main_Menu.Utils;
 using UI.POIs.StoppingPoints;
 using UnityEngine;
+using UnityEngine.Rendering.Universal.Internal;
 using UnityEngine.UI;
 
 namespace Visualization.POIs {
@@ -42,12 +43,8 @@ namespace Visualization.POIs {
 
         [Header("UI Elements")] 
         public RectTransform container;
-        public IntersectionGroup intersectionGroupPrefab;
-        public LaneGroup laneGroupPrefab;
-        public StoppingPointEntry stoppingPointEntryPrefab;
 
-        public List<IntersectionStoppingPoints> IntersectionStoppingPoints { get; set; } =
-            new List<IntersectionStoppingPoints>();
+        public List<IntersectionStoppingPoints> IntersectionStoppingPoints { get; set; } = new();
 
         private bool _currentlyActive;
 
@@ -57,18 +54,23 @@ namespace Visualization.POIs {
             IntersectionStoppingPoints.ForEach(x => max += x.laneStoppingPoints.Count);
             
             foreach (var intersectionPoints in IntersectionStoppingPoints) {
-                var newIntEntry = Instantiate(intersectionGroupPrefab, container);
+                var intersectionGroup =
+                    Resources.Load<IntersectionGroup>(
+                        "Prefabs/UI/Visualization/RuntimeMenu/StoppingPoints/IntersectionGroup");
+                var newIntEntry = Instantiate(intersectionGroup, container);
                 newIntEntry.InitializeData(intersectionPoints.IntersectionId);
                 
                 foreach (var laneStoppingPoint in intersectionPoints.laneStoppingPoints) {
                     laneStoppingPoint.color = Color.HSVToRGB(index / (float) max, .9f, .7f, false);
                     
-                    var newLaneEntry = Instantiate(laneGroupPrefab, container);
+                    var laneGroup = Resources.Load<LaneGroup>("Prefabs/UI/Visualization/RuntimeMenu/StoppingPoints/LaneGroup");
+                    var newLaneEntry = Instantiate(laneGroup, container);
                     newLaneEntry.InitializeData(laneStoppingPoint.LaneId, laneStoppingPoint.color);
                     newLaneEntry.Parent = newIntEntry;
 
                     foreach (var stoppingPoint in laneStoppingPoint.stoppingPoints) {
-                        var newStoppingPointEntry = Instantiate(stoppingPointEntryPrefab, container);
+                        var stoppingPointEntry = Resources.Load<StoppingPointEntry>("Prefabs/UI/Visualization/RuntimeMenu/StoppingPoints/StoppingPointEntry");
+                        var newStoppingPointEntry = Instantiate(stoppingPointEntry, container);
                         newStoppingPointEntry.InitializeData(stoppingPoint);
                         newStoppingPointEntry.Parent = newLaneEntry;
                         
@@ -94,7 +96,6 @@ namespace Visualization.POIs {
 
             // scroll up
             container.parent.parent.GetComponent<ScrollRect>().verticalNormalizedPosition = 1f;
-            
             LayoutRebuilder.ForceRebuildLayoutImmediate(container);
         }
 
@@ -124,12 +125,11 @@ namespace Visualization.POIs {
 
         private void Update() {
             // check for key input to toggle the stopping points
-            if (Input.GetKeyUp(KeyCode.P)) {
-                if (_currentlyActive)
-                    Deactivate();
-                else {
-                    Activate();
-                }
+            if (!Input.GetKeyUp(KeyCode.P)) return;
+            if (_currentlyActive)
+                Deactivate();
+            else {
+                Activate();
             }
         }
     }
