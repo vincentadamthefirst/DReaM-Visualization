@@ -38,83 +38,33 @@ namespace Visualization.OcclusionManagement {
         }
 
         /// <summary>
-        /// Checks for mouse clicks.
-        /// </summary>
-        private void Update() {
-            CheckMouseClick();
-        }
-
-        /// <summary>
         /// Used to find all agents in the scene and display their information.
         /// </summary>
         public void Prepare() {
             var agents = FindObjectsOfType<Agent>().ToList().OrderBy(x => int.Parse(x.Id));
             foreach (var agent in agents) {
                 var agentCard = Resources.Load<AgentCard>("Prefabs/UI/Visualization/AgentCard");
-                var newObject = Instantiate(agentCard, agentCardHolder);
+                var newAgentCard = Instantiate(agentCard, agentCardHolder);
 
-                newObject.Parent = agentCardHolder;
-                newObject.Agent = agent;
+                newAgentCard.Parent = agentCardHolder;
+                newAgentCard.Agent = agent;
                 // register necessary events for this card
-                newObject.CardClicked += HandleCardClick;
-                agent.TargetStatusChanged += newObject.TargetStatusChanged;
+                newAgentCard.CardClicked += HandleCardClick;
+                agent.TargetStatusChanged += newAgentCard.TargetStatusChanged;
+                agent.TargetStatusChanged += TargetStatusChanged;
                 
-                newObject.CustomAwake();
-                _agentCards.Add(newObject, agent);
-                _agentCardsReverse.Add(agent, newObject);
+                newAgentCard.CustomAwake();
+                _agentCards.Add(newAgentCard, agent);
+                _agentCardsReverse.Add(agent, newAgentCard);
             }
         }
 
-        /// <summary>
-        /// Sends a ray out into the scene and retrieves the first agent it hits (if there is one). Changes this agents
-        /// target status.
-        /// </summary>
-        private void CheckMouseClick() {
-            if (_settingsOpen) return;
-            if (!_extendedCamera) return;
-            if (!Input.GetMouseButtonDown(0)) return;
-
-            var ray = _extendedCamera.Camera.ScreenPointToRay(Input.mousePosition);
-            if (!Physics.Raycast(ray, out var hit, _layerMask)) return;
-
-            var hitElement = _agentOcclusionManager.AllColliders[hit.collider];
-            if (!hitElement.GetType().IsSubclassOf(typeof(Agent))) return;
-            
-            hitElement.Clicked();
-            
+        private void TargetStatusChanged(object element, bool value) {
+            if (!element.GetType().IsSubclassOf(typeof(Agent))) return;
             if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) {
                 // snap the camera to the agent
-                _extendedCamera.CameraController.LockedOnAgent = (Agent) hitElement;
+                _extendedCamera.CameraController.LockedOnAgent = (Agent) element;
                 _extendedCamera.CameraController.LockedOnAgentIsSet = true;
-                return;
-            }
-
-            if (hitElement is TargetableElement element) {
-                if (element.IsTarget) {
-                    element.IsTarget = false;
-                    
-                    // TODO enable side Panel writing
-                    
-                    // if (_sidePanelEnabled && (hitElement as Agent).WriteToSidePanel) {
-                    //     (hitElement as Agent).WriteToSidePanel = false;
-                    //     if (Targets.Count > 0) {
-                    //         var newSidePanelWriter = ((Agent)Targets.Last());
-                    //         newSidePanelWriter.WriteToSidePanel = true;
-                    //         _sidePanelAgent = newSidePanelWriter;
-                    //     }
-                    // }
-                } else {
-                    element.IsTarget = true;
-                    
-                    //
-                    //
-                    // if (_sidePanelEnabled) {
-                    //     if (_sidePanelAgent != null)
-                    //         _sidePanelAgent.WriteToSidePanel = false;
-                    //     (hitElement as Agent).WriteToSidePanel = true;
-                    //     _sidePanelAgent = hitElement as Agent;
-                    // }
-                }
             }
         }
 

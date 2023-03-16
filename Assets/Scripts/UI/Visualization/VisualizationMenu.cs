@@ -39,7 +39,8 @@ namespace UI.Visualization {
         }
         
         public void Rebuild() {
-            // // clearing all entries
+            // clearing all entries
+            // TODO re-add
             // foreach (Transform child in objectsContent.transform) {
             //     Destroy(child);
             // }
@@ -51,24 +52,21 @@ namespace UI.Visualization {
             //     newEntry.name = element.name;
             //     newEntry.SetText(element.name);
             // }
-
+            //
             // LayoutRebuilder.ForceRebuildLayoutImmediate(objectsContent);
         }
 
         private void SetupSettingsPanel() {
             // Occlusion Settings
-            settingsPanel.AddHeading("hdg_occ", "Verdeckungs - Einstellungen");
-            settingsPanel.AddCheckBox("app_handleOcclusions", "Verdeckungen Vermeiden:", true, "hdg_occ");
-            var inField1 = settingsPanel.AddInputField("app_occ_min_opacity_agent", "Minimale Agent-Sichtbarkeit",
-                "Komma-Zahl", "0,7", "app_handleOcclusions");
+            settingsPanel.AddHeading("hdg_occ", "Occlusion");
+            settingsPanel.AddCheckBox("app_handleOcclusions", "Reduce Occlusion:", true, "hdg_occ");
+            var inField1 = settingsPanel.AddInputField("app_occ_min_opacity_other", "Minimum Object Opacity",
+                "Decimal Value", "0,3", "app_handleOcclusions");
             inField1.inputField.contentType = TMP_InputField.ContentType.DecimalNumber;
-            var inField2 = settingsPanel.AddInputField("app_occ_min_opacity_other", "Minimale Objekt-Sichtbarkeit",
-                "Komma-Zahl", "0,3", "app_handleOcclusions");
-            inField2.inputField.contentType = TMP_InputField.ContentType.DecimalNumber;
             settingsPanel.AddRuler(2);
 
             // Resolution Settings
-            settingsPanel.AddHeading("hdg_look", "Grafik - Einstellungen");
+            settingsPanel.AddHeading("hdg_look", "Graphics");
             settingsPanel.AddCheckBox("app_fullscreen", "Fullscreen:", true, "hdg_look");
             // TODO resolution
 

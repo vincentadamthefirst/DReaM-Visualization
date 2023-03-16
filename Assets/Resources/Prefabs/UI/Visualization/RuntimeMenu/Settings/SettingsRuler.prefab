@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 5968480731599684227}
   - component: {fileID: 5968480731599684226}
   - component: {fileID: 5664116507634627001}
+  - component: {fileID: 3641256275532754297}
   m_Layer: 5
   m_Name: SettingsRuler
   m_TagString: Untagged
@@ -29,6 +30,7 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -89,3 +91,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   spacer: {fileID: 0}
+--- !u!114 &3641256275532754297
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5968480731599684224}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 01273a1a4b1141f0854b2d4d2bf57b01, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  imageColor: 4

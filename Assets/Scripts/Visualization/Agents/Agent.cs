@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Scenery;
+using Scenery.RoadNetwork;
 using UnityEngine;
 using Utils;
 
@@ -32,7 +33,7 @@ namespace Visualization.Agents {
     }
 
     public abstract class Agent : TargetableElement {
-        
+
         public VisualizationMaster Master { get; set; }
         
         public DynamicData DynamicData { get; } = new();

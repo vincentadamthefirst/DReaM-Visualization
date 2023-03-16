@@ -79,14 +79,13 @@ namespace Visualization.OcclusionManagement {
                 targetable.TargetStatusChanged += Detector.TargetStatusChanged;
             }
             _allOccluders =  FindObjectsOfType<OccluderElement>().ToArray();
-
-            // TODO re-add
+            
             // adding the objects to the settings
-            // foreach (var visualizationElement in _allElements) {
-            //     if (visualizationElement.GetType().IsSubclassOf(typeof(RoadObject))) {
-            //         _visualizationMenu.Elements.Add(visualizationElement);
-            //     }
-            // }
+            foreach (var visualizationElement in _allOccluders) {
+                if (visualizationElement.GetType().IsSubclassOf(typeof(RoadObject))) {
+                    _visualizationMenu.Elements.Add(visualizationElement);
+                }
+            }
             _visualizationMenu.Rebuild();
             
             // enabling the occlusion management 

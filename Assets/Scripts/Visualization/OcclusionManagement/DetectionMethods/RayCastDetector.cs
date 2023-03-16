@@ -48,7 +48,7 @@ namespace Visualization.OcclusionManagement.DetectionMethods {
                 var currentHits = Physics.RaycastAll(startPoints[i], directionVector, distance);
 
                 foreach (var hit in currentHits) {
-                    var hitOccluder = hit.collider.transform.parent.GetComponent<OccluderElement>();
+                    var hitOccluder = hit.collider?.transform.parent?.GetComponent<OccluderElement>();
                     if (hitOccluder == null) continue;
                     newHits.Add(hitOccluder);
                 }

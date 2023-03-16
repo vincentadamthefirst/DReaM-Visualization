@@ -15,7 +15,7 @@ namespace UI.Main_Menu.Settings {
         private readonly Dictionary<string, Setting> _settings = new();
 
         public void AddCheckBox(string settingName, string text, bool defaultValue = false, string parent = null) {
-            var checkBox = Resources.Load<CheckBox>("Prefabs/UI/Settings/SettingsCheckBox");
+            var checkBox = Resources.Load<CheckBox>("Prefabs/UI/Visualization/RuntimeMenu/Settings/SettingsCheckBox");
             var newObject = Instantiate(checkBox, scrollField);
 
             if (newObject == null)
@@ -24,13 +24,13 @@ namespace UI.Main_Menu.Settings {
             newObject.name = settingName;
             newObject.SetData(text, defaultValue);
 
-            if (parent != null) {
-                if (!_settings.ContainsKey(parent))
-                    throw new NullReferenceException("Parent not found");
-                var parentSetting = _settings[parent];
-                newObject.SetSpacing(parentSetting.GetSpacing() + spacing);
-            } else 
-                newObject.SetSpacing(startSpacing);
+            // if (parent != null) {
+            //     if (!_settings.ContainsKey(parent))
+            //         throw new NullReferenceException("Parent not found");
+            //     var parentSetting = _settings[parent];
+            //     newObject.SetSpacing(parentSetting.GetSpacing() + spacing);
+            // } else 
+            //     newObject.SetSpacing(startSpacing);
 
             _settings.Add(settingName, newObject);
         }
@@ -42,7 +42,7 @@ namespace UI.Main_Menu.Settings {
         public InputField AddInputField(string settingName, string text, string placeholder, string defaultValue,
             string parent = null) {
             
-            var inputField = Resources.Load<InputField>("Prefabs/UI/Settings/SettingsInputField");
+            var inputField = Resources.Load<InputField>("Prefabs/UI/Visualization/RuntimeMenu/Settings/SettingsInputField");
             var newObject = Instantiate(inputField, scrollField);
 
             if (newObject == null)
@@ -51,43 +51,43 @@ namespace UI.Main_Menu.Settings {
             newObject.name = settingName;
             newObject.SetData(text, placeholder, defaultValue);
 
-            if (parent != null) {
-                if (!_settings.ContainsKey(parent))
-                    throw new NullReferenceException("Parent not found");
-                var parentSetting = _settings[parent];
-                newObject.SetSpacing(parentSetting.GetSpacing() + spacing);
-            } else 
-                newObject.SetSpacing(startSpacing);
+            // if (parent != null) {
+            //     if (!_settings.ContainsKey(parent))
+            //         throw new NullReferenceException("Parent not found");
+            //     var parentSetting = _settings[parent];
+            //     newObject.SetSpacing(parentSetting.GetSpacing() + spacing);
+            // } else 
+            //     newObject.SetSpacing(startSpacing);
 
             _settings.Add(settingName, newObject);
             return newObject;
         }
         
         public void AddRuler(int thickness) {
-            var ruler = Resources.Load<Ruler>("Prefabs/UI/Settings/SettingsRuler");
+            var ruler = Resources.Load<Ruler>("Prefabs/UI/Visualization/RuntimeMenu/Settings/SettingsRuler");
             var newObject = Instantiate(ruler, scrollField);
-            
+
             if (newObject == null)
                 throw new NullReferenceException("Something went terribly wrong when initializing the main menu.");
             
-            newObject.SetData(thickness, Color.black);
+            newObject.SetData(thickness);
             newObject.name = "ruler";
         }
 
         public void AddHeading(string settingName, string text, string parent = null) {
-            var heading = Resources.Load<Heading>("Prefabs/UI/Settings/SettingsHeading");
+            var heading = Resources.Load<Heading>("Prefabs/UI/Visualization/RuntimeMenu/Settings/SettingsHeading");
             var newObject = Instantiate(heading, scrollField);
             
             if (newObject == null)
                 throw new NullReferenceException("Something went terribly wrong when initializing the main menu.");
             
-            if (parent != null) {
-                if (!_settings.ContainsKey(parent))
-                    throw new NullReferenceException("Parent not found");
-                var parentSetting = _settings[parent];
-                newObject.SetSpacing(parentSetting.GetSpacing() + spacing);
-            } else 
-                newObject.SetSpacing(startSpacing);
+            // if (parent != null) {
+            //     if (!_settings.ContainsKey(parent))
+            //         throw new NullReferenceException("Parent not found");
+            //     var parentSetting = _settings[parent];
+            //     newObject.SetSpacing(parentSetting.GetSpacing() + spacing);
+            // } else 
+            //     newObject.SetSpacing(startSpacing);
             
             newObject.SetData(text);
             newObject.name = settingName;

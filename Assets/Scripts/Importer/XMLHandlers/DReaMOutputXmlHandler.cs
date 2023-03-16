@@ -60,10 +60,9 @@ namespace Importer.XMLHandlers {
         
         private Dictionary<int, List<string>> _agentValueMapping;
 
-        public List<IntersectionStoppingPoints> StoppingPoints = new List<IntersectionStoppingPoints>();
+        public List<IntersectionStoppingPoints> StoppingPoints = new();
 
-        public Dictionary<string, List<ConflictArea>> ConflictAreaMapping { get; } =
-            new Dictionary<string, List<ConflictArea>>();
+        public Dictionary<string, List<ConflictArea>> ConflictAreaMapping { get; } = new();
 
         private ValueMapper _valueMapper;
 

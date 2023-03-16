@@ -18,13 +18,14 @@ namespace UI.POIs.StoppingPoints {
 
         public void InitializeData(StoppingPoint stoppingPoint) {
             _stoppingPoint = stoppingPoint;
+            toggle.onValueChanged.AddListener(delegate { ToggleChange(); });
 
             road.text = stoppingPoint.roadId;
             lane.text = stoppingPoint.laneId;
             type.text = stoppingPoint.type;
         }
 
-        public void ToggleChange() {
+        private void ToggleChange() {
             if (!toggle.isOn) {
                 Parent.toggle.SetIsOnWithoutNotify(false);
                 Parent.Parent.toggle.SetIsOnWithoutNotify(false);

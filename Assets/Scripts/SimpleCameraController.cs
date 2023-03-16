@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using Utils;
 using Visualization.Agents;
 
@@ -12,6 +13,17 @@ using Visualization.Agents;
 ///     - Right click : Hold to move the camera (locks cursor)
 /// </summary>
 public class SimpleCameraController : MonoBehaviour {
+    
+    public static SimpleCameraController Instance { get; private set; }
+
+    private void Awake() {
+        if (Instance != null && Instance != this) {
+            Destroy(this);
+        } else {
+            Instance = this;
+        }
+    }
+
     public class CameraState {
         public float yaw;
         public float pitch;
@@ -105,14 +117,16 @@ public class SimpleCameraController : MonoBehaviour {
     private Vector3 _lastRotation;
     
     // if the settings panel is currently open
-    private bool _settingsOpen;
+    public bool SettingsOpen { get; private set; }
+    
+    public bool RightMouseClicked { get; private set; }
 
     /// <summary>
     /// Sets information on the state of the settings panel.
     /// </summary>
     /// <param name="value">If the settings panel has been opened</param>
     public void SetMenuOpen(bool value) {
-        _settingsOpen = value;
+        SettingsOpen = value;
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
     }
@@ -158,18 +172,20 @@ public class SimpleCameraController : MonoBehaviour {
     }
 
     private void Update() {
-        if (_settingsOpen || AutomaticMovement) return;
+        if (SettingsOpen || AutomaticMovement) return;
 
         // Hide and lock cursor when right mouse button pressed
         if (Input.GetMouseButtonDown(1)) {
             Cursor.lockState = CursorLockMode.Locked;
             LockedOnAgentIsSet = false;
+            RightMouseClicked = true;
         }
 
         // Unlock and show cursor when right mouse button released
         if (Input.GetMouseButtonUp(1)) {
             Cursor.visible = true;
             Cursor.lockState = CursorLockMode.None;
+            RightMouseClicked = false;
         }
 
         // The camera should follow an agent

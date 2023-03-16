@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using Scenery.RoadNetwork;
 using UnityEngine;
 
 namespace Scenery {
 
-    public abstract class TargetableElement : VisualizationElement {
+    public abstract class TargetableElement : HoverableElement {
         [SerializeField] private bool _isTarget;
 
         public event EventHandler<bool> TargetStatusChanged;
@@ -16,6 +18,11 @@ namespace Scenery {
                 Debug.Log($"{name} target status changed to {_isTarget}");
                 TargetStatusChanged?.Invoke(this, _isTarget);
             }
+        }
+
+        public override void MouseClicked() {
+            base.MouseClicked();
+            IsTarget = !IsTarget;
         }
 
         public virtual Bounds AABB => new Bounds();

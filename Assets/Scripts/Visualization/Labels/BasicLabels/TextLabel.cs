@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 namespace Visualization.Labels.BasicLabels {
-    public class IdLabel : MonoBehaviour {
+    public class TextLabel : MonoBehaviour {
         
         public Camera MainCamera { get; set; }
 

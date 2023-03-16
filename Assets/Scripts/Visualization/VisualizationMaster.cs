@@ -21,14 +21,12 @@ namespace Visualization {
         /// <summary>
         /// The catalog of possible vehicle models, populated by VehicleModelsXmlHandler
         /// </summary>
-        public Dictionary<string, VehicleModelInformation> VehicleModelCatalog { get; } =
-            new Dictionary<string, VehicleModelInformation>();
-        
+        public Dictionary<string, VehicleModelInformation> VehicleModelCatalog { get; } = new();
+
         /// <summary>
         /// The catalog of possible pedestrian models, populated by PedestrianModelsXmlHandler
         /// </summary>
-        public Dictionary<string, PedestrianModelInformation> PedestrianModelCatalog { get; } =
-            new Dictionary<string, PedestrianModelInformation>();
+        public Dictionary<string, PedestrianModelInformation> PedestrianModelCatalog { get; } = new();
 
         /// <summary>
         /// The models that this simulation run can use
@@ -37,27 +35,27 @@ namespace Visualization {
 
         public int MaxSampleTime { get; set; }
         public int MinSampleTime { get; set; }
-        
+
         public bool DisableLabels { get; set; }
-        
+
         public int SampleStep { get; set; }
-        
+
         public int CurrentTime { get; set; }
-        
+
         public bool PlayBackwards { get; set; }
 
         public bool Pause { get; set; } = true;
-        
+
         public event EventHandler<int> TimeChanged;
 
         // fallback vehicle model
-        private readonly VehicleModelInformation _basicVehicle = new VehicleModelInformation
-            {Width = 2f, Length = 5f, Height = 1.8f, Center = Vector3.zero, WheelDiameter = 0.65f};
-        
+        private readonly VehicleModelInformation _basicVehicle = new()
+            { Width = 2f, Length = 5f, Height = 1.8f, Center = Vector3.zero, WheelDiameter = 0.65f };
+
         // fallback pedestrian model
-        private readonly PedestrianModelInformation _basicPedestrian = new PedestrianModelInformation
-            {Width = 0.7f, Length = 0.7f, Height = 1.8f, Center = Vector3.zero};
-        
+        private readonly PedestrianModelInformation _basicPedestrian = new()
+            { Width = 0.7f, Length = 0.7f, Height = 1.8f, Center = Vector3.zero };
+
         // all Agents of the current visualization run
         public List<Agent> Agents { get; } = new List<Agent>();
 
@@ -73,14 +71,14 @@ namespace Visualization {
         public void PrepareAgents() {
             // setting a color for each agent
             for (var i = 0; i < Agents.Count; i++) {
-                var c = Color.HSVToRGB(i / (float) Agents.Count, .9f, .7f, false);
-                var agentMaterial = new Material(agentDesigns.vehicleChassisBase) {color = c};
+                var c = Color.HSVToRGB(i / (float)Agents.Count, .9f, .7f, false);
+                var agentMaterial = new Material(agentDesigns.vehicleChassisBase) { color = c };
 
                 Agents[i].StaticData.ColorMaterial = agentMaterial;
             }
-            
+
             Agents.ForEach(a => a.Prepare());
-            
+
             _playbackControl.SetTotalTime(MinSampleTime, MaxSampleTime);
         }
 
@@ -93,9 +91,9 @@ namespace Visualization {
             var agentModel = agentDesigns.GetAgentModel(AgentType.Vehicle, modelType);
             Agent instantiated;
 
-            if (agentModel.modelName.Contains("fallback")) 
+            if (agentModel.modelName.Contains("fallback"))
                 instantiated = Instantiate(agentDesigns.boxPrefab, transform, true);
-            else 
+            else
                 instantiated = Instantiate(agentDesigns.vehiclePrefab, transform, true);
 
             // adding the RoadNetworkHolder
@@ -107,9 +105,9 @@ namespace Visualization {
                 instantiated.transform, true);
             Agents.Add(instantiated);
             instantiated.StaticData.Model = model;
-            
+
             // adding basic ID label
-            var idLabel = Resources.Load<IdLabel>("Prefabs/UI/Visualization/Labels/IdLabel");
+            var idLabel = Resources.Load<TextLabel>("Prefabs/UI/Visualization/Labels/TextLabel");
             var idLabelObject = Instantiate(idLabel, model.transform);
             idLabelObject.name = "IdLabel";
             idLabelObject.GetComponent<TMP_Text>().SetText($"Agent {id}");
@@ -127,7 +125,7 @@ namespace Visualization {
             //     _labelOcclusionManager.AddLabel(label);
             //     instantiated.OwnLabel = label;
             // } else {
-                Destroy(instantiated.StaticData.Model.transform.Find("Camera").gameObject);
+            Destroy(instantiated.StaticData.Model.transform.Find("Camera").gameObject);
             // }
 
             // retrieving model information
@@ -144,19 +142,19 @@ namespace Visualization {
         /// <returns>The instantiated agent</returns>
         public PedestrianAgent InstantiatePedestrian(string modelType, string id) {
             var pedestrianAgent = Instantiate(agentDesigns.pedestrianPrefab, transform, true);
-            
+
             // adding the RoadNetworkHolder
             pedestrianAgent.settings = settings;
             pedestrianAgent.Master = this;
-            
+
             // retrieving prefab for 3d model
             var model = Instantiate(agentDesigns.GetAgentModel(AgentType.Pedestrian, modelType).model,
                 pedestrianAgent.transform, true);
             Agents.Add(pedestrianAgent);
             pedestrianAgent.StaticData.Model = model;
-            
+
             // adding basic ID label
-            var idLabel = Resources.Load<IdLabel>("Prefabs/UI/Visualization/Labels/IdLabel");
+            var idLabel = Resources.Load<TextLabel>("Prefabs/UI/Visualization/Labels/TextLabel");
             var idLabelObject = Instantiate(idLabel, model.transform);
             idLabelObject.name = "IdLabel";
             idLabelObject.GetComponent<TMP_Text>().SetText($"Agent {id}");
@@ -174,14 +172,14 @@ namespace Visualization {
             //     _labelOcclusionManager.AddLabel(label);
             //     pedestrianAgent.OwnLabel = label;
             // } else {
-                Destroy(pedestrianAgent.StaticData.Model.transform.Find("Camera").gameObject);
+            Destroy(pedestrianAgent.StaticData.Model.transform.Find("Camera").gameObject);
             // }
 
             // retrieving model information
             pedestrianAgent.StaticData.ModelInformation = PedestrianModelCatalog.ContainsKey(modelType)
                 ? PedestrianModelCatalog[modelType]
                 : _basicPedestrian;
-            
+
             return pedestrianAgent;
         }
 
@@ -192,7 +190,7 @@ namespace Visualization {
             foreach (var agent in Agents) {
                 agent.UpdateForTimeStep(CurrentTime, PlayBackwards);
             }
-            
+
             _playbackControl.UpdateCurrentTime(CurrentTime);
         }
 
@@ -201,7 +199,7 @@ namespace Visualization {
         /// </summary>
         private void Update() {
             if (Pause) return;
-            
+
             CurrentTime = PlayBackwards
                 ? CurrentTime - Mathf.RoundToInt(Time.deltaTime * 1000f)
                 : CurrentTime + Mathf.RoundToInt(Time.deltaTime * 1000f);
@@ -213,7 +211,7 @@ namespace Visualization {
             foreach (var agent in Agents) {
                 agent.UpdateForTimeStep(CurrentTime, PlayBackwards);
             }
-            
+
             _playbackControl.UpdateCurrentTime(CurrentTime);
         }
     }

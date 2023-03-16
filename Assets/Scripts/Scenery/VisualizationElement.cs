@@ -1,11 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using UI.Settings;
 using UnityEngine;
 
 namespace Scenery {
 
     public enum ElementOrigin {
-        OpenDrive, OpenPass,
+        OpenDrive, OpenPass, Generated
     }
 
     /**
@@ -22,10 +24,24 @@ namespace Scenery {
          */
         public event EventHandler ElementClicked;
 
-        public void Clicked() {
+        private void OnMouseDown() => MouseClicked();
+
+        private void OnMouseEnter() => MouseEnter();
+
+        private void OnMouseExit() => MouseExit();
+
+        public virtual void MouseClicked() {
+            Debug.Log($"Mouse Click: {name}");
             ElementClicked?.Invoke(this, EventArgs.Empty);
         }
 
+        public virtual void MouseEnter() {
+            // may be overridden
+        }
+        
+        public virtual void MouseExit() {
+            // may be overriden
+        }
 
         public ApplicationSettings settings;
         

@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 3711225147654842105}
   - component: {fileID: 2622044893451893758}
-  - component: {fileID: -867767442580603231}
   m_Layer: 0
   m_Name: Pedestrian
   m_TagString: Untagged
@@ -28,6 +27,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -44,16 +44,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 985e2b73b57140aeac65ce8a1e6afd70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!65 &-867767442580603231
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1571145401351911389}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
+  _isTarget: 0

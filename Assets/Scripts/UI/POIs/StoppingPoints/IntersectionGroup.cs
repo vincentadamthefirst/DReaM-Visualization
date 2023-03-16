@@ -10,13 +10,14 @@ namespace UI.POIs.StoppingPoints {
         
         public Toggle toggle;
 
-        public List<LaneGroup> LaneGroups { get; } = new List<LaneGroup>();
+        public List<LaneGroup> LaneGroups { get; } = new();
 
         public void InitializeData(string intersectionId) {
             intersectionText.text = intersectionId;
+            toggle.onValueChanged.AddListener(delegate { ToggleChange(); });
         }
 
-        public void ToggleChange() {
+        private void ToggleChange() {
             LaneGroups.ForEach(x => x.toggle.isOn = toggle.isOn);
         }
         

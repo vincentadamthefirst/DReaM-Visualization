@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 8741721173191418861}
   - component: {fileID: 1355119702227136009}
-  - component: {fileID: 4635163661144144638}
   m_Layer: 0
   m_Name: Agent
   m_TagString: Untagged
@@ -28,6 +27,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -44,20 +44,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4b722c6cd70f430c9d32bc64e996b546, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _isTarget: 0
   indicatorOffMaterial: {fileID: 2100000, guid: f301c494b81af5c41b169f9beb209a56, type: 2}
   indicatorOnMaterial: {fileID: 2100000, guid: 099caca5d39839842aa4796acecfa58d, type: 2}
   brakeOffMaterial: {fileID: 2100000, guid: 938efe945fca42443b5f3c56ef323ff4, type: 2}
   brakeOnMaterial: {fileID: 2100000, guid: 2e178d10aeccfe94a9e446367909b8ca, type: 2}
---- !u!65 &4635163661144144638
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7954247505173058644}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}

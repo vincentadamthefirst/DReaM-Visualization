@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Visualization.Labels.BasicLabels {
     public class BasicLabelController : MonoBehaviour {
 
-        private readonly List<IdLabel> _idLabels = new();
+        private readonly List<TextLabel> _idLabels = new();
 
         private void Update() {
             if (Input.GetKeyDown(KeyCode.F2)) {
@@ -14,7 +14,7 @@ namespace Visualization.Labels.BasicLabels {
             }
         }
 
-        public void AddLabel(IdLabel label) {
+        public void AddLabel(TextLabel label) {
             _idLabels.Add(label);
         }
     }
