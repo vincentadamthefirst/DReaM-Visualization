@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
+using Newtonsoft.Json.Serialization;
 using TMPro;
 using UI.Settings;
 using UI.Visualization;
@@ -11,10 +12,25 @@ using Visualization.Labels.BasicLabels;
 using Visualization.OcclusionManagement;
 
 namespace Visualization {
+
+    public class ActiveModules {
+        public bool DReaM { get; set; } = false;
+    }
+    
     public class VisualizationMaster : MonoBehaviour {
+
+        public static VisualizationMaster Instance { get; private set; }
+
+        private void Awake() {
+            if (Instance != null && Instance != this) {
+                Destroy(this);
+            } else {
+                Instance = this;
+            }
+        }
+
         private PlaybackControl _playbackControl;
-        private LabelOcclusionManager _labelOcclusionManager;
-        private BasicLabelController _basicLabelController;
+        private IdLabelController _idLabelController;
 
         public ApplicationSettings settings { get; set; }
 
@@ -48,6 +64,8 @@ namespace Visualization {
 
         public event EventHandler<int> TimeChanged;
 
+        public ActiveModules ActiveModules { get; } = new ActiveModules();
+
         // fallback vehicle model
         private readonly VehicleModelInformation _basicVehicle = new()
             { Width = 2f, Length = 5f, Height = 1.8f, Center = Vector3.zero, WheelDiameter = 0.65f };
@@ -60,9 +78,9 @@ namespace Visualization {
         public List<Agent> Agents { get; } = new List<Agent>();
 
         public void FindAll() {
-            _labelOcclusionManager = FindObjectOfType<LabelOcclusionManager>();
+            FindObjectOfType<LabelOcclusionManager>();
             _playbackControl = FindObjectOfType<PlaybackControl>();
-            _basicLabelController = FindObjectOfType<BasicLabelController>();
+            _idLabelController = FindObjectOfType<IdLabelController>();
         }
 
         /// <summary>
@@ -113,7 +131,7 @@ namespace Visualization {
             idLabelObject.GetComponent<TMP_Text>().SetText($"Agent {id}");
             idLabelObject.gameObject.SetActive(false);
             idLabelObject.MainCamera = Camera.main;
-            _basicLabelController.AddLabel(idLabelObject);
+            _idLabelController.AddLabel(idLabelObject);
 
             // adding label
             // FIXME
@@ -160,7 +178,7 @@ namespace Visualization {
             idLabelObject.GetComponent<TMP_Text>().SetText($"Agent {id}");
             idLabelObject.gameObject.SetActive(false);
             idLabelObject.MainCamera = Camera.main;
-            _basicLabelController.AddLabel(idLabelObject);
+            _idLabelController.AddLabel(idLabelObject);
 
             // adding label TODO use other Label then vehicle!
             // FIXME re-enable

@@ -3,7 +3,7 @@ using TMPro;
 using UnityEngine;
 
 namespace Visualization.Labels {
-    public class PedestrianScreenLabel : ScreenLabel {
+    public class PedestrianScreenLabelOld : ScreenLabelOld {
         private TextMeshProUGUI _stopping;
 
         private readonly Color _stoppingOffColor = new Color(.4f, 0, 0);

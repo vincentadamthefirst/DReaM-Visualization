@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 namespace Visualization.Labels {
-    public class VehicleScreenLabel : ScreenLabel {
+    public class VehicleScreenLabelOld : ScreenLabelOld {
         private TextMeshProUGUI _brake;
 
         private Image _indicatorLeft;

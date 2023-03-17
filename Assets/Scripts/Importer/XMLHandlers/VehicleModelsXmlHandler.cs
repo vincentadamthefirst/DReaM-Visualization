@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using UnityEngine;
+using Visualization;
 using Visualization.Agents;
 
 namespace Importer.XMLHandlers {
@@ -57,7 +58,7 @@ namespace Importer.XMLHandlers {
                     WheelDiameter = wheelDiameter
                 };
                 
-                VisualizationMaster.VehicleModelCatalog.Add(name, info);
+                VisualizationMaster.Instance.VehicleModelCatalog.Add(name, info);
             }
         }
 

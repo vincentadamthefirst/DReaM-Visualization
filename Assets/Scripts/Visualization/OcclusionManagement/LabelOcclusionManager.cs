@@ -18,7 +18,7 @@ namespace Visualization.OcclusionManagement {
         /// <summary>
         /// All Labels that are managed by this OcclusionManager
         /// </summary>
-        public List<ScreenLabel> AllLabels { get; } = new List<ScreenLabel>();
+        public List<ScreenLabelOld> AllLabels { get; } = new List<ScreenLabelOld>();
         
         // information about the screen
         private const float MaxHeight = 1080f;
@@ -129,7 +129,7 @@ namespace Visualization.OcclusionManagement {
             PlaceLabels(ref rightLabelsActive, false);
         }
 
-        private void PlaceLabels(ref List<ScreenLabel> activeLabels, bool left) {
+        private void PlaceLabels(ref List<ScreenLabelOld> activeLabels, bool left) {
             if (activeLabels.Count == 0) return;
             var preferredY = new float[activeLabels.Count];
 
@@ -192,8 +192,8 @@ namespace Visualization.OcclusionManagement {
             return MaxWidth / 2f - _labelWidth / 2f - .0001f * Mathf.Pow(y, 2) + 60f;
         }
 
-        private Vector2 AnchorToPlacementCircle(ScreenLabel label) {
-            return new Vector2(GetXForY(label.AnchorScreenPosition.y), label.AnchorScreenPosition.y);
+        private Vector2 AnchorToPlacementCircle(ScreenLabelOld labelOld) {
+            return new Vector2(GetXForY(labelOld.AnchorScreenPosition.y), labelOld.AnchorScreenPosition.y);
         }
 
         public Vector2 WorldToScreenPoint(Vector3 point) {
@@ -203,10 +203,10 @@ namespace Visualization.OcclusionManagement {
                 Mathf.Lerp(-MaxHeight / 2f, MaxHeight / 2f, wts.y / Screen.height));
         }
 
-        public void AddLabel(ScreenLabel label) {
-            AllLabels.Add(label);
+        public void AddLabel(ScreenLabelOld labelOld) {
+            AllLabels.Add(labelOld);
             var newPointer= Instantiate(pointerPrefab, _pointerHolder);
-            label.Pointer = newPointer;
+            labelOld.Pointer = newPointer;
         }
     }
 }

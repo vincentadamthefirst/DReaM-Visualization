@@ -2,7 +2,7 @@
 using UnityEngine;
 
 namespace Visualization.Labels.BasicLabels {
-    public class BasicLabelController : MonoBehaviour {
+    public class IdLabelController : MonoBehaviour {
 
         private readonly List<TextLabel> _idLabels = new();
 

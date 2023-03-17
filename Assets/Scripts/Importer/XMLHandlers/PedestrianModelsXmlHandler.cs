@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using UnityEngine;
+using Visualization;
 using Visualization.Agents;
 
 namespace Importer.XMLHandlers {
@@ -48,7 +49,7 @@ namespace Importer.XMLHandlers {
                     Center = centerPoint,
                 };
                 
-                VisualizationMaster.PedestrianModelCatalog.Add(name, info);
+                VisualizationMaster.Instance.PedestrianModelCatalog.Add(name, info);
             }
         }
 

@@ -42,6 +42,8 @@ namespace Visualization.Agents {
         // invoked whenever the agent is deactivated
         public event EventHandler OnAgentDeactivation;
 
+        public event EventHandler AgentUpdated;
+
         /// <summary>
         /// The current SimulationStep Object
         /// </summary>
@@ -173,6 +175,8 @@ namespace Visualization.Agents {
         /// <param name="backwards">If the playback is currently backwards</param>
         public void UpdateForTimeStep(int timeStep, bool backwards) {
             DynamicData.CurrentTime = timeStep;
+            
+            AgentUpdated?.Invoke(this, EventArgs.Empty);
 
             if (timeStep > StaticData.MaxTimeStep || timeStep < StaticData.MinTimeStep) {
                 // time step exceeds the range for this agent

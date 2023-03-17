@@ -3,7 +3,7 @@ using UnityEngine;
 using Visualization.Agents;
 
 namespace Visualization.Labels {
-    public abstract class Label : MonoBehaviour {
+    public abstract class LabelOld : MonoBehaviour {
         
         /// <summary>
         /// The camera that belongs to the agent of this label

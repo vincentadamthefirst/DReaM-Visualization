@@ -31,7 +31,6 @@ namespace UI.Visualization {
         [Header("Button Info")] 
         public PlaybackButtonData buttonData;
         
-        private VisualizationMaster _visualizationMaster;
         private RectTransform _selfTransform;
         
         public event EventHandler<bool> PauseStatusChanged;
@@ -40,8 +39,6 @@ namespace UI.Visualization {
         public bool Disable { get; set; }
 
         public void FindAll() {
-            _visualizationMaster = FindObjectOfType<VisualizationMaster>();
-
             currentTime.onValueChanged.AddListener(TimeInput);
             playPause.onClick.AddListener(PlayPauseChanged);
             playDirection.onClick.AddListener(PlayDirectionChanged);
@@ -51,7 +48,7 @@ namespace UI.Visualization {
         }
 
         private void TimeInput(string input) {
-            _visualizationMaster.Pause = true;
+            VisualizationMaster.Instance.Pause = true;
             int newTime;
             try {
                 newTime = int.Parse(input);
@@ -59,19 +56,19 @@ namespace UI.Visualization {
                 return;
             }
 
-            if (newTime < _visualizationMaster.MinSampleTime) {
-                currentTime.SetTextWithoutNotify(_visualizationMaster.MinSampleTime + "");
-                newTime = _visualizationMaster.MinSampleTime;
+            if (newTime < VisualizationMaster.Instance.MinSampleTime) {
+                currentTime.SetTextWithoutNotify(VisualizationMaster.Instance.MinSampleTime + "");
+                newTime = VisualizationMaster.Instance.MinSampleTime;
             }
 
-            if (newTime > _visualizationMaster.MaxSampleTime) {
-                currentTime.SetTextWithoutNotify(_visualizationMaster.MaxSampleTime + "");
-                newTime = _visualizationMaster.MaxSampleTime;
+            if (newTime > VisualizationMaster.Instance.MaxSampleTime) {
+                currentTime.SetTextWithoutNotify(VisualizationMaster.Instance.MaxSampleTime + "");
+                newTime = VisualizationMaster.Instance.MaxSampleTime;
             }
 
-            _visualizationMaster.CurrentTime = newTime;
-            if (_visualizationMaster.Pause) {
-                _visualizationMaster.SmallUpdate();
+            VisualizationMaster.Instance.CurrentTime = newTime;
+            if (VisualizationMaster.Instance.Pause) {
+                VisualizationMaster.Instance.SmallUpdate();
             }
         }
 
@@ -100,23 +97,23 @@ namespace UI.Visualization {
         }
 
         private void PlayPauseChanged() {
-            _visualizationMaster.Pause = !_visualizationMaster.Pause;
-            playPause.GetComponentInChildren<SVGImage>().sprite = _visualizationMaster.Pause
+            VisualizationMaster.Instance.Pause = !VisualizationMaster.Instance.Pause;
+            playPause.GetComponentInChildren<SVGImage>().sprite = VisualizationMaster.Instance.Pause
                 ? buttonData.playSymbol
                 : buttonData.pauseSymbol;
-            PauseStatusChanged?.Invoke(this, _visualizationMaster.Pause);
+            PauseStatusChanged?.Invoke(this, VisualizationMaster.Instance.Pause);
         }
 
         private void PlayDirectionChanged() {
-            _visualizationMaster.PlayBackwards = !_visualizationMaster.PlayBackwards;
-            playDirection.transform.SetLocalPositionAndRotation(playDirection.transform.localPosition, Quaternion.Euler(0, 0, _visualizationMaster.PlayBackwards ? 0 : 180));
-            PlayBackwardsStatusChanged?.Invoke(this, _visualizationMaster.PlayBackwards);
+            VisualizationMaster.Instance.PlayBackwards = !VisualizationMaster.Instance.PlayBackwards;
+            playDirection.transform.SetLocalPositionAndRotation(playDirection.transform.localPosition, Quaternion.Euler(0, 0, VisualizationMaster.Instance.PlayBackwards ? 0 : 180));
+            PlayBackwardsStatusChanged?.Invoke(this, VisualizationMaster.Instance.PlayBackwards);
         }
 
         private void TimeSliderValueChanged(float current) {
-            _visualizationMaster.CurrentTime = Mathf.RoundToInt(current);
-            if (_visualizationMaster.Pause) {
-                _visualizationMaster.SmallUpdate();
+            VisualizationMaster.Instance.CurrentTime = Mathf.RoundToInt(current);
+            if (VisualizationMaster.Instance.Pause) {
+                VisualizationMaster.Instance.SmallUpdate();
             }
         }
     }

@@ -8,7 +8,7 @@ using Visualization.OcclusionManagement;
 using Color = UnityEngine.Color;
 
 namespace Visualization.Labels {
-    public class ScreenLabel : Label {
+    public class ScreenLabelOld : LabelOld {
         public RectTransform LabelMainObject { get; private set; }
         
         public Agent Agent { get; set; }

@@ -11,8 +11,6 @@ namespace Importer.XMLHandlers {
         private Version _fileVersion;
         private string _filePath;
         protected XDocument xmlDocument;
-        
-        public VisualizationMaster VisualizationMaster { get; set; }
 
         public void SetFilePath(string path) {
             _filePath = path;

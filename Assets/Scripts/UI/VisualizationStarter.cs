@@ -4,6 +4,7 @@ using UI.Settings;
 using UI.Visualization;
 using UnityEngine;
 using Visualization;
+using Visualization.Labels;
 using Visualization.OcclusionManagement;
 using Visualization.POIs;
 
@@ -31,8 +32,10 @@ namespace UI {
             _agentOcclusionManager = FindObjectOfType<AgentOcclusionManager>();
             _labelOcclusionManager = FindObjectOfType<LabelOcclusionManager>();
             _dataMover = FindObjectOfType<DataMover>();
-
+            
+            VisualizationMaster.Instance.ActiveModules.DReaM = _dataMover.DReaMOutputXmlHandler != null;
             LoadAll();
+            LabelManager.Instance.CollectAgents();
 
             _dataMover.SceneryXmlHandler = null;
             _dataMover.PedestrianModelsXmlHandler = null;
@@ -132,15 +135,6 @@ namespace UI {
             
             roadNetworkHolder.settings = appSettings;
             _agentOcclusionManager.Settings = appSettings;
-
-            // setting the Visualization Master
-            _dataMover.SceneryXmlHandler.VisualizationMaster = visualizationMaster;
-            _dataMover.SimulationOutputXmlHandler.VisualizationMaster = visualizationMaster;
-            _dataMover.PedestrianModelsXmlHandler.VisualizationMaster = visualizationMaster;
-            _dataMover.VehicleModelsXmlHandler.VisualizationMaster = visualizationMaster;
-            _dataMover.ProfilesCatalogXmlHandler.VisualizationMaster = visualizationMaster;
-            if (_dataMover.DReaMOutputXmlHandler != null)
-                _dataMover.DReaMOutputXmlHandler.VisualizationMaster = visualizationMaster;
         }
     }
 }

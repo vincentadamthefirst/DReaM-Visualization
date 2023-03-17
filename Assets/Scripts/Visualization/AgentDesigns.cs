@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 using Visualization.Agents;
 using Visualization.Labels;
@@ -13,8 +14,8 @@ namespace Visualization {
         [Header("Prefabs")] 
         public PedestrianAgent pedestrianPrefab;
         public VehicleAgent vehiclePrefab;
-        public VehicleScreenLabel vehicleScreenLabel;
-        public PedestrianScreenLabel pedestrianScreenLabel;
+        [FormerlySerializedAs("vehicleScreenLabel")] public VehicleScreenLabelOld vehicleScreenLabelOld;
+        [FormerlySerializedAs("pedestrianScreenLabel")] public PedestrianScreenLabelOld pedestrianScreenLabelOld;
         public AgentSensor sensorPrefab;
         public Toggle sensorTogglePrefab;
         public BoxAgent boxPrefab;

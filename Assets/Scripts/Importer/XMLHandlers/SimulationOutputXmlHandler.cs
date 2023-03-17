@@ -94,9 +94,9 @@ namespace Importer.XMLHandlers {
 
             GetSampleSize();
             
-            VisualizationMaster.MaxSampleTime = _maxSampleTime;
-            VisualizationMaster.MinSampleTime = _minSampleTime;
-            VisualizationMaster.SampleStep = _sampleStep;
+            VisualizationMaster.Instance.MaxSampleTime = _maxSampleTime;
+            VisualizationMaster.Instance.MinSampleTime = _minSampleTime;
+            VisualizationMaster.Instance.SampleStep = _sampleStep;
             
             ParseEvents();
             ParseXmlAgents();
@@ -225,11 +225,11 @@ namespace Importer.XMLHandlers {
             foreach (var xmlAgent in _xmlAgents.Values) {
                 switch (xmlAgent.AgentType) {
                     case AgentType.Pedestrian:
-                        xmlAgent.ActualAgent = VisualizationMaster.InstantiatePedestrian(xmlAgent.ModelType, xmlAgent.Id);
+                        xmlAgent.ActualAgent = VisualizationMaster.Instance.InstantiatePedestrian(xmlAgent.ModelType, xmlAgent.Id);
                         xmlAgent.ActualAgent.name = "Ped #" + xmlAgent.Id + " [" + xmlAgent.ModelType + "]";
                         break;
                     default:
-                        xmlAgent.ActualAgent = VisualizationMaster.InstantiateVehicleAgent(xmlAgent.ModelType, xmlAgent.Id);
+                        xmlAgent.ActualAgent = VisualizationMaster.Instance.InstantiateVehicleAgent(xmlAgent.ModelType, xmlAgent.Id);
                         xmlAgent.ActualAgent.name = "Car #" + xmlAgent.Id + " [" + xmlAgent.ModelType + "]";
                         break;
                 }

@@ -8,9 +8,6 @@ using Visualization.Agents;
 namespace Importer.XMLHandlers {
 
     public class ProfilesCatalogXmlHandler : XmlHandler {
-
-        public VisualizationMaster VisualizationMaster { get; set; }
-        
         public virtual void StartImport() {
             if (xmlDocument.Root == null) return;
 
@@ -33,7 +30,7 @@ namespace Importer.XMLHandlers {
             
             Debug.Log($"Dir: {direction}, Dis: {distance}, Ope: {opening}" );
             
-            foreach (var agent in VisualizationMaster.Agents) {
+            foreach (var agent in VisualizationMaster.Instance.Agents) {
                 if (agent is PedestrianAgent)
                     continue;
                 

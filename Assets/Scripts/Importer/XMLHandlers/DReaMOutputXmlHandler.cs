@@ -151,7 +151,7 @@ namespace Importer.XMLHandlers {
 
                 foreach (var sampleAgent in sampleAgents) {
                     var id = GetString(sampleAgent, "id", "-1");
-                    var agent = VisualizationMaster.Agents.First(x => x.Id == id);
+                    var agent = VisualizationMaster.Instance.Agents.First(x => x.Id == id);
 
                     var agentSample = string.Concat(sampleAgent.Nodes());
                     _valueMapper.SetCurrentSample(agentSample);
