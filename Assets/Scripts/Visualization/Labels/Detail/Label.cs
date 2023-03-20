@@ -8,11 +8,11 @@ using Visualization.Agents;
 
 namespace Visualization.Labels.Detail {
     public class Reference<T> {
-        private readonly Func<T> getter;
+        private readonly Func<T> _getter;
         public Reference(Func<T> getter) {
-            this.getter = getter;
+            _getter = getter;
         }
-        public T Value => getter();
+        public T Value => _getter();
     }
     
     public class Label : MonoBehaviour {

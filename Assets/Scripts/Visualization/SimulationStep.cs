@@ -71,7 +71,7 @@ namespace Visualization {
         /// <summary>
         /// The relative position of the sensor towards the center of the vehicle
         /// </summary>
-        public Vector2 RelativePosition { get; set; }
+        public Vector2 LocalPosition { get; set; }
 
         /// <summary>
         /// Tells whether the opening angle of this Sensor Changed towards the previous SimulationStep

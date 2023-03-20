@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using Scenery;
 using Scenery.RoadNetwork;
 using UnityEngine;
@@ -59,9 +60,10 @@ namespace Visualization.Agents {
 
         private MeshRenderer[] _modelRenderers;
 
-        public SensorData GetSensorData(string sensorName) {
-            // TODO
-            throw new NotImplementedException();
+        [CanBeNull]
+        public SensorInformation GetSensorData(string sensorName) {
+            var success = DynamicData.ActiveSimulationStep.SensorInformation.TryGetValue(sensorName, out var info);
+            return success ? info : null;
         }
 
         public SensorSetup GetSensorSetup(string sensorName) {
@@ -175,8 +177,6 @@ namespace Visualization.Agents {
         /// <param name="backwards">If the playback is currently backwards</param>
         public void UpdateForTimeStep(int timeStep, bool backwards) {
             DynamicData.CurrentTime = timeStep;
-            
-            AgentUpdated?.Invoke(this, EventArgs.Empty);
 
             if (timeStep > StaticData.MaxTimeStep || timeStep < StaticData.MinTimeStep) {
                 // time step exceeds the range for this agent
@@ -206,6 +206,8 @@ namespace Visualization.Agents {
 
             UpdatePosition();
             UpdateRotation();
+            
+            AgentUpdated?.Invoke(this, EventArgs.Empty);
 
             // if (!isTarget) return;
             //
