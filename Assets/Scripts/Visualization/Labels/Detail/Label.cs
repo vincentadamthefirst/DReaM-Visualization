@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using TMPro;
 using Unity.VectorGraphics;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using Visualization.Agents;
 
 namespace Visualization.Labels.Detail {
@@ -15,10 +16,11 @@ namespace Visualization.Labels.Detail {
         public T Value => _getter();
     }
     
-    public class Label : MonoBehaviour {
+    public class Label : MonoBehaviour, IDragHandler {
 
         public RectTransform main;
         public RectTransform secondary;
+        public RectTransform tertiary;
 
         private List<LabelEntry> _labelEntries = new ();
 
@@ -33,12 +35,17 @@ namespace Visualization.Labels.Detail {
         private Reference<bool> _brake;
         private Reference<bool> _indicatorRight;
 
+        private RectTransform _parent;
+        private RectTransform _self;
+
         private void Awake() {
             _agentId = main.Find("Agent ID").GetComponent<TMP_Text>();
             var lights = main.Find("Lights");
             _indicatorLeftImage = lights.Find("Left").GetComponent<SVGImage>();
             _brakeText = lights.Find("Brake").GetComponent<TMP_Text>();
             _indicatorRightImage = lights.Find("Right").GetComponent<SVGImage>();
+            _parent = (RectTransform) transform.parent;
+            _self = (RectTransform) transform;
         }
 
         public void Initialize(Agent agent) {
@@ -77,6 +84,23 @@ namespace Visualization.Labels.Detail {
         public void TriggerUpdate() {
             UpdateLightStatus();
             _labelEntries.ForEach(x => x.TriggerUpdate());
+        }
+
+        public void OnDrag(PointerEventData _) {
+            var newPosX = Input.mousePosition.x - (_parent.rect.width / 2f);
+            var newPosY = Input.mousePosition.y - (_parent.rect.height / 2f);
+
+            if (newPosX > (_parent.rect.width - _self.rect.width) / 2f)
+                newPosX = (_parent.rect.width - _self.rect.width) / 2f;
+            else if (newPosX < -((_parent.rect.width - _self.rect.width) / 2f))
+                newPosX = -((_parent.rect.width - _self.rect.width) / 2f);
+            
+            if (newPosY > (_parent.rect.height - _self.rect.height) / 2f) 
+                newPosY = (_parent.rect.height - _self.rect.height) / 2f;
+            else if (newPosY < -((_parent.rect.height - _self.rect.height) / 2f))
+                newPosY = -((_parent.rect.height - _self.rect.height) / 2f);
+
+            transform.localPosition = new Vector3(newPosX, newPosY, 0);
         }
     }
 }
