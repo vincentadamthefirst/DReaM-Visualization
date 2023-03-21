@@ -28,17 +28,21 @@ namespace Visualization.Labels {
         private void AgentTargetStatusChanged(object sender, bool newStatus) {
             var agent = (Agent)sender;
             if (_activeLabels.ContainsKey(agent.Id)) {
+                Debug.Log("Label exists, removing");
                 var label = _activeLabels[agent.Id];
                 _activeLabels.Remove(agent.Id);
-                Destroy(label);
+                Destroy(label.gameObject);
             } else {
-                CreateLabelForAgent(agent);
+                var label = CreateLabelForAgent(agent);
+                agent.AgentUpdated += delegate { label.TriggerUpdate(); };
+                _activeLabels.Add(agent.Id, label);
             }
         }
 
-        private void CreateLabelForAgent(Agent agent) {
+        private Label CreateLabelForAgent(Agent agent) {
             var labelPrefab = Resources.Load<Label>("Prefabs/UI/Visualization/Labels/Label");
             var label = Instantiate(labelPrefab, transform);
+            label.name = $"Label (Agent #{agent.Id})"; 
 
             label.Initialize(agent); // initializes the main view
             
@@ -75,9 +79,17 @@ namespace Visualization.Labels {
                 gazeType.Reference = new Reference<string>(() => $"{agent.DynamicData.ActiveSimulationStep.AdditionalInformation.GlanceType}");
                 label.AddLabelEntry(gazeType);
             }
+            
+            return label;
+        }
 
-            agent.AgentUpdated += delegate { label.TriggerUpdate(); };
-            _activeLabels.Add(agent.Id, label);
+        public void AddSensorToLabel(Agent agent, AgentSensor sensor) {
+            if (!_activeLabels.ContainsKey(agent.Id)) {
+                Debug.Log($"Agent {agent.Id} does not have an active label. Cannot add sensor.");
+                return;
+            }
+            
+            // TODO add sensor stuff
         }
     }
 }

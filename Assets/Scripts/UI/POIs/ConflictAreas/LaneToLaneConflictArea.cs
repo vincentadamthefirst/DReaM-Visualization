@@ -14,16 +14,16 @@ namespace UI.POIs.ConflictAreas {
         
         public RoadBGroup Parent { get; set; }
 
-        private ConflictArea _conflictArea;
+        private ConflictAreaInfo _conflictAreaInfo;
         
         private bool _matchesCurrentSearch = false;
 
-        public void InitializeData(ConflictArea conflictArea) {
-            _conflictArea = conflictArea;
+        public void InitializeData(ConflictAreaInfo conflictAreaInfo) {
+            _conflictAreaInfo = conflictAreaInfo;
 
-            currentLane.text = "" + conflictArea.laneIdA;
-            otherLane.text = "" + conflictArea.laneIdB;
-            colorImage.color = conflictArea.color;
+            currentLane.text = "" + conflictAreaInfo.laneIdA;
+            otherLane.text = "" + conflictAreaInfo.laneIdB;
+            colorImage.color = conflictAreaInfo.color;
         }
 
         public void ToggleChange() {
@@ -33,7 +33,7 @@ namespace UI.POIs.ConflictAreas {
                 Parent.Parent.Parent.toggle.SetIsOnWithoutNotify(false);
             }
 
-            _conflictArea.obj.SetActive(toggle.isOn);
+            _conflictAreaInfo.conflictArea.MeshObject.SetActive(toggle.isOn);
         }
 
         public bool Match(string search) {

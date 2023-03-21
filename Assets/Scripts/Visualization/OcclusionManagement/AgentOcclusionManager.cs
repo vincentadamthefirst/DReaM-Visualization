@@ -68,10 +68,10 @@ namespace Visualization.OcclusionManagement {
                 AllColliders[coll] = tmp;
             }
 
-            Debug.Log("Colliders Mapped: ");
-            foreach (var pair in AllColliders) {
-                Debug.Log(pair.Value.name);
-            }
+            // Debug.Log("Colliders Mapped: "); TODO fix agent occlusion
+            // foreach (var pair in AllColliders) {
+            //     Debug.Log(pair.Value.name); 
+            // }
 
             // finding all possible targets & occluders
             _allTargetable = FindObjectsOfType<TargetableElement>().ToArray();

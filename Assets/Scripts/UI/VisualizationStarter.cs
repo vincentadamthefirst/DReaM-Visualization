@@ -36,6 +36,7 @@ namespace UI {
             VisualizationMaster.Instance.ActiveModules.DReaM = _dataMover.DReaMOutputXmlHandler != null;
             LoadAll();
             LabelManager.Instance.CollectAgents();
+            SensorManager.Instance.CollectAgents();
 
             _dataMover.SceneryXmlHandler = null;
             _dataMover.PedestrianModelsXmlHandler = null;
@@ -120,7 +121,7 @@ namespace UI {
             _targetController.FindAll();
             _labelOcclusionManager.FindAll();
             
-            Debug.Log(PlayerPrefs.GetString("app_occ_min_opacity_agent").Replace(',', '.'));
+            // Debug.Log(PlayerPrefs.GetString("app_occ_min_opacity_agent").Replace(',', '.'));
             // TODO actually parse values
 
             var appSettings = new ApplicationSettings {

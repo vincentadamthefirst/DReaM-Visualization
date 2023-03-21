@@ -7,19 +7,15 @@ using Visualization.Agents;
 
 namespace Importer.XMLHandlers {
 
-    public class ProfilesCatalogXmlHandler : XmlHandler {
-        public virtual void StartImport() {
-            if (xmlDocument.Root == null) return;
-
-            var vehCompProfile = xmlDocument.Root.XPathSelectElement("//VehicleComponentProfile[@Type='Sensor_CAEB']");
+    public sealed class ProfilesCatalogXmlHandler : XmlHandler {
+        public void StartImport() {
+            var vehCompProfile = xmlDocument.Root?.XPathSelectElement("//VehicleComponentProfile[@Type='Sensor_CAEB']");
             if (vehCompProfile == null) return;
 
             var sensorDirectionAttribute = vehCompProfile.XPathSelectElement("Double[@Key='sensorDirectionAngle']")?.Attribute("Value");
             var sensorDistanceAttribute = vehCompProfile.XPathSelectElement("Double[@Key='sensorDistance']")?.Attribute("Value");
             var sensorAngleAttribute = vehCompProfile.XPathSelectElement("Double[@Key='sensorOpeningAngle']")?.Attribute("Value");
 
-            Debug.Log(sensorAngleAttribute?.Value ?? "yikes");
-            
             var direction = float.Parse(sensorDirectionAttribute?.Value ?? "0", CultureInfo.InvariantCulture);
             var distance = float.Parse(sensorDistanceAttribute?.Value ?? "100", CultureInfo.InvariantCulture);
             var opening = float.Parse(sensorAngleAttribute?.Value ?? "180", CultureInfo.InvariantCulture);
@@ -28,18 +24,16 @@ namespace Importer.XMLHandlers {
             direction *= Mathf.Deg2Rad;
             opening *= Mathf.Deg2Rad;
             
+            Debug.Log("Found AEB sensor");
             Debug.Log($"Dir: {direction}, Dis: {distance}, Ope: {opening}" );
-            
-            foreach (var agent in VisualizationMaster.Instance.Agents) {
-                if (agent is PedestrianAgent)
-                    continue;
-                
-                var samples = agent.SimulationSteps.Values.OrderBy(s => s.Time).ToArray();
-                foreach (var simulationStep in samples) {
-                    simulationStep.SensorInformation.Add("aeb", new SensorInformation {
-                        Heading = simulationStep.Rotation + direction, Distance = distance, OpeningAngle = opening
-                    });
-                }
+
+            foreach (var simulationStep in VisualizationMaster.Instance.Agents
+                         .Where(agent => agent is not PedestrianAgent)
+                         .Select(agent => agent.SimulationSteps.Values.OrderBy(s => s.Time).ToArray())
+                         .SelectMany(samples => samples)) {
+                simulationStep.SensorInformation.Add("aeb", new SensorInformation {
+                    Heading = simulationStep.Rotation + direction, Distance = distance, OpeningAngle = opening
+                });
             }
         }
 

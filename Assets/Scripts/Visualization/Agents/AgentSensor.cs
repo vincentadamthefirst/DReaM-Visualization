@@ -25,8 +25,7 @@ namespace Visualization.Agents {
         private Transform _child;
         private MeshFilter _meshFilter;
         private MeshRenderer _meshRenderer;
-
-        private bool _active = false;
+        
         private bool _on = true;
 
         public SensorSetup SensorSetup { get; set; }
@@ -35,10 +34,6 @@ namespace Visualization.Agents {
             _child = transform.GetChild(0);
             _meshFilter = _child.GetChild(0).GetComponent<MeshFilter>();
             _meshRenderer = _child.GetChild(0).GetComponent<MeshRenderer>();
-        }
-
-        public void Initialize() {
-            
         }
 
         /// <summary>
@@ -56,7 +51,7 @@ namespace Visualization.Agents {
         /// <param name="localPosition">the local position of this sensor inside the agent</param>
         /// <param name="globalRotation">the global rotation of this sensors view frustum</param>
         private void UpdatePositionAndRotation(Vector3 agentPosition, Vector3 localPosition, float globalRotation) {
-            _child.position = agentPosition;
+            _child.position = agentPosition + localPosition;
             _child.rotation = Quaternion.Euler(0, (-globalRotation) * Mathf.Rad2Deg, 0);
         }
 
@@ -101,10 +96,10 @@ namespace Visualization.Agents {
         }
 
         [SuppressMessage("ReSharper", "PossibleNullReferenceException")]
-        public void AgentUpdated(object agentObject) {
-            var agent = agentObject as Agent;
+        public void AgentUpdated(object sender, EventArgs _) {
+            var agent = sender as Agent;
             var sensorInfo = agent.GetSensorData(SensorSetup.sensorName);
-            if (sensorInfo.OpeningChangedTowardsPrevious || sensorInfo.OpeningChangedTowardsNext)
+            if (sensorInfo.ValuesChangedTowardsNeighbors)
                 UpdateOpeningAngle(sensorInfo.OpeningAngle, sensorInfo.Distance);
             UpdatePositionAndRotation(agent.DynamicData.Position3D + new Vector3(0, 1, 0), sensorInfo.LocalPosition, sensorInfo.Heading);
         }
@@ -117,13 +112,8 @@ namespace Visualization.Agents {
             UpdateVisibility();
         }
 
-        public void SetActive(bool active) {
-            _active = active;
-            UpdateVisibility();
-        }
-
         private void UpdateVisibility() {
-            _child.GetChild(0).gameObject.SetActive(_active && _on);
+            _child.GetChild(0).gameObject.SetActive(_on);
         }
     }
 }

@@ -50,7 +50,7 @@ namespace Scenery {
         protected static readonly int BaseMap = Shader.PropertyToID("_BaseMap");
         protected static readonly int OcclusionMap = Shader.PropertyToID("_OcclusionMap");
         protected static readonly int BaseColor = Shader.PropertyToID("_BaseColor");
-        protected static readonly int Color = Shader.PropertyToID("_Color");
+        protected static readonly int ShaderColor = Shader.PropertyToID("_Color");
         protected static readonly int Surface = Shader.PropertyToID("_Surface");
     }
 }

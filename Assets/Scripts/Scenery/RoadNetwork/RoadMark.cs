@@ -60,7 +60,7 @@ namespace Scenery.RoadNetwork {
             var p = material.GetTextureScale(BaseMap);
             var v = new Vector2(p.x, ParentLane.Parent.Length * p.y);
             material.SetTextureScale(BaseMap, v);
-            material.SetColor(Color, RoadMarkColor);
+            material.SetColor(ShaderColor, RoadMarkColor);
             meshRenderer.material = material;
         }
         

@@ -6,10 +6,11 @@ using UI.Main_Menu.Utils;
 using UI.POIs.ConflictAreas;
 using UnityEngine;
 using UnityEngine.UI;
+using Visualization.Labels.BasicLabels;
 
 namespace Visualization.POIs {
 
-    public class ConflictArea {
+    public class ConflictAreaInfo {
         public float startSa;
         public float endSa;
         public float startSb;
@@ -22,7 +23,7 @@ namespace Visualization.POIs {
         public int laneIdB;
 
         public Color color;
-        public GameObject obj;
+        public ConflictArea conflictArea;
     }
 
     public class ConflictAreaVisualizer : MonoBehaviour {
@@ -30,69 +31,69 @@ namespace Visualization.POIs {
         [Header("UI Elements")] public RectTransform container;
         public TMP_InputField searchInput;
 
-        public Dictionary<string, List<ConflictArea>> ConflictAreaMapping { get; set; } = new();
+        public Dictionary<string, List<ConflictAreaInfo>> ConflictAreaMapping { get; set; } = new();
 
         public Material conflictAreaMaterial;
 
         private readonly List<IntersectionGroup> _junctionGroups = new();
+        private readonly List<ConflictArea> _conflictAreas = new();
 
-        // (current road -> (other road -> (current lane, other lanes)))
-        // private readonly Dictionary<string, Dictionary<string, Dictionary<int, List<ConflictArea>>>> _mapping = new();
-
-        private void BuildConflictArea(Road roadA, Road roadB, ConflictArea area, float colorLerp) {
-            var laneA = roadA.LaneSections[0].LaneIdMappings["" + area.laneIdA];
-            var laneB = roadB.LaneSections[0].LaneIdMappings["" + area.laneIdB];
+        private void BuildConflictArea(Road roadA, Road roadB, ConflictAreaInfo areaInfo, float colorLerp) {
+            var laneA = roadA.LaneSections[0].LaneIdMappings["" + areaInfo.laneIdA];
+            var laneB = roadB.LaneSections[0].LaneIdMappings["" + areaInfo.laneIdB];
 
             var meshA = new Mesh();
             var meshB = new Mesh();
 
-            RoadHelper.GenerateSimpleMeshForLane(ref meshA, laneA, area.startSa, area.endSa);
-            RoadHelper.GenerateSimpleMeshForLane(ref meshB, laneB, area.startSb, area.endSb);
+            RoadHelper.GenerateSimpleMeshForLane(ref meshA, laneA, areaInfo.startSa, areaInfo.endSa);
+            RoadHelper.GenerateSimpleMeshForLane(ref meshB, laneB, areaInfo.startSb, areaInfo.endSb);
 
-            var newObj = new GameObject {
-                transform = {
-                    name = $"ConflictArea {roadA.Id} & {roadB.Id}",
-                    parent = transform
-                }
-            };
+            var conflictAreaPrefab = Resources.Load<ConflictArea>("Prefabs/Objects/ConflictArea");
+            var conflictArea = Instantiate(conflictAreaPrefab, transform);
+            conflictArea.name = $"ConflictArea {roadA.Id} & {roadB.Id}";
 
-            var meshFilter = newObj.AddComponent<MeshFilter>();
-            var meshRenderer = newObj.AddComponent<MeshRenderer>();
-
-            var mesh2 = new Mesh();
+            var mesh = new Mesh();
             var totalVertices = meshA.vertices.ToList();
             totalVertices.AddRange(meshB.vertices);
-            mesh2.vertices = totalVertices.Select(x => x + Vector3.up * .2f).ToArray();
+            mesh.vertices = totalVertices.Select(x => x + Vector3.up * .2f).ToArray();
 
-            mesh2.subMeshCount = 2;
-            mesh2.SetTriangles(meshA.triangles, 0);
-            mesh2.SetTriangles(meshB.triangles.Select(x => x + meshA.vertices.Length).ToArray(), 1);
+            mesh.subMeshCount = 2;
+            mesh.SetTriangles(meshA.triangles, 0);
+            mesh.SetTriangles(meshB.triangles.Select(x => x + meshA.vertices.Length).ToArray(), 1);
 
-            mesh2.Optimize();
-            mesh2.RecalculateBounds();
-            mesh2.RecalculateNormals();
+            mesh.Optimize();
+            mesh.RecalculateBounds();
+            mesh.RecalculateNormals();
 
-            var col2 = Color.HSVToRGB(colorLerp, .9f, .7f, false);
-            area.color = col2;
-
+            var color = Color.HSVToRGB(colorLerp, .9f, .7f, false);
+            areaInfo.color = color;
+            
             var mat2 = new Material(conflictAreaMaterial) {
-                color = col2.WithAlpha(.2f)
+                color = color.WithAlpha(.2f)
             };
-            meshRenderer.materials = new[] { mat2, mat2 };
+            var materials = new[] { mat2, mat2 };
 
-            meshFilter.mesh = mesh2;
+            conflictArea.SetMeshData(mesh, materials);
 
-            newObj.SetActive(false);
-            area.obj = newObj;
+            var centroid = new Vector2 {
+                x = mesh.vertices.Sum(vertex => vertex.x) / mesh.vertices.Length,
+                y = mesh.vertices.Sum(vertex => vertex.z) / mesh.vertices.Length
+            };
 
-            // if (!_mapping.ContainsKey(roadA.OpenDriveId))
-            //     _mapping.Add(roadA.OpenDriveId, new Dictionary<string, Dictionary<int, List<ConflictArea>>>());
-            // if (!_mapping[roadA.OpenDriveId].ContainsKey(roadB.OpenDriveId))
-            //     _mapping[roadA.OpenDriveId].Add(roadB.OpenDriveId, new Dictionary<int, List<ConflictArea>>());
-            // if (!_mapping[roadA.OpenDriveId][roadB.OpenDriveId].ContainsKey(area.laneIdA))
-            //     _mapping[roadA.OpenDriveId][roadB.OpenDriveId].Add(area.laneIdA, new List<ConflictArea>());
-            //
-            // _mapping[roadA.OpenDriveId][roadB.OpenDriveId][area.laneIdA].Add(area);
+            var textLabelPrefab = Resources.Load<TextLabel>("Prefabs/UI/Visualization/Labels/TextLabel");
+            var textLabel = Instantiate(textLabelPrefab, conflictArea.transform);
+            textLabel.name = "Label";
+            textLabel.transform.localPosition = new Vector3(centroid.x, 1.5f, centroid.y);
+            textLabel.MainCamera = Camera.main;
+            textLabel.GetComponent<TMP_Text>().fontSize = 3.5f;
+            textLabel.GetComponent<TMP_Text>().SetText(
+                $"Road {areaInfo.roadIdA}, Lane {areaInfo.laneIdA} <br>" +
+                $"Road {areaInfo.roadIdB}, Lane {areaInfo.laneIdB}");
+            textLabel.gameObject.SetActive(false);
+            conflictArea.InfoLabel = textLabel;
+
+            conflictArea.MeshObject.SetActive(false);
+            areaInfo.conflictArea = conflictArea;
         }
 
         public void GenerateObjects() {

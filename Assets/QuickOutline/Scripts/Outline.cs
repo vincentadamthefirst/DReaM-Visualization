@@ -146,7 +146,7 @@ public class Outline : MonoBehaviour {
         Destroy(outlineFillMaterial);
     }
 
-    void Bake() {
+    public void Bake() {
         // Generate smooth normals for each mesh
         var bakedMeshes = new HashSet<Mesh>();
 
@@ -164,13 +164,16 @@ public class Outline : MonoBehaviour {
         }
     }
 
-    void LoadSmoothNormals() {
+    public void LoadSmoothNormals() {
         // Retrieve or generate smooth normals
         foreach (var meshFilter in GetComponentsInChildren<MeshFilter>()) {
             // Skip if smooth normals have already been adopted
             if (!registeredMeshes.Add(meshFilter.sharedMesh)) {
                 continue;
             }
+            
+            if (meshFilter.sharedMesh == null)
+                continue;
 
             // Retrieve or generate smooth normals
             var index = bakeKeys.IndexOf(meshFilter.sharedMesh);

@@ -61,9 +61,7 @@ namespace Visualization.POIs {
                         "Prefabs/UI/Visualization/RuntimeMenu/StoppingPoints/IntersectionGroup");
                 var newIntEntry = Instantiate(intersectionGroup, container);
                 newIntEntry.InitializeData(intersectionPoints.IntersectionId);
-                
-                Debug.Log($"IntersectionGroup {intersectionPoints.IntersectionId}");
-                
+
                 foreach (var laneStoppingPoint in intersectionPoints.laneStoppingPoints) {
                     laneStoppingPoint.color = Color.HSVToRGB(index / (float) max, .9f, .7f, false);
                     

@@ -1,12 +1,16 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 
 namespace Scenery.RoadNetwork {
     public abstract class HoverableElement : VisualizationElement {
         private List<Outline> _outlines;
 
         private void Start() {
+            if (_outlines == null)
+                FindOutlines();
+        }
+
+        protected void FindOutlines() {
             _outlines = transform.GetComponentsInChildren<Outline>().ToList();
         }
 

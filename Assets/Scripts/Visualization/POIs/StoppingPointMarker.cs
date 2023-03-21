@@ -10,7 +10,7 @@ namespace Visualization.POIs {
 
         public override void MouseEnter() {
             base.MouseEnter();
-            InfoLabel.gameObject.SetActive(true);
+            InfoLabel.gameObject.SetActive(!SimpleCameraController.Instance.RightMouseClicked && !SimpleCameraController.Instance.SettingsOpen);
         }
         
         public override void MouseExit() {

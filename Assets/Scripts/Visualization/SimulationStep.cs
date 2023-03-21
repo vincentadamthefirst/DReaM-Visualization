@@ -44,7 +44,7 @@ namespace Visualization {
         /// The information of this Agents sensors at this step.
         /// The information of this Agents sensors at this step.
         /// </summary>
-        public Dictionary<string, SensorInformation> SensorInformation { get; } = new Dictionary<string, SensorInformation>();
+        public Dictionary<string, SensorInformation> SensorInformation { get; } = new();
         
         /// <summary>
         /// The additional information for an agent at this SimulationStep
@@ -74,15 +74,10 @@ namespace Visualization {
         public Vector2 LocalPosition { get; set; }
 
         /// <summary>
-        /// Tells whether the opening angle of this Sensor Changed towards the previous SimulationStep
+        /// Has any of the stored values changed towards the next or previous SimulationStep
         /// </summary>
-        public bool OpeningChangedTowardsPrevious { get; set; }
-        
-        /// <summary>
-        /// Tells whether the opening angle of this Sensor Changed towards the next SimulationStep
-        /// </summary>
-        public bool OpeningChangedTowardsNext { get; set; }
-        
+        public bool ValuesChangedTowardsNeighbors { get; set; }
+
         /// <summary>
         /// Global heading the sensor looks at.
         /// </summary>

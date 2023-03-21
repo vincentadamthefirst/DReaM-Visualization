@@ -27,7 +27,7 @@ namespace Scenery {
 
                 if (current.GetComponent<TargetableElement>() != null) return current.GetComponent<TargetableElement>();
                 current = current.transform.parent;
-                depth = depth + 1;
+                depth += 1;
             }
         }
     }

@@ -62,7 +62,7 @@ namespace Importer.XMLHandlers {
 
         public List<IntersectionStoppingPoints> StoppingPoints = new();
 
-        public Dictionary<string, List<ConflictArea>> ConflictAreaMapping { get; } = new();
+        public Dictionary<string, List<ConflictAreaInfo>> ConflictAreaMapping { get; } = new();
 
         private ValueMapper _valueMapper;
 
@@ -100,7 +100,7 @@ namespace Importer.XMLHandlers {
             var returnString = versionString + "<color=\"white\">";
             
             var runResults = xmlDocument.Root.Element("RunResults")?.Elements("RunResult");
-            returnString += " <b>|</b> RunResults: " + runResults?.Count() ?? "<color=\"red\"><b>-1</b></color>";
+            returnString += " <b>|</b> RunResults: " + runResults?.Count();
 
             return returnString;
         }
@@ -114,7 +114,6 @@ namespace Importer.XMLHandlers {
                 throw new ArgumentMissingException("No RunResults found in DReaMOutput. Aborting.");
             } 
             foreach (var runResult in allRunResults) {
-                Debug.Log(GetString(runResult, "RunId"));
                 if (!GetString(runResult, "RunId").Contains(RunId)) continue;
                 _runResult = runResult;
                 break;
@@ -204,11 +203,11 @@ namespace Importer.XMLHandlers {
             foreach (var junction in caJunctions) {
                 var junctionId = junction.Attribute("id")?.Value.ToLower() ?? "not on junction";
                 if (!ConflictAreaMapping.ContainsKey(junctionId))
-                    ConflictAreaMapping.Add(junctionId, new List<ConflictArea>());
+                    ConflictAreaMapping.Add(junctionId, new List<ConflictAreaInfo>());
 
                 var conflictAreas = junction.Elements("ConflictArea");
                 foreach (var conflictArea in conflictAreas) {
-                    ConflictAreaMapping[junctionId].Add(new ConflictArea {
+                    ConflictAreaMapping[junctionId].Add(new ConflictAreaInfo {
                         startSa = GetFloat(conflictArea, "startA"),
                         endSa = GetFloat(conflictArea, "endA"),
                         startSb = GetFloat(conflictArea, "startB"),

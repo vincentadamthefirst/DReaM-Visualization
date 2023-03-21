@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
 using Scenery;
-using Scenery.RoadNetwork;
 using UnityEngine;
 using Utils;
 
@@ -26,8 +25,8 @@ namespace Visualization.Agents {
         public GameObject Model { get; set; }
         public ModelInformation ModelInformation { get; set; }
         public Material ColorMaterial { get; set; }
-        
-        public Dictionary<string, SensorSetup> UniqueSensors { get; set; }
+
+        public Dictionary<string, SensorSetup> UniqueSensors { get; } = new();
 
         public int MaxTimeStep { get; set; }
         public int MinTimeStep { get; set; }
@@ -66,11 +65,6 @@ namespace Visualization.Agents {
             return success ? info : null;
         }
 
-        public SensorSetup GetSensorSetup(string sensorName) {
-            // TODO
-            throw new NotImplementedException();
-        }
-
         /// <summary>
         /// Prepares this agent
         /// </summary>
@@ -99,17 +93,21 @@ namespace Visualization.Agents {
         /// Initializes this agents sensors if necessary. Currently only handles the drivers view.
         /// </summary>
         private void SetupSensors() {
-            // find the amount of sensors this agent needs
-            // foreach (var sensorInfo in SimulationSteps.Values.SelectMany(step =>
-            //              step.SensorInformation.Where(sensorInfo => !uniqueSensorNames.Contains(sensorInfo.Key)))) {
-            //     StaticData.UniqueSensors.Add(sensorInfo.Key);
-            // }
-
-            // var sensorColors = new[] {
-            //     new Color(.26f, .83f, .76f, AgentDesigns.sensorBase.color.a),
-            //     new Color(.94f, .62f, .25f, AgentDesigns.sensorBase.color.a),
-            //     new Color(.4f, .85f, .38f, AgentDesigns.sensorBase.color.a),
-            // };
+            // find the unique sensors this agent has
+            var uniqueSensorNames = SimulationSteps.Values
+                .SelectMany(simulationStep =>
+                    simulationStep.SensorInformation.Where(pair => !StaticData.UniqueSensors.ContainsKey(pair.Key)))
+                .Select(pair => pair.Key).ToList();
+            
+            // assign colors to the sensors
+            for (var i = 0; i < uniqueSensorNames.Count; i++) {
+                StaticData.UniqueSensors.Add(uniqueSensorNames[i], new SensorSetup {
+                    sensorName = uniqueSensorNames[i],
+                    color = Color.HSVToRGB(i / (float)uniqueSensorNames.Count, .9f, .7f, false)
+                });
+            }
+            
+            Debug.Log("Agent " + Id + ": " + uniqueSensorNames.Count + " sensors");
 
             // // initializing all sensors for this agent
             // for (var i = 0; i < uniqueSensorNames.Count; i++) {
@@ -130,14 +128,6 @@ namespace Visualization.Agents {
             // ordering the simulation steps
             var ordered = SimulationSteps.Values.OrderBy(s => s.Time).ToArray();
 
-            // ensure that the first step contains all sensors
-            // foreach (var uniqueSensor in uniqueSensorNames.Where(uniqueSensor =>
-            //              !ordered[0].SensorInformation.ContainsKey(uniqueSensor))) {
-            //     ordered[0].SensorInformation.Add(uniqueSensor, new SensorInformation {
-            //         Distance = 0, Heading = 0, OpeningAngle = 0
-            //     });
-            // }
-
             // filling missing data in the simulation steps & mark if data changes
             for (var i = 0; i < ordered.Length - 1; i++) {
                 var a = ordered[i];
@@ -151,22 +141,20 @@ namespace Visualization.Agents {
                     });
                 }
 
-                foreach (var info in a.SensorInformation) {
-                    var curr = info.Value;
-                    var next = b.SensorInformation[info.Key];
-                    if (Math.Abs(curr.OpeningAngle - next.OpeningAngle) > 0.00001f) {
-                        curr.OpeningChangedTowardsNext = true;
-                        next.OpeningChangedTowardsPrevious = true;
-                    }
+                foreach (var (s, current) in a.SensorInformation) {
+                    var next = b.SensorInformation[s];
+                    if (!(Math.Abs(current.OpeningAngle - next.OpeningAngle) > 0.00001f) &&
+                        current.LocalPosition == next.LocalPosition) continue;
+                    current.ValuesChangedTowardsNeighbors = true;
+                    next.ValuesChangedTowardsNeighbors = true;
                 }
             }
 
             // set first and last Sensor data in SimulationSteps
-            if (ordered.Length != 0) {
-                ordered[0].SensorInformation.Values.ToList().ForEach(x => x.OpeningChangedTowardsPrevious = true);
-                ordered[ordered.Length - 1].SensorInformation.Values.ToList()
-                    .ForEach(x => x.OpeningChangedTowardsNext = true);
-            }
+            if (ordered.Length == 0) return;
+            ordered[0].SensorInformation.Values.ToList().ForEach(x => x.ValuesChangedTowardsNeighbors = true);
+            ordered[^1].SensorInformation.Values.ToList()
+                .ForEach(x => x.ValuesChangedTowardsNeighbors = true);
         }
 
         /// <summary>
