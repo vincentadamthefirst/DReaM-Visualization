@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using TMPro;
 using Unity.VectorGraphics;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 using Utils;
 using Visualization.Agents;
 
@@ -14,6 +14,8 @@ namespace Visualization.Labels.Detail {
     public class Label : MonoBehaviour, IDragHandler {
 
         public RectTransform main;
+        
+        public RawImage CognitiveMap { get; private set; }
 
         private readonly List<RectTransform> _infoPanels = new();
         private readonly List<LabelEntry> _labelEntries = new ();
@@ -32,6 +34,8 @@ namespace Visualization.Labels.Detail {
         private RectTransform _parent;
         private RectTransform _self;
 
+        private Button _closeButton;
+
         private void Awake() {
             _agentId = main.Find("Agent ID").GetComponent<TMP_Text>();
             var lights = main.Find("Lights");
@@ -40,9 +44,14 @@ namespace Visualization.Labels.Detail {
             _indicatorRightImage = lights.Find("Right").GetComponent<SVGImage>();
             _parent = (RectTransform) transform.parent;
             _self = (RectTransform) transform;
+            CognitiveMap = main.Find("Minimap").GetComponent<RawImage>();
+            _closeButton = CognitiveMap.transform.Find("CloseButton").GetComponent<Button>();
         }
 
         public void Initialize(Agent agent) {
+            _closeButton.onClick.AddListener(() => {
+                agent.IsTarget = false;
+            });
             if (agent.GetType() == typeof(BoxAgent) || agent.GetType() == typeof(VehicleAgent)) {
                 GeneralSetup(agent);
                 VehicleSetup(agent.DynamicData.ActiveSimulationStep.AdditionalInformation as AdditionalVehicleInformation);
@@ -92,7 +101,22 @@ namespace Visualization.Labels.Detail {
             _labelEntries.Add(textEntry);
         }
 
-        public void TriggerUpdate() {
+        public void AddLabelSensorEntry(AgentSensor sensor, Reference<string> reference) {
+            var sensorEntryPrefab = Resources.Load<LabelSensorEntry>("Prefabs/UI/Visualization/Labels/LabelSensorEntry");
+            var rect = sensorEntryPrefab.GetComponent<RectTransform>().rect;
+            if (_infoPanels.Count == 0 || CheckIfLastInfoPanelOverflows(rect.height)) {
+                var infoPanelPrefab = Resources.Load<RectTransform>("Prefabs/UI/Visualization/Labels/InfoPanel");
+                var infoPanel = Instantiate(infoPanelPrefab, transform);
+                _infoPanels.Add(infoPanel);
+            }
+            var parent = _infoPanels[^1];
+            var sensorEntry = Instantiate(sensorEntryPrefab, parent);
+            sensorEntry.Reference = reference;
+            sensorEntry.AddSensor(sensor);
+            _labelEntries.Add(sensorEntry);
+        }
+
+        public void TriggerUpdate(object sender, EventArgs _) {
             UpdateLightStatus();
             _labelEntries.ForEach(x => x.TriggerUpdate());
         }
@@ -112,6 +136,10 @@ namespace Visualization.Labels.Detail {
                 newPosY = -((_parent.rect.height - _self.rect.height) / 2f);
 
             transform.localPosition = new Vector3(newPosX, newPosY, 0);
+        }
+
+        private void UpdateOtherAgents() {
+            
         }
     }
 }

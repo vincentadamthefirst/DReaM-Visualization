@@ -8,13 +8,11 @@ using Visualization.Labels.BasicLabels;
 using Visualization.OcclusionManagement;
 
 namespace Visualization {
-
     public class ActiveModules {
         public bool DReaM { get; set; } = false;
     }
-    
-    public class VisualizationMaster : MonoBehaviour {
 
+    public class VisualizationMaster : MonoBehaviour {
         public static VisualizationMaster Instance { get; private set; }
 
         private void Awake() {
@@ -74,7 +72,6 @@ namespace Visualization {
         public Dictionary<string, Agent> AgentIdMapping { get; } = new();
 
         public void FindAll() {
-            FindObjectOfType<LabelOcclusionManager>();
             _playbackControl = FindObjectOfType<PlaybackControl>();
             _idLabelController = FindObjectOfType<IdLabelController>();
         }
@@ -104,20 +101,21 @@ namespace Visualization {
         /// <returns>The instantiated agent</returns>
         public Agent InstantiateVehicleAgent(string modelType, string id) {
             var agentModel = agentDesigns.GetAgentModel(AgentType.Vehicle, modelType);
-            Agent vehicleAgent;
 
-            if (agentModel.modelName.Contains("fallback"))
-                vehicleAgent = Instantiate(agentDesigns.boxPrefab, transform, true);
-            else
-                vehicleAgent = Instantiate(agentDesigns.vehiclePrefab, transform, true);
+            Agent vehiclePrefab = agentModel.modelName.Contains("fallback")
+                ? Resources.Load<BoxAgent>("Prefabs/Agents/BoxAgent")
+                : Resources.Load<VehicleAgent>("Prefabs/Agents/Agent");
+            var vehicleAgent = Instantiate(vehiclePrefab, transform, true);
 
             // adding the RoadNetworkHolder
             vehicleAgent.Master = this;
             vehicleAgent.Id = id;
 
             // retrieving prefab for 3d model
-            var model = Instantiate(agentDesigns.GetAgentModel(AgentType.Vehicle, modelType).model,
-                vehicleAgent.transform, true);
+            var modelPrefab =
+                Resources.Load<GameObject>(
+                    $"Prefabs/Agents/Models/{agentDesigns.GetAgentModel(AgentType.Vehicle, modelType).model}");
+            var model = Instantiate(modelPrefab, vehicleAgent.transform, true);
             Agents.Add(vehicleAgent);
             AgentIdMapping.Add(vehicleAgent.Id, vehicleAgent);
             vehicleAgent.StaticData.Model = model;
@@ -130,11 +128,14 @@ namespace Visualization {
             idLabelObject.gameObject.SetActive(false);
             idLabelObject.MainCamera = Camera.main;
             _idLabelController.AddLabel(idLabelObject);
-            
+
             if (DisableLabels)
                 Destroy(vehicleAgent.StaticData.Model.transform.Find("Camera").gameObject);
-            else 
-                vehicleAgent.StaticData.Model.transform.Find("Camera").gameObject.SetActive(false);
+            else {
+                vehicleAgent.StaticData.AgentCamera =
+                    vehicleAgent.StaticData.Model.transform.Find("Camera").GetComponent<Camera>();
+                vehicleAgent.StaticData.AgentCamera.gameObject.SetActive(false);
+            }
 
             // retrieving model information
             vehicleAgent.StaticData.ModelInformation = VehicleModelCatalog.ContainsKey(modelType)
@@ -149,15 +150,18 @@ namespace Visualization {
         /// </summary>
         /// <returns>The instantiated agent</returns>
         public PedestrianAgent InstantiatePedestrian(string modelType, string id) {
-            var pedestrianAgent = Instantiate(agentDesigns.pedestrianPrefab, transform, true);
+            var pedestrianPrefab = Resources.Load<PedestrianAgent>("Prefabs/Agents/Pedestrian");
+            var pedestrianAgent = Instantiate(pedestrianPrefab, transform, true);
 
             // adding the RoadNetworkHolder
             pedestrianAgent.Master = this;
             pedestrianAgent.Id = id;
 
             // retrieving prefab for 3d model
-            var model = Instantiate(agentDesigns.GetAgentModel(AgentType.Pedestrian, modelType).model,
-                pedestrianAgent.transform, true);
+            var modelPrefab =
+                Resources.Load<GameObject>(
+                    $"Prefabs/Agents/Models/{agentDesigns.GetAgentModel(AgentType.Vehicle, modelType).model}");
+            var model = Instantiate(modelPrefab, pedestrianAgent.transform, true);
             Agents.Add(pedestrianAgent);
             AgentIdMapping.Add(pedestrianAgent.Id, pedestrianAgent);
             pedestrianAgent.StaticData.Model = model;
@@ -173,8 +177,11 @@ namespace Visualization {
 
             if (DisableLabels)
                 Destroy(pedestrianAgent.StaticData.Model.transform.Find("Camera").gameObject);
-            else 
-                pedestrianAgent.StaticData.Model.transform.Find("Camera").gameObject.SetActive(false);
+            else {
+                pedestrianAgent.StaticData.AgentCamera =
+                    pedestrianAgent.StaticData.Model.transform.Find("Camera").GetComponent<Camera>();
+                pedestrianAgent.StaticData.AgentCamera.gameObject.SetActive(false);
+            }
 
             // retrieving model information
             pedestrianAgent.StaticData.ModelInformation = PedestrianModelCatalog.ContainsKey(modelType)

@@ -14,21 +14,18 @@ namespace UI {
         public VisualizationMaster visualizationMaster;
         public RoadNetworkHolder roadNetworkHolder;
         public Terrain terrain;
-
-        private LabelOcclusionManager _labelOcclusionManager;
+        
         private AgentOcclusionManager _agentOcclusionManager;
         private TargetController _targetController;
         private PlaybackControl _playbackControl;
         private DataMover _dataMover;
 
         private void Start() {
-            FindObjectOfType<LabelOcclusionManager>().Disable = true;
             FindObjectOfType<AgentOcclusionManager>().Disable = true;
             
             _targetController = FindObjectOfType<TargetController>();
             _playbackControl = FindObjectOfType<PlaybackControl>();
             _agentOcclusionManager = FindObjectOfType<AgentOcclusionManager>();
-            _labelOcclusionManager = FindObjectOfType<LabelOcclusionManager>();
             _dataMover = FindObjectOfType<DataMover>();
             
             VisualizationMaster.Instance.ActiveModules.DReaM = _dataMover.DReaMOutputXmlHandler != null;
@@ -85,12 +82,7 @@ namespace UI {
             visualizationMaster.SmallUpdate();
 
             // enabling the occlusion managers
-            if (_dataMover.DReaMOutputXmlHandler == null) {
-                var loc = FindObjectOfType<LabelOcclusionManager>();
-                loc.DisableAllLabels();
-                loc.Disable = true;
-            } else {
-                FindObjectOfType<LabelOcclusionManager>().Disable = false;
+            if (_dataMover.DReaMOutputXmlHandler != null) {
                 FindObjectOfType<AgentOcclusionManager>().Disable = false;
             }
 
@@ -109,7 +101,6 @@ namespace UI {
             visualizationMaster.FindAll();
             _agentOcclusionManager.FindAll();
             _targetController.FindAll();
-            _labelOcclusionManager.FindAll();
             visualizationMaster.DisableLabels = _dataMover.DReaMOutputXmlHandler == null;
         }
     }

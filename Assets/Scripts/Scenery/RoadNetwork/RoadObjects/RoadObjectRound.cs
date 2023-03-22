@@ -134,8 +134,9 @@ namespace Scenery.RoadNetwork.RoadObjects {
 
         private void ShowStreetLamp(RoadObjectPrefab rop) {
             if (rop == null) return;
-            
-            var streetLamp = Instantiate(rop.prefab, transform, true);
+
+            var prefab = Resources.Load<GameObject>($"Prefabs/Objects/RoadNetwork/RoadObjects/{rop.prefabName}");
+            var streetLamp = Instantiate(prefab, transform, true);
             streetLamp.layer = 19;
             Height -= 1;
 
@@ -154,7 +155,8 @@ namespace Scenery.RoadNetwork.RoadObjects {
         private void ShowPole(RoadObjectPrefab rop) {
             if (rop == null) return;
             
-            var pole = Instantiate(rop.prefab, transform, true);
+            var prefab = Resources.Load<GameObject>($"Prefabs/Objects/RoadNetwork/RoadObjects/{rop.prefabName}");
+            var pole = Instantiate(prefab, transform, true);
             pole.layer = 19;
 
             var middleLocalScale = pole.transform.GetChild(0).localScale;
@@ -173,7 +175,8 @@ namespace Scenery.RoadNetwork.RoadObjects {
         private void ShowTree(RoadObjectPrefab rop) {
             if (rop == null) return;
             
-            var tree = Instantiate(rop.prefab, transform, true);
+            var prefab = Resources.Load<GameObject>($"Prefabs/Objects/RoadNetwork/RoadObjects/{rop.prefabName}");
+            var tree = Instantiate(prefab, transform, true);
             tree.layer = 19;
             
             var scaleA = 2 * Radius / rop.baseRadius;

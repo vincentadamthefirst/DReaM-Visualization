@@ -57,7 +57,6 @@ namespace UI {
         }
 
         public void OnPointerClick(PointerEventData eventData) {
-            Debug.Log("Mouse down");
             CardClicked?.Invoke(this, EventArgs.Empty);
         }
     }

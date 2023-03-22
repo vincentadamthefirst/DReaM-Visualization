@@ -10,22 +10,11 @@ using Visualization.Labels;
 namespace Visualization {
     [CreateAssetMenu(menuName = "AgentDesigns")]
     public class AgentDesigns : ScriptableObject {
-
-        [Header("Prefabs")] 
-        public PedestrianAgent pedestrianPrefab;
-        public VehicleAgent vehiclePrefab;
-        [FormerlySerializedAs("vehicleScreenLabel")] public VehicleScreenLabelOld vehicleScreenLabelOld;
-        [FormerlySerializedAs("pedestrianScreenLabel")] public PedestrianScreenLabelOld pedestrianScreenLabelOld;
-        public AgentSensor sensorPrefab;
-        public Toggle sensorTogglePrefab;
-        public BoxAgent boxPrefab;
-        
         [Header("AgentModels")]
-        public List<AgentModel> agentModels = new List<AgentModel>();
+        public List<AgentModel> agentModels = new();
 
         [Header("Materials")]
         public Material vehicleChassisBase;
-        public Material sensorBase;
 
         public AgentModel GetAgentModel(AgentType agentType, string vehicleModel) {
             var found = agentModels.Where(am => am.agentType == agentType && vehicleModel.Contains(am.modelName));
@@ -42,7 +31,7 @@ namespace Visualization {
     [Serializable]
     public class AgentModel {
         public AgentType agentType;
-        public GameObject model;
+        public string model;
         public string modelName;
     }
 }

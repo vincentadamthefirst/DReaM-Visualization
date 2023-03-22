@@ -30,6 +30,8 @@ namespace Visualization.Agents {
 
         public int MaxTimeStep { get; set; }
         public int MinTimeStep { get; set; }
+        
+        public Camera AgentCamera { get; set; }
     }
 
     public abstract class Agent : TargetableElement {
@@ -94,11 +96,14 @@ namespace Visualization.Agents {
         /// </summary>
         private void SetupSensors() {
             // find the unique sensors this agent has
-            var uniqueSensorNames = SimulationSteps.Values
-                .SelectMany(simulationStep =>
-                    simulationStep.SensorInformation.Where(pair => !StaticData.UniqueSensors.ContainsKey(pair.Key)))
-                .Select(pair => pair.Key).ToList();
-            
+            var uniqueSensorNames = new List<string>();
+            foreach (var simulationStep in SimulationSteps.Values) {
+                foreach (var (sensor, _) in simulationStep.SensorInformation) {
+                    if (!uniqueSensorNames.Contains(sensor))
+                        uniqueSensorNames.Add(sensor);
+                }
+            }
+
             // assign colors to the sensors
             for (var i = 0; i < uniqueSensorNames.Count; i++) {
                 StaticData.UniqueSensors.Add(uniqueSensorNames[i], new SensorSetup {
@@ -106,24 +111,6 @@ namespace Visualization.Agents {
                     color = Color.HSVToRGB(i / (float)uniqueSensorNames.Count, .9f, .7f, false)
                 });
             }
-            
-            Debug.Log("Agent " + Id + ": " + uniqueSensorNames.Count + " sensors");
-
-            // // initializing all sensors for this agent
-            // for (var i = 0; i < uniqueSensorNames.Count; i++) {
-            //     var uniqueSensor = uniqueSensorNames[i];
-            //     var sensorScript = Instantiate(AgentDesigns.sensorPrefab, transform.parent);
-            //     sensorScript.name = /*name + " - Sensor " +*/ uniqueSensor;
-            //     _agentSensors.Add(uniqueSensor, sensorScript);
-            //     sensorScript.FindAll();
-            //
-            //     var sensorMat = new Material(AgentDesigns.sensorBase) {
-            //         color = i < 3 ? sensorColors[i] : ColorMaterial.color.WithAlpha(AgentDesigns.sensorBase.color.a)
-            //         //color = ColorMaterial.color.WithAlpha(AgentDesigns.sensorBase.color.a)
-            //     };
-            //     sensorScript.SetMeshMaterial(sensorMat);
-            //     if (OwnLabel != null) OwnLabel.AddSensor(sensorScript);
-            // }
 
             // ordering the simulation steps
             var ordered = SimulationSteps.Values.OrderBy(s => s.Time).ToArray();
@@ -196,26 +183,6 @@ namespace Visualization.Agents {
             UpdateRotation();
             
             AgentUpdated?.Invoke(this, EventArgs.Empty);
-
-            // if (!isTarget) return;
-            //
-            // // update label
-            // UpdateLabel();
-            //
-            // // updating the sensors
-            // foreach (var info in previous.SensorInformation) {
-            //     var sensor = _agentSensors[info.Key];
-            //     if (backwards && info.Value.OpeningChangedTowardsNext ||
-            //         !backwards && info.Value.OpeningChangedTowardsPrevious || _targetStatusChanged) {
-            //         sensor.UpdateOpeningAngle(info.Value.OpeningAngle, info.Value.Distance);
-            //         
-            //         if (info.Key == "aeb")
-            //             Debug.Log(info.Value.OpeningAngle + " ... " + info.Value.Distance);
-            //     }
-            //     
-            //     
-            //     sensor.UpdatePositionAndRotation(CurrentPosition + new Vector3(0, 1f, 0), info.Value.Heading);
-            // }
         }
 
         protected abstract void UpdatePosition();

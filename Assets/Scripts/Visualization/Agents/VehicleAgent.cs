@@ -107,7 +107,7 @@ namespace Visualization.Agents {
             UpdateIndicators();
             UpdateBrakes();
             
-            DynamicData.Position3D = StaticData.Model.transform.GetChild(0).position;
+            DynamicData.Position3D = StaticData.Model.transform.position;
             boundingBox.center = DynamicData.Position3D;
         }
 

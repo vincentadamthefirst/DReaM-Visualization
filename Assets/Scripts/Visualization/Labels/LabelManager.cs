@@ -37,49 +37,53 @@ namespace Visualization.Labels {
             if (_activeLabels.ContainsKey(agent.Id)) {
                 var label = _activeLabels[agent.Id];
                 _activeLabels.Remove(agent.Id);
+                agent.StaticData.AgentCamera.gameObject.SetActive(false);
+                agent.AgentUpdated -= label.TriggerUpdate;
                 Destroy(label.gameObject);
             } else {
                 var label = CreateLabelForAgent(agent);
-                agent.AgentUpdated += delegate { label.TriggerUpdate(); };
-                _activeLabels.Add(agent.Id, label);
+                agent.AgentUpdated += label.TriggerUpdate;
             }
         }
 
         private Label CreateLabelForAgent(Agent agent) {
             var labelPrefab = Resources.Load<Label>("Prefabs/UI/Visualization/Labels/Label");
             var label = Instantiate(labelPrefab, transform);
-            label.name = $"Label (Agent #{agent.Id})"; 
-
+            label.name = $"Label (Agent #{agent.Id})";
             label.Initialize(agent); // initializes the main view
-            
-            // initialize secondary view
-            // var labelTextEntryPrefab = Resources.Load<LabelTextEntry>("Prefabs/UI/Visualization/Labels/LabelTextEntry");
-            
+
             label.AddLabelTextEntry("Position:", new Reference<string>(() => $"({agent.DynamicData.Position2D.x:F2}, {agent.DynamicData.Position2D.y:F2})"));
-            label.AddLabelTextEntry("Velocity:", new Reference<string>(() => $"{agent.DynamicData.ActiveSimulationStep.Velocity} m/s"));
-            label.AddLabelTextEntry("Acceleration:", new Reference<string>(() => $"{agent.DynamicData.ActiveSimulationStep.Acceleration} m/s²"));
+            label.AddLabelTextEntry("Velocity:", new Reference<string>(() => $"{agent.DynamicData.ActiveSimulationStep.Velocity:F2} m/s"));
+            label.AddLabelTextEntry("Acceleration:", new Reference<string>(() => $"{agent.DynamicData.ActiveSimulationStep.Acceleration:F2} m/s²"));
 
             if (VisualizationMaster.Instance.ActiveModules.DReaM) {
                 label.AddLabelTextEntry("Crossing Phase:", new Reference<string>(() => $"{agent.DynamicData.ActiveSimulationStep.AdditionalInformation.CrossingPhase}"));
                 label.AddLabelTextEntry("Scan AOI:", new Reference<string>(() => $"{agent.DynamicData.ActiveSimulationStep.AdditionalInformation.ScanAoI}"));
                 label.AddLabelTextEntry("Gaze Type:", new Reference<string>(() => $"{agent.DynamicData.ActiveSimulationStep.AdditionalInformation.GlanceType}"));
             }
+            
+            if (agent.StaticData.AgentCamera != null) {
+                var targetTexture = new RenderTexture(250, 250, 1);
+                label.CognitiveMap.texture = targetTexture;
+                agent.StaticData.AgentCamera.aspect = 1f;
+                agent.StaticData.AgentCamera.orthographicSize = 100f;
+                agent.StaticData.AgentCamera.targetTexture = targetTexture;
+                agent.StaticData.AgentCamera.gameObject.SetActive(true);
+            } 
+            
+            _activeLabels.Add(agent.Id, label);
 
             if (_sensorStorage.ContainsKey(agent.Id)) {
                 _sensorStorage[agent.Id].ForEach(x => CreateSensorEntry(x.Item1, x.Item2));
                 _sensorStorage.Remove(agent.Id);
             }
-
+            
             return label;
         }
 
         private void CreateSensorEntry(Agent agent, AgentSensor sensor) {
-            // var label = _activeLabels[agent.Id];
-            // var sensorEntryPrefab = Resources.Load<LabelSensorEntry>("Prefabs/UI/Visualization/Labels/LabelSensorEntry");
-            // var sensorEntry = Instantiate(sensorEntryPrefab, label.tertiary);
-            // sensorEntry.Reference = new Reference<string>(() => $"{agent.DynamicData.ActiveSimulationStep.AdditionalInformation.CrossingPhase}");
-            // sensorEntry.AddSensor(sensor);
-            // label.AddLabelEntry(sensorEntry);
+            var label = _activeLabels[agent.Id]; 
+            label.AddLabelSensorEntry(sensor, new Reference<string>(() => $"hdg: {sensor.CurrentStatus.Heading:F2}, opn: {sensor.CurrentStatus.OpeningAngle:F2}"));
         }
 
         public void AddSensorToLabel(Agent agent, AgentSensor sensor) {

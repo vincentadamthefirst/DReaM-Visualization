@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
-using Debug = System.Diagnostics.Debug;
 
 namespace Visualization.Agents {
 
@@ -28,7 +27,11 @@ namespace Visualization.Agents {
         
         private bool _on = true;
 
+        public SensorInformation CurrentStatus { get; private set; } = new();
+
         public SensorSetup SensorSetup { get; set; }
+
+        private bool _newSensor = true;
 
         private void Awake() {
             _child = transform.GetChild(0);
@@ -83,25 +86,19 @@ namespace Visualization.Agents {
 
             newMesh.RecalculateNormals();
             _meshFilter.mesh = newMesh;
-
-
-            // var newMesh = new Mesh();
-            // var height = Mathf.Sin(angleRadians / 2f) * distance;
-            // newMesh.vertices = new[]
-            //     {Vector3.zero, new Vector3(height, 0, distance), new Vector3(-height, 0, distance)};
-            // newMesh.triangles = new[] {0, 2, 1};
-            //
-            // newMesh.RecalculateNormals();
-            // _meshFilter.mesh = newMesh;
         }
 
         [SuppressMessage("ReSharper", "PossibleNullReferenceException")]
         public void AgentUpdated(object sender, EventArgs _) {
             var agent = sender as Agent;
             var sensorInfo = agent.GetSensorData(SensorSetup.sensorName);
-            if (sensorInfo.ValuesChangedTowardsNeighbors)
+            if (sensorInfo.ValuesChangedTowardsNeighbors || _newSensor) {
                 UpdateOpeningAngle(sensorInfo.OpeningAngle, sensorInfo.Distance);
-            UpdatePositionAndRotation(agent.DynamicData.Position3D + new Vector3(0, 1, 0), sensorInfo.LocalPosition, sensorInfo.Heading);
+                _newSensor = false;
+            }
+            var localPos = new Vector3(sensorInfo.LocalPosition.x, 0, sensorInfo.LocalPosition.y);
+            UpdatePositionAndRotation(agent.DynamicData.Position3D + new Vector3(0, 1, 0), localPos, sensorInfo.Heading);
+            CurrentStatus = sensorInfo;
         }
 
         /// <summary>

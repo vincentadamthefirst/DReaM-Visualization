@@ -54,10 +54,10 @@ namespace Scenery.RoadNetwork.RoadSignals {
         public override void Show() {
             transform.parent = Parent.transform;
 
-            var tsp = RoadDesign.GetTrafficSignPrefab(Type);
-            if (tsp == null) return;
+            var trafficSignPrefab = Resources.Load<GameObject>($"Prefabs/Objects/RoadNetwork/TrafficSigns/{Type.ToString()}");
+            if (trafficSignPrefab == null) return;
 
-            var trafficSign = Instantiate(tsp.prefab, transform, true);
+            var trafficSign = Instantiate(trafficSignPrefab, transform, true);
             trafficSign.layer = 19;
             var m = Orientation == RoadObjectOrientation.Negative ? -1 : 1;
             trafficSign.transform.position = Parent.EvaluatePoint(S, m * Mathf.Abs(T), ZOffset);

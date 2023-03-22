@@ -136,15 +136,17 @@ namespace Importer.XMLHandlers {
         private void ImportSamples() {
             var samples = _runResult.Element("Cyclics")?.Element("Samples")?.Elements("Sample") ??
                           throw new ArgumentMissingException("Samples not given correctly.");
-            
+
             foreach (var sample in samples) {
                 var sampleTime = GetInt(sample, "time", -1);
                 if (sampleTime < 0) 
                     throw new ArgumentMissingException("Negative time values are not supported.");
-                if (sampleTime < _minSampleTime || sampleTime > _maxSampleTime)
+                if (sampleTime < _minSampleTime || sampleTime > _maxSampleTime) {
+                    Debug.Log("Continuing due to " + sampleTime);
                     continue;
+                }
 
-                var sampleAgents = sample.Elements("A").ToList();
+                var sampleAgents = sample.Elements("Agent").ToList();
 
                 foreach (var sampleAgent in sampleAgents) {
                     var id = GetString(sampleAgent, "id", "-1");

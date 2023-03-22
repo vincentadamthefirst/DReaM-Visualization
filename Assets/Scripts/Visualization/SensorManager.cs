@@ -40,12 +40,11 @@ namespace Visualization {
                 var sensors = _activeSensors[agent.Id];
                 _activeSensors.Remove(agent.Id);
                 foreach (var sensor in sensors) {
+                    agent.AgentUpdated -= sensor.AgentUpdated;
                     Destroy(sensor.gameObject);
                 }
             } else {
-                foreach (var (sensorName, sensorSetup) in agent.StaticData.UniqueSensors) {
-                    Debug.Log("Creating sensor " + sensorName);
-                    
+                foreach (var (_, sensorSetup) in agent.StaticData.UniqueSensors) {
                     var sensorPrefab = Resources.Load<AgentSensor>("Prefabs/Objects/AgentSensor");
                     var sensor = Instantiate(sensorPrefab, agent.transform.parent);
                     sensor.SensorSetup = sensorSetup;
@@ -58,6 +57,10 @@ namespace Visualization {
                     agent.AgentUpdated += sensor.AgentUpdated;
                     
                     LabelManager.Instance.AddSensorToLabel(agent, sensor);
+                    
+                    if (!_activeSensors.ContainsKey(agent.Id))
+                        _activeSensors.Add(agent.Id, new List<AgentSensor>());
+                    _activeSensors[agent.Id].Add(sensor);
                 }
             }
         }

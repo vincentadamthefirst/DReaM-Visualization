@@ -28,7 +28,6 @@ namespace Scenery {
         private void OnMouseExit() => MouseExit();
 
         public virtual void MouseClicked() {
-            Debug.Log($"Mouse Click: {name}");
             ElementClicked?.Invoke(this, EventArgs.Empty);
         }
 

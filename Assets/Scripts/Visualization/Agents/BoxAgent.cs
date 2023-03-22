@@ -77,7 +77,7 @@ namespace Visualization.Agents {
             StaticData.Model.transform.position = new Vector3(DynamicData.ActiveSimulationStep.Position.x + nextPositionPointer.x, 0,
                 DynamicData.ActiveSimulationStep.Position.y + nextPositionPointer.y);
 
-            DynamicData.Position3D = StaticData.Model.transform.GetChild(0).position;
+            DynamicData.Position3D = StaticData.Model.transform.position;
             boundingBox.center = DynamicData.Position3D;
         }
 
