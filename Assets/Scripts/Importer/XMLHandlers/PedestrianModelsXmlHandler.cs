@@ -4,13 +4,10 @@ using Visualization;
 using Visualization.Agents;
 
 namespace Importer.XMLHandlers {
-    public class PedestrianModelsXmlHandler : XmlHandler {
+    public sealed class PedestrianModelsXmlHandler : XmlHandler {
+        public override XmlType GetXmlType() => XmlType.PedestrianModels;
 
-        public override string GetName() {
-            return "ped";
-        }
-
-        public virtual void StartImport() {
+        public void StartImport() {
             ImportPedestrianModels();
         }
         

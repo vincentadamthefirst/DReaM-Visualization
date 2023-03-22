@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using UI.Settings;
 using UnityEngine;
 
 namespace Scenery {
@@ -43,8 +40,6 @@ namespace Scenery {
             // may be overriden
         }
 
-        public ApplicationSettings settings;
-        
         // Properties for materials
         protected static readonly int BumpMap = Shader.PropertyToID("_BumpMap");
         protected static readonly int BaseMap = Shader.PropertyToID("_BaseMap");

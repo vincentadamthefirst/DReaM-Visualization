@@ -1,5 +1,7 @@
 ﻿using System;
+using Importer;
 using Importer.XMLHandlers;
+using Settings;
 using TMPro;
 using UI.Main_Menu.Notifications;
 using UI.Main_Menu.Settings;
@@ -86,34 +88,41 @@ namespace UI.Main_Menu {
         }
         
         private void StartVisualization() {
-            XmlHandler sceneryHandler, outputHandler, vehicleHandler, pedestrianHandler, profilesHandler, dreamHandler;
+            var sceneryHandler = importController.GetXmlHandler<SceneryXmlHandler>();
+            var outputHandler = importController.GetXmlHandler<SimulationOutputXmlHandler>();
+            var vehicleHandler = importController.GetXmlHandler<VehicleModelsXmlHandler>();
+            var pedestrianHandler = importController.GetXmlHandler<PedestrianModelsXmlHandler>();
+            var profilesHandler = importController.GetXmlHandler<ProfilesCatalogXmlHandler>();
+            var dreamHandler = importController.GetXmlHandler<DReaMOutputXmlHandler>();
 
-            try {
-                sceneryHandler = importController.GetXmlHandler<SceneryXmlHandler>();
-                outputHandler = importController.GetXmlHandler<SimulationOutputXmlHandler>();
-                vehicleHandler = importController.GetXmlHandler<VehicleModelsXmlHandler>();
-                pedestrianHandler = importController.GetXmlHandler<PedestrianModelsXmlHandler>();
-                profilesHandler = importController.GetXmlHandler<ProfilesCatalogXmlHandler>();
-                dreamHandler = importController.GetXmlHandler<DReaMOutputXmlHandler>();
-            } catch (ArgumentNullException e) {
-                notificationManager.ShowNotification(NotificationType.Error,
-                    "Bitte OpenDrive, Output sowie Pedestrian- und VehicleModelsCatalog auswählen!");
+            if (sceneryHandler == null || outputHandler == null || vehicleHandler == null ||
+                pedestrianHandler == null || profilesHandler == null) {
+                Debug.LogError("Missing one of the required XmlHandlers.");
                 return;
             }
 
-            var selectedConfigs = sceneryHandler.GetFilePath() + "," + outputHandler.GetFilePath() + "," +
-                                  vehicleHandler.GetFilePath() + "," + pedestrianHandler.GetFilePath() + "," +
-                                  profilesHandler.GetFilePath();
-            PlayerPrefs.SetString("selectedConfigs", selectedConfigs);
+            SettingsManager.Instance.Settings.defaultConfiguration = new LoadConfiguration {
+                filePaths = {
+                    { XmlType.Scenery, sceneryHandler.GetFilePath() },
+                    { XmlType.SimulationOutput, outputHandler.GetFilePath() },
+                    { XmlType.VehicleModels, vehicleHandler.GetFilePath() },
+                    { XmlType.PedestrianModels, pedestrianHandler.GetFilePath() },
+                    { XmlType.ProfilesCatalog, profilesHandler.GetFilePath() },
+                }
+            };
 
-            _dataMover.SceneryXmlHandler = (SceneryXmlHandler)sceneryHandler;
-            _dataMover.SimulationOutputXmlHandler = (SimulationOutputXmlHandler)outputHandler;
-            _dataMover.VehicleModelsXmlHandler = (VehicleModelsXmlHandler)vehicleHandler;
-            _dataMover.PedestrianModelsXmlHandler = (PedestrianModelsXmlHandler)pedestrianHandler;
-            _dataMover.ProfilesCatalogXmlHandler = (ProfilesCatalogXmlHandler)profilesHandler;
-            _dataMover.DReaMOutputXmlHandler = (DReaMOutputXmlHandler)dreamHandler;
+            if (dreamHandler != null)
+                SettingsManager.Instance.Settings.defaultConfiguration.filePaths.Add(XmlType.DReaM,
+                    dreamHandler.GetFilePath());
 
-            if (_dataMover.DReaMOutputXmlHandler != null)
+            _dataMover.SceneryXmlHandler = sceneryHandler;
+            _dataMover.SimulationOutputXmlHandler = outputHandler;
+            _dataMover.VehicleModelsXmlHandler = vehicleHandler;
+            _dataMover.PedestrianModelsXmlHandler = pedestrianHandler;
+            _dataMover.ProfilesCatalogXmlHandler = profilesHandler;
+            _dataMover.DReaMOutputXmlHandler = dreamHandler;
+
+            if (dreamHandler != null)
                 _dataMover.DReaMOutputXmlHandler.RunId = importController.GetRunId();
             _dataMover.SimulationOutputXmlHandler.RunId = importController.GetRunId();
 

@@ -1,8 +1,7 @@
 ﻿namespace Importer.XMLHandlers {
     public class ScenarioXmlHandler : XmlHandler {
-        public override string GetName() {
-            return "wip";
-        }
+        
+        public override XmlType GetXmlType() => XmlType.Scenario;
 
         public virtual void StartImport() {
             // TODO implement

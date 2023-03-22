@@ -2,7 +2,6 @@
 using System.Linq;
 using Scenery.RoadNetwork.RoadObjects;
 using Scenery.RoadNetwork.RoadSignals;
-using UI.Settings;
 using UnityEngine;
 
 namespace Scenery.RoadNetwork {
@@ -17,12 +16,12 @@ namespace Scenery.RoadNetwork {
         /// <summary>
         /// The Roads in the scene, referenced by their OpenDrive ID
         /// </summary>
-        public ConcurrentDictionary<string, Road> Roads { get; } = new ConcurrentDictionary<string, Road>();
+        public ConcurrentDictionary<string, Road> Roads { get; } = new();
         
         /// <summary>
         /// The Junctions in the scene, referenced by their OpenDrive ID
         /// </summary>
-        private ConcurrentDictionary<string, Junction> Junctions { get; } = new ConcurrentDictionary<string, Junction>();
+        private ConcurrentDictionary<string, Junction> Junctions { get; } = new();
 
         /// <summary>
         /// The RoadDesign to use for all scene elements
@@ -32,8 +31,6 @@ namespace Scenery.RoadNetwork {
         // integers to set the base layer for roads and objects
         private const int RoadLayer = 17;
         private const int ObjectLayer = 19;
-
-        public ApplicationSettings settings;
 
         /// <summary>
         /// Shows a simple Terrain that is big enough to fit under all scene elements by setting its size and position
@@ -132,7 +129,6 @@ namespace Scenery.RoadNetwork {
             Junctions[junctionId].AddRoad(newRoad);
             newRoad.ParentJunction = Junctions[junctionId];
             newRoad.gameObject.isStatic = true;
-            newRoad.settings = settings;
 
             return newRoad;
         }
@@ -148,8 +144,7 @@ namespace Scenery.RoadNetwork {
             newLane.gameObject.layer = RoadLayer;
             newLane.RoadDesign = roadDesign;
             newLane.gameObject.isStatic = true;
-            newLane.settings = settings;
-            
+
             return newLane;
         }
 
@@ -164,7 +159,6 @@ namespace Scenery.RoadNetwork {
                     .GetComponent<LaneSection>();
             newLaneSection.gameObject.layer = RoadLayer;
             newLaneSection.gameObject.isStatic = true;
-            newLaneSection.settings = settings;
             
             return newLaneSection;
         }
@@ -181,7 +175,6 @@ namespace Scenery.RoadNetwork {
             newJunction.gameObject.layer = RoadLayer;
             newJunction.RoadDesign = roadDesign;
             newJunction.gameObject.isStatic = true;
-            newJunction.settings = settings;
             
             Junctions[openDriveId] = newJunction;
             return newJunction;
@@ -201,7 +194,6 @@ namespace Scenery.RoadNetwork {
             newRoadMark.ParentLane = parentLane;
             parentLane.RoadMark = newRoadMark;
             newRoadMark.gameObject.isStatic = true;
-            newRoadMark.settings = settings;
             
             return newRoadMark;
         }
@@ -220,7 +212,6 @@ namespace Scenery.RoadNetwork {
             newRoadObjectRound.RoadDesign = roadDesign;
             parentRoad.RoadObjects.Add(newRoadObjectRound);
             newRoadObjectRound.gameObject.isStatic = true;
-            newRoadObjectRound.settings = settings;
             
             return newRoadObjectRound;
         }
@@ -239,7 +230,6 @@ namespace Scenery.RoadNetwork {
             newRoadObjectSquare.RoadDesign = roadDesign;
             parentRoad.RoadObjects.Add(newRoadObjectSquare);
             newRoadObjectSquare.gameObject.isStatic = true;
-            newRoadObjectSquare.settings = settings;
             
             return newRoadObjectSquare;
         }
@@ -256,7 +246,6 @@ namespace Scenery.RoadNetwork {
             var trafficSign = newObj.AddComponent<TrafficSign>();
             trafficSign.Parent = parentRoad;
             trafficSign.RoadDesign = roadDesign;
-            trafficSign.settings = settings;
             
             parentRoad.TrafficSigns.Add(trafficSign);
 

@@ -36,11 +36,9 @@ namespace Importer.XMLHandlers {
                 });
             }
         }
-
-        public override string GetName() {
-            return "profiles";
-        }
-
+        
+        public override XmlType GetXmlType() => XmlType.ProfilesCatalog;
+        
         public override string GetDetails() {
             return "details";
         }

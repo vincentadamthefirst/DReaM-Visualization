@@ -78,9 +78,7 @@ namespace Importer.XMLHandlers {
             _maxSampleTime = max;
         }
 
-        public override string GetName() {
-            return "dream";
-        }
+        public override XmlType GetXmlType() => XmlType.DReaM;
 
         public override string GetDetails() {
             if (xmlDocument.Root == null) return "<color=\"red\"><b>XML Error</b>";

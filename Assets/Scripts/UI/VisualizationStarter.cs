@@ -1,6 +1,5 @@
 ﻿using Scenery.RoadNetwork;
 using UI.Main_Menu;
-using UI.Settings;
 using UI.Visualization;
 using UnityEngine;
 using Visualization;
@@ -17,7 +16,6 @@ namespace UI {
 
         private LabelOcclusionManager _labelOcclusionManager;
         private AgentOcclusionManager _agentOcclusionManager;
-        // private SettingsPanel _settingsPanel;
         private TargetController _targetController;
         private PlaybackControl _playbackControl;
         private DataMover _dataMover;
@@ -25,8 +23,7 @@ namespace UI {
         private void Start() {
             FindObjectOfType<LabelOcclusionManager>().Disable = true;
             FindObjectOfType<AgentOcclusionManager>().Disable = true;
-
-            // _settingsPanel = FindObjectOfType<SettingsPanel>();
+            
             _targetController = FindObjectOfType<TargetController>();
             _playbackControl = FindObjectOfType<PlaybackControl>();
             _agentOcclusionManager = FindObjectOfType<AgentOcclusionManager>();
@@ -91,13 +88,6 @@ namespace UI {
                 var loc = FindObjectOfType<LabelOcclusionManager>();
                 loc.DisableAllLabels();
                 loc.Disable = true;
-
-                // foreach (var label in loc.AllLabels) {
-                //     label.gameObject.SetActive(false);
-                //     label.AgentCamera.gameObject.SetActive(false);
-                // }
-                //
-                // loc.gameObject.SetActive(false);
             } else {
                 FindObjectOfType<LabelOcclusionManager>().Disable = false;
                 FindObjectOfType<AgentOcclusionManager>().Disable = false;
@@ -114,28 +104,12 @@ namespace UI {
 
         private void Prerequisites() {
             // finding necessary elements in the different components
-            // _settingsPanel.FindAll();
             _playbackControl.FindAll();
             visualizationMaster.FindAll();
             _agentOcclusionManager.FindAll();
             _targetController.FindAll();
             _labelOcclusionManager.FindAll();
-            
-            // Debug.Log(PlayerPrefs.GetString("app_occ_min_opacity_agent").Replace(',', '.'));
-            // TODO actually parse values
-
-            var appSettings = new ApplicationSettings {
-                checkOcclusion = PlayerPrefs.GetInt("app_handleOcclusions") > 0,
-                fullscreen = PlayerPrefs.GetInt("app_fullscreen") > 0,
-                minimumAgentOpacity = .7f, // float.Parse(PlayerPrefs.GetString("app_occ_min_opacity_agent").Replace(',', '.'), CultureInfo.InvariantCulture),
-                minimumObjectOpacity = .3f //float.Parse(PlayerPrefs.GetString("app_occ_min_opacity_object").Replace(',', '.'), CultureInfo.InvariantCulture),
-            };
-            
-            visualizationMaster.settings = appSettings;
             visualizationMaster.DisableLabels = _dataMover.DReaMOutputXmlHandler == null;
-            
-            roadNetworkHolder.settings = appSettings;
-            _agentOcclusionManager.Settings = appSettings;
         }
     }
 }

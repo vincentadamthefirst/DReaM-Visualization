@@ -17,10 +17,8 @@ namespace Importer.XMLHandlers {
         public RoadNetworkHolder roadNetworkHolder;
 
         private int _roadIdCounter;
-
-        public override string GetName() {
-            return "scene";
-        }
+        
+        public override XmlType GetXmlType() => XmlType.Scenery;
 
         public virtual void StartImport() {
             if (xmlDocument.Root == null) return; // TODO Error handling

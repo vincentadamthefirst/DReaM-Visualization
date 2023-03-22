@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Settings;
 using UnityEngine;
 using Utils;
 
@@ -45,7 +46,6 @@ namespace Scenery.RoadNetwork.RoadObjects {
                 newChild.RoadDesign = RoadDesign;
                 newChild.name = name;
                 newChild.Radius = Radius;
-                newChild.settings = settings;
                 newChild.Show();
             }
 
@@ -118,7 +118,7 @@ namespace Scenery.RoadNetwork.RoadObjects {
                 tmp = new Material[_modelRenderers[i].materials.Length];
                 for (var j = 0; j < _modelRenderers[i].materials.Length; j++) {
                     tmp[j] = new Material(_nonOccludedMaterials[i][j]);
-                    tmp[j].ChangeToTransparent(settings.minimumObjectOpacity *
+                    tmp[j].ChangeToTransparent(SettingsManager.Instance.Settings.minimalOpacity *
                                                (RoadObjectType == RoadObjectType.Tree ? .5f : 1f));
                 }
                 

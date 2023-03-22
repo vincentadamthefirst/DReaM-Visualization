@@ -5,9 +5,8 @@ using Visualization.Agents;
 
 namespace Importer.XMLHandlers {
     public class VehicleModelsXmlHandler : XmlHandler {
-        public override string GetName() {
-            return "veh";
-        }
+        
+        public override XmlType GetXmlType() => XmlType.VehicleModels;
 
         public virtual void StartImport() {
             if (xmlDocument.Root == null) return;

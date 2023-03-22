@@ -8,8 +8,8 @@ using Importer.XMLHandlers;
 namespace Importer {
 
     public class FolderImporter {
-        private static readonly Dictionary<string, XmlType> FileStrings = new Dictionary<string, XmlType> {
-            {"scenario", XmlType.Scenario},
+        private static readonly Dictionary<string, XmlType> FileStrings = new() {
+            // {"scenario", XmlType.Scenario}, TODO currently disabled since it is not actually supported
             {"scenery", XmlType.Scenery},
             {"vehicle", XmlType.VehicleModels},
             {"pedestrian", XmlType.PedestrianModels},
@@ -18,9 +18,9 @@ namespace Importer {
             {"profiles", XmlType.ProfilesCatalog}
         };
 
-        private static readonly Dictionary<XmlType, Type> Handlers = new Dictionary<XmlType, Type> {
+        private static readonly Dictionary<XmlType, Type> Handlers = new() {
             {XmlType.DReaM, typeof(DReaMOutputXmlHandler)},
-            {XmlType.Scenario, typeof(ScenarioXmlHandler)},
+            // {XmlType.Scenario, typeof(ScenarioXmlHandler)},
             {XmlType.Scenery, typeof(SceneryXmlHandler)},
             {XmlType.PedestrianModels, typeof(PedestrianModelsXmlHandler)},
             {XmlType.VehicleModels, typeof(VehicleModelsXmlHandler)},

@@ -24,14 +24,6 @@ namespace UI.Main_Menu.Settings {
             newObject.name = settingName;
             newObject.SetData(text, defaultValue);
 
-            // if (parent != null) {
-            //     if (!_settings.ContainsKey(parent))
-            //         throw new NullReferenceException("Parent not found");
-            //     var parentSetting = _settings[parent];
-            //     newObject.SetSpacing(parentSetting.GetSpacing() + spacing);
-            // } else 
-            //     newObject.SetSpacing(startSpacing);
-
             _settings.Add(settingName, newObject);
         }
 
@@ -50,14 +42,6 @@ namespace UI.Main_Menu.Settings {
 
             newObject.name = settingName;
             newObject.SetData(text, placeholder, defaultValue);
-
-            // if (parent != null) {
-            //     if (!_settings.ContainsKey(parent))
-            //         throw new NullReferenceException("Parent not found");
-            //     var parentSetting = _settings[parent];
-            //     newObject.SetSpacing(parentSetting.GetSpacing() + spacing);
-            // } else 
-            //     newObject.SetSpacing(startSpacing);
 
             _settings.Add(settingName, newObject);
             return newObject;
@@ -80,53 +64,11 @@ namespace UI.Main_Menu.Settings {
             
             if (newObject == null)
                 throw new NullReferenceException("Something went terribly wrong when initializing the main menu.");
-            
-            // if (parent != null) {
-            //     if (!_settings.ContainsKey(parent))
-            //         throw new NullReferenceException("Parent not found");
-            //     var parentSetting = _settings[parent];
-            //     newObject.SetSpacing(parentSetting.GetSpacing() + spacing);
-            // } else 
-            //     newObject.SetSpacing(startSpacing);
-            
+
             newObject.SetData(text);
             newObject.name = settingName;
             
             _settings.Add(settingName, newObject);
-        }
-
-        public bool GetBool(string settingName) {
-            var setting = _settings[settingName];
-            if (setting is CheckBox)
-                return ((CheckBox)_settings[settingName]).IsOn();
-            
-            throw new ArgumentException("CheckBox does not exist.");
-        }
-
-        public int GetInt(string settingName) {
-            var setting = _settings[settingName];
-            if (setting is InputField)
-                return int.Parse(((InputField)_settings[settingName]).GetValue());
-            
-            throw new ArgumentException("InputField does not exist.");
-        }
-        
-        public float GetFloat(string settingName) {
-            var setting = _settings[settingName];
-            if (setting is InputField)
-                return float.Parse(((InputField)_settings[settingName]).GetValue(), CultureInfo.InvariantCulture);
-            
-            throw new ArgumentException("InputField does not exist.");
-        }
-
-        public string GetString(string settingName) {
-            var setting = _settings[settingName];
-            if (setting is InputField)
-                return ((InputField)_settings[settingName]).GetValue();
-            if (setting is DropDown)
-                return "TODO"; // TODO
-            
-            throw new ArgumentException("Setting does not exist.");
         }
 
         public void SaveSettings() {

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Settings;
+using UnityEngine;
 using Utils;
 
 namespace Scenery.RoadNetwork.RoadObjects {
@@ -40,7 +41,6 @@ namespace Scenery.RoadNetwork.RoadObjects {
                 newChild.name = name;
                 newChild.Width = Width;
                 newChild.Length = Length;
-                newChild.settings = settings;
                 newChild.Show();
             }
 
@@ -109,7 +109,7 @@ namespace Scenery.RoadNetwork.RoadObjects {
 
         public override void SetupOccludedMaterials() {
             _occludedMaterial = new Material(_nonOccludedMaterial);
-                _occludedMaterial.ChangeToTransparent(settings.minimumObjectOpacity *
+                _occludedMaterial.ChangeToTransparent(SettingsManager.Instance.Settings.minimalOpacity *
                                                       (RoadObjectType == RoadObjectType.Tree ? .5f : 1f));
         }
 

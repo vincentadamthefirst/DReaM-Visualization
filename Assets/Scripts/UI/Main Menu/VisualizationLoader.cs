@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using Min_Max_Slider;
+using Settings;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -21,7 +22,9 @@ namespace UI.Main_Menu {
                 // if it is over a user-defined value, display a range selection
 
                 var sampleInfo = dataMover.SimulationOutputXmlHandler.GetSampleSize();
-                if (sampleInfo.Item3 > int.Parse(PlayerPrefs.GetString("app_samples_show_selection"))) {
+
+                if (SettingsManager.Instance.Settings.showSampleSelectionThreshold > 0 &&
+                    sampleInfo.Item3 > SettingsManager.Instance.Settings.showSampleSelectionThreshold) {
                     userInput.SetActive(true);
                     _stepSize = sampleInfo.Item4;
                     minMaxSlider.onValueChanged.AddListener(SliderValueChanged);

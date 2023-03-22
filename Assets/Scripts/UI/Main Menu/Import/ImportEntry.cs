@@ -1,20 +1,11 @@
-﻿using TMPro;
+﻿using Importer.XMLHandlers;
+using TMPro;
 using UI.Main_Menu.Utils;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace UI.Main_Menu.Import {
 
-    public enum ImportType {
-        PedestrianModels,
-        VehicleModels,
-        Scenery,
-        Output,
-        Profiles,
-        DReaM,
-        Unsupported,
-    }
-    
     public class ImportEntry : MonoBehaviour {
         public bool IsSelected => toggle.isOn;
 
@@ -25,7 +16,7 @@ namespace UI.Main_Menu.Import {
 
         protected Image background;
 
-        private static readonly string[] TypeNames = { "ped", "veh", "scene", "out", "profiles", "dream", "w.i.p." };
+        private static readonly string[] TypeNames = { "w.i.p", "ped", "veh", "scene", "out", "profiles", "dream" };
         
         private void Awake() {
             toggle = transform.Find("Toggle").GetComponent<Toggle>();
@@ -43,7 +34,7 @@ namespace UI.Main_Menu.Import {
             fileText.SetText(newName);
         }
         
-        public void SetType(ImportType type) {
+        public void SetType(XmlType type) {
             typeText.SetText(TypeNames[(int) type]);
         }
 

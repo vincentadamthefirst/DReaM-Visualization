@@ -57,10 +57,8 @@ namespace Importer.XMLHandlers {
             _minSampleTime = min;
             _maxSampleTime = max;
         }
-
-        public override string GetName() {
-            return "out";
-        }
+        
+        public override XmlType GetXmlType() => XmlType.SimulationOutput;
 
         public List<string> GetRuns() {
             if (xmlDocument.Root == null) {

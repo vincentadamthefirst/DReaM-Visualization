@@ -6,6 +6,13 @@ using Visualization;
 using Version = Utils.VersionSystem.Version;
 
 namespace Importer.XMLHandlers {
+    
+    /// <summary>
+    /// The different xml-types that are inputs for the OpenPass simulation.
+    /// </summary>
+    public enum XmlType {
+        Scenario, PedestrianModels, VehicleModels, Scenery, SimulationOutput, ProfilesCatalog, DReaM, Unsupported
+    }
 
     public abstract class XmlHandler {
         private Version _fileVersion;
@@ -21,7 +28,7 @@ namespace Importer.XMLHandlers {
             return _filePath;
         }
 
-        public abstract string GetName();
+        public abstract XmlType GetXmlType();
 
         public abstract string GetDetails();
         

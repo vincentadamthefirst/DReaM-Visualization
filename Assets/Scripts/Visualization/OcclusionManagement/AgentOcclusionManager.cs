@@ -3,13 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using Scenery;
 using Scenery.RoadNetwork.RoadObjects;
-using UI;
-using UI.Settings;
 using UI.Visualization;
 using UnityEngine;
-using UnityEngine.Rendering.Universal;
 using Utils;
-using Visualization.Agents;
 using Visualization.OcclusionManagement.DetectionMethods;
 
 namespace Visualization.OcclusionManagement {
@@ -23,11 +19,6 @@ namespace Visualization.OcclusionManagement {
         /// </summary>
         public bool Disable { get; set; }
 
-        /// <summary>
-        /// The settings to be used for occlusion management.
-        /// </summary>
-        public ApplicationSettings Settings { get; set; }
-        
         public Dictionary<Collider, VisualizationElement> AllColliders { get; } = new();
 
         private OccluderElement[] _allOccluders = Array.Empty<OccluderElement>();
