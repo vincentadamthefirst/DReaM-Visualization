@@ -166,6 +166,7 @@ GameObject:
   - component: {fileID: 7567815896424716166}
   - component: {fileID: 7567815896424716161}
   - component: {fileID: 7567815896424716164}
+  - component: {fileID: 3486904982425764080}
   m_Layer: 5
   m_Name: AgentCard
   m_TagString: Untagged
@@ -270,6 +271,21 @@ MonoBehaviour:
   text: {fileID: 7567815895518767141}
   iconImage: {fileID: 7567815896703574342}
   colorBand: {fileID: 7567815897511870025}
+--- !u!114 &3486904982425764080
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7567815896424716163}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_EffectColor: {r: 0, g: 0, b: 0, a: 0.5}
+  m_EffectDistance: {x: 1, y: -1}
+  m_UseGraphicAlpha: 1
 --- !u!1 &7567815896703574336
 GameObject:
   m_ObjectHideFlags: 0

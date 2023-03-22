@@ -59,12 +59,14 @@ namespace Visualization {
         /// <summary>
         /// List of all events that happen at this time for this agent.
         /// </summary>
-        public List<SimulationEvent> Events { get; } = new List<SimulationEvent>();
+        public List<SimulationEvent> Events { get; } = new();
         
         /// <summary>
-        /// Information that is not further classified and can be displayed in the side panel.
+        /// Dictionary containing all fields for an agent even if they cannot be displayed by normal means.
+        /// Key = name
+        /// Value = value
         /// </summary>
-        public List<object> UnclassifiedInformation { get; } = new List<object>();
+        public Dictionary<string, object> AllInfo { get; } = new();
     }
 
     public class SensorInformation {

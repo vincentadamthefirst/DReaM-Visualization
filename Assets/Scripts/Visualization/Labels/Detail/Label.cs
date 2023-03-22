@@ -1,28 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using TMPro;
 using Unity.VectorGraphics;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using Utils;
 using Visualization.Agents;
 
 namespace Visualization.Labels.Detail {
-    public class Reference<T> {
-        private readonly Func<T> _getter;
-        public Reference(Func<T> getter) {
-            _getter = getter;
-        }
-        public T Value => _getter();
-    }
-    
+
     public class Label : MonoBehaviour, IDragHandler {
 
         public RectTransform main;
-        public RectTransform secondary;
-        public RectTransform tertiary;
 
-        private List<LabelEntry> _labelEntries = new ();
+        private readonly List<RectTransform> _infoPanels = new();
+        private readonly List<LabelEntry> _labelEntries = new ();
 
         private TMP_Text _agentId;
         private SVGImage _indicatorLeftImage;
@@ -77,8 +71,25 @@ namespace Visualization.Labels.Detail {
             _indicatorRightImage.color = _indicatorRight.Value ? new Color(243, 142, 72) : new Color(169, 69, 0);
         }
 
-        public void AddLabelEntry(LabelEntry labelEntry) {
-            _labelEntries.Add(labelEntry);
+        private bool CheckIfLastInfoPanelOverflows(float nextSize) {
+            var last = _infoPanels[^1];
+            var totalChildSize = last.Cast<RectTransform>().Sum(child => child.rect.height + 3);
+            return totalChildSize + nextSize > 246;
+        }
+
+        public void AddLabelTextEntry(string title, Reference<string> reference) {
+            var labelTextEntryPrefab = Resources.Load<LabelTextEntry>("Prefabs/UI/Visualization/Labels/LabelTextEntry");
+            var rect = labelTextEntryPrefab.GetComponent<RectTransform>().rect;
+            if (_infoPanels.Count == 0 || CheckIfLastInfoPanelOverflows(rect.height)) {
+                var infoPanelPrefab = Resources.Load<RectTransform>("Prefabs/UI/Visualization/Labels/InfoPanel");
+                var infoPanel = Instantiate(infoPanelPrefab, transform);
+                _infoPanels.Add(infoPanel);
+            }
+            var parent = _infoPanels[^1];
+            var textEntry = Instantiate(labelTextEntryPrefab, parent);
+            textEntry.Initialize(title);
+            textEntry.Reference = reference;
+            _labelEntries.Add(textEntry);
         }
 
         public void TriggerUpdate() {

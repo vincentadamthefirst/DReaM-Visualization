@@ -12,8 +12,8 @@ using Visualization.POIs;
 namespace Importer.XMLHandlers {
 
     public class ValueMapper {
-        private readonly Dictionary<string, int> _defaultPositionMapping = new Dictionary<string, int>();
-        private readonly Dictionary<string, int> _listPositionMapping = new Dictionary<string, int>();
+        private readonly Dictionary<string, int> _defaultPositionMapping = new();
+        private readonly Dictionary<string, int> _listPositionMapping = new();
 
         private string[] _currentSplitSample;
         
@@ -158,8 +158,11 @@ namespace Importer.XMLHandlers {
 
                     // extract basic string info
                     info.ScanAoI = _valueMapper.GetString("ScanAOI");
+                    step.AllInfo.Add("ScanAOI", info.ScanAoI);
                     info.GlanceType = _valueMapper.GetString("GazeType");
+                    step.AllInfo.Add("GazeType", info.GlanceType);
                     info.CrossingPhase = _valueMapper.GetString("crossingPhase");
+                    step.AllInfo.Add("crossingPhase", info.CrossingPhase);
 
                     // extract sensor information
                     var sensorInformation = new SensorInformation {
@@ -167,6 +170,10 @@ namespace Importer.XMLHandlers {
                         Heading = _valueMapper.GetFloat("ufovAngle"),
                         OpeningAngle = _valueMapper.GetFloat("openingAngle")
                     };
+                    
+                    step.AllInfo.Add("viewDistance", sensorInformation.Distance);
+                    step.AllInfo.Add("ufovAngle", sensorInformation.Heading);
+                    step.AllInfo.Add("openingAngle", sensorInformation.OpeningAngle);
 
                     step.SensorInformation.Add("driver", sensorInformation);
 
@@ -182,6 +189,7 @@ namespace Importer.XMLHandlers {
                     }
 
                     info.OtherAgents = otherAgents.ToArray();
+                    step.AllInfo.Add("otherAgents", otherAgents.ToArray());
                 }
             }
         }

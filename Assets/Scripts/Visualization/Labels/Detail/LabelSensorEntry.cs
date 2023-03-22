@@ -1,5 +1,6 @@
 ﻿using TMPro;
 using UnityEngine.UI;
+using Utils;
 using Visualization.Agents;
 
 namespace Visualization.Labels.Detail {

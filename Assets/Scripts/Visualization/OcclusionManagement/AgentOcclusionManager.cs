@@ -77,8 +77,7 @@ namespace Visualization.OcclusionManagement {
                     _visualizationMenu.Elements.Add(visualizationElement);
                 }
             }
-            _visualizationMenu.Rebuild();
-            
+
             // enabling the occlusion management 
             Disable = false;
         }

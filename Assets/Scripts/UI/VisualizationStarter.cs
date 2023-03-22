@@ -1,4 +1,5 @@
 ﻿using Scenery.RoadNetwork;
+using Settings;
 using UI.Main_Menu;
 using UI.Visualization;
 using UnityEngine;
@@ -95,10 +96,10 @@ namespace UI {
 
             // prepare side panel
             var sidePanel = FindObjectOfType<SidePanel.SidePanel>();
-            if (PlayerPrefs.GetInt("app_wip_features") > 0) {
-                sidePanel.Setup(_dataMover.SimulationOutputXmlHandler.GetUnknownAttributeNames());
+            if (SettingsManager.Instance.Settings.useSidePanel) {
+                sidePanel.CollectAgents();
             } else {
-                sidePanel.gameObject.SetActive(false);
+                Destroy(sidePanel.gameObject);
             }
         }
 

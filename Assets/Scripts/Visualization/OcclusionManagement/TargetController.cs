@@ -53,7 +53,7 @@ namespace Visualization.OcclusionManagement {
                 agent.TargetStatusChanged += newAgentCard.TargetStatusChanged;
                 agent.TargetStatusChanged += TargetStatusChanged;
                 
-                newAgentCard.CustomAwake();
+                newAgentCard.Initialize();
                 _agentCards.Add(newAgentCard, agent);
                 _agentCardsReverse.Add(agent, newAgentCard);
             }
@@ -80,9 +80,8 @@ namespace Visualization.OcclusionManagement {
                 _extendedCamera.CameraController.LockedOnAgentIsSet = true;
                 return;
             }
-            
-            var clicked = _agentCards[card];
-            clicked.IsTarget = !_agentOcclusionManager.Targets.Contains(clicked);
+
+            card.Agent.IsTarget = !card.Agent.IsTarget;
         }
     }
 }

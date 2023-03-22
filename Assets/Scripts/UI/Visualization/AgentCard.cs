@@ -2,6 +2,7 @@
 using TMPro;
 using Unity.VectorGraphics;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using Visualization;
 using Visualization.Agents;
@@ -17,7 +18,7 @@ namespace UI {
         public Sprite truck;
     }
     
-    public class AgentCard : MonoBehaviour {
+    public class AgentCard : MonoBehaviour, IPointerClickHandler {
         public RectTransform Parent { get; set; }
         public Agent Agent { get; set; }
 
@@ -30,20 +31,13 @@ namespace UI {
         public SVGImage iconImage;
         public Image colorBand;
 
-        public void CustomAwake() {
+        private void Awake() {
             _mainObject = GetComponent<RectTransform>();
+        }
 
+        public void Initialize() {
             _mainObject.localScale = Vector3.one * 1f;
-            
-            if (Agent == null)
-                Debug.Log("Agent null");
-            
-            if (Agent.StaticData == null)
-                Debug.Log("SD null");
-            
-            if (Agent.StaticData.ColorMaterial == null)
-                Debug.Log("CM null");
-            
+
             colorBand.color = Agent.StaticData.ColorMaterial.color;
             text.text = Agent.name.Split(new [] {" ["}, StringSplitOptions.None)[0];
             iconImage.sprite = Agent.StaticData.AgentTypeDetail switch {
@@ -62,7 +56,8 @@ namespace UI {
             LayoutRebuilder.ForceRebuildLayoutImmediate(Parent);
         }
 
-        public void Clicked() {
+        public void OnPointerClick(PointerEventData eventData) {
+            Debug.Log("Mouse down");
             CardClicked?.Invoke(this, EventArgs.Empty);
         }
     }

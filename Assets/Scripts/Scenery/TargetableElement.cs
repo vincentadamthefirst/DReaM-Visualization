@@ -15,7 +15,6 @@ namespace Scenery {
             get => _isTarget;
             set {
                 _isTarget = value;
-                Debug.Log($"{name} target status changed to {_isTarget}");
                 TargetStatusChanged?.Invoke(this, _isTarget);
             }
         }

@@ -71,6 +71,8 @@ namespace Visualization {
         // all Agents of the current visualization run
         public List<Agent> Agents { get; } = new();
 
+        public Dictionary<string, Agent> AgentIdMapping { get; } = new();
+
         public void FindAll() {
             FindObjectOfType<LabelOcclusionManager>();
             _playbackControl = FindObjectOfType<PlaybackControl>();
@@ -102,21 +104,23 @@ namespace Visualization {
         /// <returns>The instantiated agent</returns>
         public Agent InstantiateVehicleAgent(string modelType, string id) {
             var agentModel = agentDesigns.GetAgentModel(AgentType.Vehicle, modelType);
-            Agent instantiated;
+            Agent vehicleAgent;
 
             if (agentModel.modelName.Contains("fallback"))
-                instantiated = Instantiate(agentDesigns.boxPrefab, transform, true);
+                vehicleAgent = Instantiate(agentDesigns.boxPrefab, transform, true);
             else
-                instantiated = Instantiate(agentDesigns.vehiclePrefab, transform, true);
+                vehicleAgent = Instantiate(agentDesigns.vehiclePrefab, transform, true);
 
             // adding the RoadNetworkHolder
-            instantiated.Master = this;
+            vehicleAgent.Master = this;
+            vehicleAgent.Id = id;
 
             // retrieving prefab for 3d model
             var model = Instantiate(agentDesigns.GetAgentModel(AgentType.Vehicle, modelType).model,
-                instantiated.transform, true);
-            Agents.Add(instantiated);
-            instantiated.StaticData.Model = model;
+                vehicleAgent.transform, true);
+            Agents.Add(vehicleAgent);
+            AgentIdMapping.Add(vehicleAgent.Id, vehicleAgent);
+            vehicleAgent.StaticData.Model = model;
 
             // adding basic ID label
             var idLabel = Resources.Load<TextLabel>("Prefabs/UI/Visualization/Labels/TextLabel");
@@ -128,16 +132,16 @@ namespace Visualization {
             _idLabelController.AddLabel(idLabelObject);
             
             if (DisableLabels)
-                Destroy(instantiated.StaticData.Model.transform.Find("Camera").gameObject);
+                Destroy(vehicleAgent.StaticData.Model.transform.Find("Camera").gameObject);
             else 
-                instantiated.StaticData.Model.transform.Find("Camera").gameObject.SetActive(false);
+                vehicleAgent.StaticData.Model.transform.Find("Camera").gameObject.SetActive(false);
 
             // retrieving model information
-            instantiated.StaticData.ModelInformation = VehicleModelCatalog.ContainsKey(modelType)
+            vehicleAgent.StaticData.ModelInformation = VehicleModelCatalog.ContainsKey(modelType)
                 ? VehicleModelCatalog[modelType]
                 : _basicVehicle;
 
-            return instantiated;
+            return vehicleAgent;
         }
 
         /// <summary>
@@ -149,11 +153,13 @@ namespace Visualization {
 
             // adding the RoadNetworkHolder
             pedestrianAgent.Master = this;
+            pedestrianAgent.Id = id;
 
             // retrieving prefab for 3d model
             var model = Instantiate(agentDesigns.GetAgentModel(AgentType.Pedestrian, modelType).model,
                 pedestrianAgent.transform, true);
             Agents.Add(pedestrianAgent);
+            AgentIdMapping.Add(pedestrianAgent.Id, pedestrianAgent);
             pedestrianAgent.StaticData.Model = model;
 
             // adding basic ID label

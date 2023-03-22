@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Scenery;
 using TMPro;
 using UI.Main_Menu.Settings;
@@ -22,9 +24,15 @@ namespace UI.Visualization {
         private SimpleCameraController _cameraController;
         private PlaybackControl _playbackControl;
         private TargetController _targetController;
+        private GameObject _shadow;
+        private List<Outline> _outlines;
         
         public List<VisualizationElement> Elements { get; } = new();
-        
+
+        private void Awake() {
+            _shadow = transform.Find("Shadow").gameObject;
+        }
+
         protected override void AfterButtonSetup() {
             mainMenuButton.onClick.AddListener(UnloadVisualization);
             exitButton.onClick.AddListener(ExitApplication);
@@ -36,24 +44,7 @@ namespace UI.Visualization {
             _cameraController = FindObjectOfType<SimpleCameraController>();
             _playbackControl = FindObjectOfType<PlaybackControl>();
             _targetController = FindObjectOfType<TargetController>();
-        }
-        
-        public void Rebuild() {
-            // clearing all entries
-            // TODO re-add
-            // foreach (Transform child in objectsContent.transform) {
-            //     Destroy(child);
-            // }
-            //
-            // // adding all elements
-            // foreach (var element in Elements) {
-            //     var newEntry = Instantiate(objectEntryPrefab, objectsContent);
-            //     newEntry.Object = element;
-            //     newEntry.name = element.name;
-            //     newEntry.SetText(element.name);
-            // }
-            //
-            // LayoutRebuilder.ForceRebuildLayoutImmediate(objectsContent);
+            _outlines = FindObjectsOfType<Outline>().ToList();
         }
 
         private void SetupSettingsPanel() {
@@ -75,13 +66,17 @@ namespace UI.Visualization {
 
         private void Update() {
             if (!Input.GetKeyDown(KeyCode.Escape)) return;
+            _outlines.ForEach(x => x.enabled = false);
+            
             if (menuPanel.gameObject.activeSelf) {
                 menuPanel.gameObject.SetActive(false);
+                _shadow.SetActive(false);
                 _cameraController.SetMenuOpen(false);
                 _targetController.SetMenuOpen(false);
                 _playbackControl.Disable = false;
             } else {
                 menuPanel.gameObject.SetActive(true);
+                _shadow.SetActive(true);
                 _playbackControl.Disable = true;
                 _cameraController.SetMenuOpen(true);
                 _targetController.SetMenuOpen(true);

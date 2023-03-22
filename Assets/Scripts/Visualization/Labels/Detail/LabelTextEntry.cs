@@ -1,4 +1,5 @@
 ﻿using TMPro;
+using Utils;
 
 namespace Visualization.Labels.Detail {
     public class LabelTextEntry : LabelEntry {

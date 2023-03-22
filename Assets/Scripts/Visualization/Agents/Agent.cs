@@ -21,7 +21,7 @@ namespace Visualization.Agents {
     }
 
     public class StaticData {
-        public AgentTypeDetail AgentTypeDetail;
+        public AgentTypeDetail AgentTypeDetail { get; set; }
         public GameObject Model { get; set; }
         public ModelInformation ModelInformation { get; set; }
         public Material ColorMaterial { get; set; }
