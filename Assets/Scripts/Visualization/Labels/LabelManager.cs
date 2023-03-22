@@ -63,7 +63,7 @@ namespace Visualization.Labels {
             }
             
             if (agent.StaticData.AgentCamera != null) {
-                var targetTexture = new RenderTexture(250, 250, 1);
+                var targetTexture = new RenderTexture(194, 194, 1);
                 label.CognitiveMap.texture = targetTexture;
                 agent.StaticData.AgentCamera.aspect = 1f;
                 agent.StaticData.AgentCamera.orthographicSize = 100f;

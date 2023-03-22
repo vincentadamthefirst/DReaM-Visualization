@@ -16,7 +16,7 @@ namespace Visualization.Labels.Detail {
         public RectTransform main;
         
         public RawImage CognitiveMap { get; private set; }
-
+        private readonly List<RectTransform> _otherAgents = new();
         private readonly List<RectTransform> _infoPanels = new();
         private readonly List<LabelEntry> _labelEntries = new ();
 
@@ -36,6 +36,8 @@ namespace Visualization.Labels.Detail {
 
         private Button _closeButton;
 
+        private Agent _agent;
+
         private void Awake() {
             _agentId = main.Find("Agent ID").GetComponent<TMP_Text>();
             var lights = main.Find("Lights");
@@ -49,6 +51,7 @@ namespace Visualization.Labels.Detail {
         }
 
         public void Initialize(Agent agent) {
+            _agent = agent;
             _closeButton.onClick.AddListener(() => {
                 agent.IsTarget = false;
             });
@@ -118,6 +121,7 @@ namespace Visualization.Labels.Detail {
 
         public void TriggerUpdate(object sender, EventArgs _) {
             UpdateLightStatus();
+            UpdateOtherAgents();
             _labelEntries.ForEach(x => x.TriggerUpdate());
         }
 
@@ -139,7 +143,36 @@ namespace Visualization.Labels.Detail {
         }
 
         private void UpdateOtherAgents() {
-            
+            var current = _agent.DynamicData.ActiveSimulationStep.AdditionalInformation.OtherAgents;
+            var difference = current.Length - _otherAgents.Count;
+
+            if (difference > 0) {
+                var go = new GameObject("agent pointer");
+                var img = go.AddComponent<Image>();
+                img.rectTransform.sizeDelta = new Vector2(7f, 7f);
+                img.color = Color.cyan;
+                go.transform.parent = CognitiveMap.transform;
+                _otherAgents.Add(img.rectTransform);
+            }
+
+            var toDestroy = new List<RectTransform>();
+            for (var i = 0; i < _otherAgents.Count; i++) {
+                if (i >= current.Length) {
+                    toDestroy.Add(_otherAgents[i]);
+                    continue;
+                }
+                
+                var localPosition =
+                    _agent.StaticData.AgentCamera.WorldToViewportPoint(new Vector3(current[i].Item1.x, 0, current[i].Item1.y));
+
+                var actualPosition = new Vector2((localPosition.x - 0.5f) * 194, (localPosition.y - 0.5f) * 194);
+                _otherAgents[i].localPosition = actualPosition;
+                _otherAgents[i].localRotation = Quaternion.identity; //Quaternion.Euler(0, 0, Mathf.Rad2Deg * current[i].Item2);
+            }
+
+            while (toDestroy.Count > 0) {
+                Destroy(toDestroy[0]);
+            }
         }
     }
 }
