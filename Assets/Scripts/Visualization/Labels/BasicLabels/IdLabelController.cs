@@ -7,9 +7,9 @@ namespace Visualization.Labels.BasicLabels {
         private readonly List<TextLabel> _idLabels = new();
 
         private void Update() {
-            if (Input.GetKeyDown(KeyCode.F2)) {
+            if (Input.GetKeyDown(KeyCode.F1)) {
                 _idLabels.ForEach(x => x.gameObject.SetActive(true));
-            } else if (Input.GetKeyUp(KeyCode.F2)) {
+            } else if (Input.GetKeyUp(KeyCode.F1)) {
                 _idLabels.ForEach(x => x.gameObject.SetActive(false));
             }
         }
