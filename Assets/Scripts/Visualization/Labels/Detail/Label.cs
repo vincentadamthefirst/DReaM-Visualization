@@ -79,7 +79,7 @@ namespace Visualization.Labels.Detail {
 
         private void UpdateLightStatus() {
             _indicatorLeftImage.color = _indicatorLeft.Value ? new Color(243, 142, 72) : new Color(169, 69, 0);
-            _brakeText.color = _brake.Value ? new Color(235, 0, 0) : new Color(150, 0, 0);
+            _brakeText.color = _brake.Value ? new Color(235, 0, 0) : new Color(110, 0, 0);
             _indicatorRightImage.color = _indicatorRight.Value ? new Color(243, 142, 72) : new Color(169, 69, 0);
         }
 

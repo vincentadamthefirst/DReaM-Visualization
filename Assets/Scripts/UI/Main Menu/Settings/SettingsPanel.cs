@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Utils;
 
 namespace UI.Main_Menu.Settings {
 
@@ -8,42 +9,42 @@ namespace UI.Main_Menu.Settings {
 
         [Header("Necessary Fields")] 
         public RectTransform scrollField;
-        public int spacing;
-        public int startSpacing;
 
         private readonly Dictionary<string, Setting> _settings = new();
 
-        public void AddCheckBox(string settingName, string text, bool defaultValue = false, string parent = null) {
-            var checkBox = Resources.Load<CheckBox>("Prefabs/UI/Visualization/RuntimeMenu/Settings/SettingsCheckBox");
-            var newObject = Instantiate(checkBox, scrollField);
+        public void AddCheckBox(string settingName, string text, Reference<bool> reference) {
+            var checkBoxPrefab = Resources.Load<CheckBox>("Prefabs/UI/Visualization/RuntimeMenu/Settings/SettingsCheckBox");
+            var checkBox = Instantiate(checkBoxPrefab, scrollField);
 
-            if (newObject == null)
+            if (checkBox == null)
                 throw new NullReferenceException("Something went terribly wrong when initializing the main menu.");
 
-            newObject.name = settingName;
-            newObject.SetData(text, defaultValue);
+            checkBox.name = settingName;
+            checkBox.Reference = reference;
+            checkBox.SetInfo(text);
+            checkBox.LoadData();
 
-            _settings.Add(settingName, newObject);
+            _settings.Add(settingName, checkBox);
         }
 
-        public void AddDropDown(string settingName, string text, string[] values, string defaultValue, string parent = null) {
+        public void AddDropDown(string settingName, string text, string[] values, string defaultValue) {
             // TODO
         }
 
-        public InputField AddInputField(string settingName, string text, string placeholder, string defaultValue,
-            string parent = null) {
-            
-            var inputField = Resources.Load<InputField>("Prefabs/UI/Visualization/RuntimeMenu/Settings/SettingsInputField");
-            var newObject = Instantiate(inputField, scrollField);
+        public InputField AddInputField(string settingName, string text, string placeholder, Reference<string> reference) {
+            var inputFieldPrefab = Resources.Load<InputField>("Prefabs/UI/Visualization/RuntimeMenu/Settings/SettingsInputField");
+            var inputField = Instantiate(inputFieldPrefab, scrollField);
 
-            if (newObject == null)
+            if (inputField == null)
                 throw new NullReferenceException("Something went terribly wrong when initializing the main menu.");
 
-            newObject.name = settingName;
-            newObject.SetData(text, placeholder, defaultValue);
+            inputField.name = settingName;
+            inputField.Reference = reference;
+            inputField.SetInfo(text, placeholder);
+            inputField.LoadData();
 
-            _settings.Add(settingName, newObject);
-            return newObject;
+            _settings.Add(settingName, inputField);
+            return inputField;
         }
         
         public void AddRuler(int thickness) {
@@ -53,58 +54,31 @@ namespace UI.Main_Menu.Settings {
             if (newObject == null)
                 throw new NullReferenceException("Something went terribly wrong when initializing the main menu.");
             
-            newObject.SetData(thickness);
             newObject.name = "ruler";
+            newObject.SetThickness(thickness);
         }
 
-        public void AddHeading(string settingName, string text, string parent = null) {
-            var heading = Resources.Load<Heading>("Prefabs/UI/Visualization/RuntimeMenu/Settings/SettingsHeading");
-            var newObject = Instantiate(heading, scrollField);
+        public void AddHeading(string settingName, string text) {
+            var headingPrefab = Resources.Load<Heading>("Prefabs/UI/Visualization/RuntimeMenu/Settings/SettingsHeading");
+            var heading = Instantiate(headingPrefab, scrollField);
             
-            if (newObject == null)
+            if (heading == null)
                 throw new NullReferenceException("Something went terribly wrong when initializing the main menu.");
-
-            newObject.SetData(text);
-            newObject.name = settingName;
             
-            _settings.Add(settingName, newObject);
+            heading.name = settingName;
+            heading.SetInfo(text);
+            _settings.Add(settingName, heading);
         }
 
         public void SaveSettings() {
-            foreach (var entry in _settings) {
-                var settingName = entry.Key;
-                var setting = entry.Value;
-
-                switch (setting) {
-                    case CheckBox checkBox:
-                        PlayerPrefs.SetInt(settingName, checkBox.IsOn() ? 1 : 0);
-                        break;
-                    case InputField inputField:
-                        PlayerPrefs.SetString(settingName, inputField.GetValue());
-                        break;
-                    case DropDown:
-                        // TODO
-                        break;
-                }
+            foreach (var (_, s) in _settings) {
+                s.StoreData();
             }
         }
 
         public void LoadSettings() {
-            foreach (var entry in _settings) {
-                var settingName = entry.Key;
-                var setting = entry.Value;
-
-                switch (setting) {
-                    case CheckBox checkBox:
-                        checkBox.SetValue(PlayerPrefs.GetInt(settingName) > 0);
-                        break;
-                    case InputField inputField:
-                        inputField.SetValue(PlayerPrefs.GetString(settingName));
-                        break;
-                    case DropDown:
-                        // TODO
-                        break;
-                }
+            foreach (var (_, s) in _settings) {
+                s.LoadData();
             }
         }
     }

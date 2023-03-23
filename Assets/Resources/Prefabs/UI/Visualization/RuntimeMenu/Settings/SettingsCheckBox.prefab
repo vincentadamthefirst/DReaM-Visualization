@@ -192,9 +192,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b31f518fcff423280d7334509942247, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  spacer: {fileID: 8030094621903839366}
-  toggle: {fileID: 1120244540268088821}
-  infoText: {fileID: 1120244540130801412}
 --- !u!1 &1120244540130801415
 GameObject:
   m_ObjectHideFlags: 0

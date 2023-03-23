@@ -5,25 +5,23 @@ using UI.Main_Menu.Notifications;
 using UI.Main_Menu.Settings;
 using UnityEngine;
 using UnityEngine.UI;
+using Utils;
 
 namespace UI.Main_Menu {
     public class MenuController : MonoBehaviour {
-        [Header("Buttons")] 
-        public Button start;
+        [Header("Buttons")] public Button start;
         public Button import;
         public Button settings;
         public Button exit;
 
-        [Header("Views")]
-        public Transform importView;
+        [Header("Views")] public Transform importView;
         public Transform settingsView;
 
-        [Header("Other")]
-        public ImportController importController;
+        [Header("Other")] public ImportController importController;
         public NotificationManager notificationManager;
         public SettingsPanel settingsPanel;
         public VisualizationLoader visualizationLoader;
-        
+
         private DataMover _dataMover;
 
         public void Start() {
@@ -31,7 +29,7 @@ namespace UI.Main_Menu {
             import.onClick.AddListener(OpenImport);
             settings.onClick.AddListener(OpenSettings);
             exit.onClick.AddListener(ExitApplication);
-            
+
             SetupSettingsController();
 
             _dataMover = FindObjectOfType<DataMover>();
@@ -39,34 +37,36 @@ namespace UI.Main_Menu {
 
         private void SetupSettingsController() {
             // Occlusion Settings
-            settingsPanel.AddHeading("hdg_occ", "Verdeckungs - Einstellungen");
-            settingsPanel.AddCheckBox("app_handleOcclusions", "Verdeckungen Vermeiden:", true, "hdg_occ");
-            var inField1 = settingsPanel.AddInputField("app_occ_min_opacity_agent", "Minimale Agent-Sichtbarkeit",
-                "Komma-Zahl", "0,7", "app_handleOcclusions");
-            inField1.inputField.contentType = TMP_InputField.ContentType.DecimalNumber;
-            var inField2 = settingsPanel.AddInputField("app_occ_min_opacity_other", "Minimale Objekt-Sichtbarkeit",
-                "Komma-Zahl", "0,3", "app_handleOcclusions");
-            inField2.inputField.contentType = TMP_InputField.ContentType.DecimalNumber;
+            settingsPanel.AddHeading("hdg_occ", "Occlusion");
+            settingsPanel.AddCheckBox("handle_occ", "Reduce Occlusion:",
+                new Reference<bool>(() => SettingsManager.Instance.Settings.handleOcclusions,
+                    x => SettingsManager.Instance.Settings.handleOcclusions = x));
+            var minOpacityInput = settingsPanel.AddInputField("min_opacity", "Minimum Object Opacity", "Decimal Value",
+                new Reference<string>(() => $"{SettingsManager.Instance.Settings.minimalOpacity:F2}",
+                    x => SettingsManager.Instance.Settings.minimalOpacity = float.Parse(x)));
+            minOpacityInput.Field.contentType = TMP_InputField.ContentType.DecimalNumber;
             settingsPanel.AddRuler(2);
 
             // Resolution Settings
-            settingsPanel.AddHeading("hdg_look", "Grafik - Einstellungen");
-            settingsPanel.AddCheckBox("app_fullscreen", "Fullscreen:", true, "hdg_look");
+            settingsPanel.AddHeading("hdg_look", "Graphics");
+            settingsPanel.AddCheckBox("fullscreen", "Fullscreen:",
+                new Reference<bool>(() => SettingsManager.Instance.Settings.fullscreen,
+                    x => SettingsManager.Instance.Settings.fullscreen = x));
             // TODO resolution
             settingsPanel.AddRuler(2);
 
             // Other Settings
-            settingsPanel.AddHeading("hdg_other", "Anwendungs - Einstellungen");
-            settingsPanel.AddCheckBox("app_wip_features", "W.I.P. Features nutzen:", true, "hdg_other");
-            var inField3 = settingsPanel.AddInputField("app_samples_show_selection",
-                "Sample Anzahl für Cutoff Trigger", "Zahl", "100", "app_wip_features");
-            inField3.inputField.contentType = TMP_InputField.ContentType.IntegerNumber;
+            settingsPanel.AddHeading("hdg_other", "Other");
+            settingsPanel.AddCheckBox("sidepanel", "Use Sidepanel",
+                new Reference<bool>(() => SettingsManager.Instance.Settings.useSidePanel,
+                    x => SettingsManager.Instance.Settings.useSidePanel = x));
 
             settingsPanel.LoadSettings();
         }
 
         private void OpenImport() {
             settingsPanel.SaveSettings();
+            SettingsManager.Instance.ApplySettings();
             importView.gameObject.SetActive(true);
             settingsView.gameObject.SetActive(false);
         }
@@ -82,9 +82,10 @@ namespace UI.Main_Menu {
         }
 
         private void StartButtonClicked() {
+            SettingsManager.Instance.ApplySettings();
             StartVisualization();
         }
-        
+
         private void StartVisualization() {
             var sceneryHandler = importController.GetXmlHandler<SceneryXmlHandler>();
             var outputHandler = importController.GetXmlHandler<SimulationOutputXmlHandler>();
@@ -125,7 +126,7 @@ namespace UI.Main_Menu {
             _dataMover.SimulationOutputXmlHandler.RunId = importController.GetRunId();
 
             settingsPanel.SaveSettings();
-            
+
             visualizationLoader.gameObject.SetActive(true);
             visualizationLoader.StartSceneLoad(_dataMover);
         }

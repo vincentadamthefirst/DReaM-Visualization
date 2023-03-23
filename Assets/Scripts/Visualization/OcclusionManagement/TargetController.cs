@@ -59,11 +59,12 @@ namespace Visualization.OcclusionManagement {
 
         private void TargetStatusChanged(object element, bool value) {
             if (!element.GetType().IsSubclassOf(typeof(Agent))) return;
-            if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) {
-                // snap the camera to the agent
-                _extendedCamera.CameraController.LockedOnAgent = (Agent) element;
-                _extendedCamera.CameraController.LockedOnAgentIsSet = true;
-            }
+            // FIXME fix agent following
+            // if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) {
+            //     // snap the camera to the agent
+            //     _extendedCamera.CameraController.LockedOnAgent = (Agent) element;
+            //     _extendedCamera.CameraController.LockedOnAgentIsSet = true;
+            // }
         }
 
         /// <summary>
@@ -72,12 +73,12 @@ namespace Visualization.OcclusionManagement {
         private void HandleCardClick(object sender, EventArgs args) {
             var card = (AgentCard) sender;
             
-            if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) {
-                // snap the camera to the agent
-                _extendedCamera.CameraController.LockedOnAgent = card.Agent;
-                _extendedCamera.CameraController.LockedOnAgentIsSet = true;
-                return;
-            }
+            // if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) {
+            //     // snap the camera to the agent
+            //     _extendedCamera.CameraController.LockedOnAgent = card.Agent;
+            //     _extendedCamera.CameraController.LockedOnAgentIsSet = true;
+            //     return;
+            // }
 
             card.Agent.IsTarget = !card.Agent.IsTarget;
         }

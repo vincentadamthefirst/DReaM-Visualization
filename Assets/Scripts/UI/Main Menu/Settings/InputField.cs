@@ -1,34 +1,32 @@
-﻿using TMPro;
+﻿using System;
+using TMPro;
+using UnityEngine.Serialization;
 
 namespace UI.Main_Menu.Settings {
-    public class InputField : Setting {
-        public TMP_InputField inputField;
-        public TMP_Text infoText;
-        public TMP_Text placeholderText;
+    public class InputField : Setting<string> {
+        public TMP_InputField Field { get; private set; }
+        private TMP_Text _infoText;
+        private TMP_Text _placeholderText;
         
         private string _text;
         private string _defaultValue;
         private string _placeholder;
 
-        public void SetData(string text, string placeholder, string defaultValue) {
-            _text = text;
-            _placeholder = placeholder;
-            _defaultValue = defaultValue;
-        }
-        
-        public void SetValue(string value) {
-            _defaultValue = value;
-            inputField.SetTextWithoutNotify(_defaultValue);
-        }
-        
-        public void Start() {
-            inputField.SetTextWithoutNotify(_defaultValue);
-            infoText.SetText(_text);
-            placeholderText.SetText(_placeholder);
+        public override void SetInfo(params string[] infos) {
+            Field = transform.Find("Wrapper").Find("Input").GetComponent<TMP_InputField>();
+            _infoText = transform.Find("Text").GetComponent<TMP_Text>();
+            _placeholderText = Field.transform.GetChild(0).Find("Placeholder").GetComponent<TMP_Text>();
+            
+            _infoText.SetText(infos[0]);
+            _placeholderText.SetText(infos[1]);
         }
 
-        public string GetValue() {
-            return inputField.text;
+        public override void StoreData() {
+            Reference.Value = Field.text;
+        }
+
+        public override void LoadData() {
+            Field.SetTextWithoutNotify(Reference.Value);
         }
     }
 }

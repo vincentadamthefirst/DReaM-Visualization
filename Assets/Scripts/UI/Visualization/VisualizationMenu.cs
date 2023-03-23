@@ -1,11 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Scenery;
+using Settings;
 using TMPro;
 using UI.Main_Menu.Settings;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using Utils;
 using Visualization.OcclusionManagement;
 
 namespace UI.Visualization {
@@ -49,16 +51,22 @@ namespace UI.Visualization {
         private void SetupSettingsPanel() {
             // Occlusion Settings
             settingsPanel.AddHeading("hdg_occ", "Occlusion");
-            settingsPanel.AddCheckBox("app_handleOcclusions", "Reduce Occlusion:", true, "hdg_occ");
-            var inField1 = settingsPanel.AddInputField("app_occ_min_opacity_other", "Minimum Object Opacity",
-                "Decimal Value", "0,3", "app_handleOcclusions");
-            inField1.inputField.contentType = TMP_InputField.ContentType.DecimalNumber;
+            settingsPanel.AddCheckBox("handle_occ", "Reduce Occlusion:",
+                new Reference<bool>(() => SettingsManager.Instance.Settings.handleOcclusions,
+                    x => SettingsManager.Instance.Settings.handleOcclusions = x));
+            var minOpacityInput = settingsPanel.AddInputField("min_opacity", "Minimum Object Opacity", "Decimal Value",
+                new Reference<string>(() => $"{SettingsManager.Instance.Settings.minimalOpacity:F2}",
+                    x => SettingsManager.Instance.Settings.minimalOpacity = float.Parse(x)));
+            minOpacityInput.Field.contentType = TMP_InputField.ContentType.DecimalNumber;
             settingsPanel.AddRuler(2);
 
             // Resolution Settings
             settingsPanel.AddHeading("hdg_look", "Graphics");
-            settingsPanel.AddCheckBox("app_fullscreen", "Fullscreen:", true, "hdg_look");
+            settingsPanel.AddCheckBox("fullscreen", "Fullscreen:",
+                new Reference<bool>(() => SettingsManager.Instance.Settings.fullscreen,
+                    x => SettingsManager.Instance.Settings.fullscreen = x));
             // TODO resolution
+            settingsPanel.AddRuler(2);
 
             settingsPanel.LoadSettings();
         }
@@ -68,6 +76,7 @@ namespace UI.Visualization {
             _outlines.ForEach(x => x.enabled = false);
             
             if (menuPanel.gameObject.activeSelf) {
+                SettingsManager.Instance.ApplySettings();
                 menuPanel.gameObject.SetActive(false);
                 _shadow.SetActive(false);
                 _cameraController.SetMenuOpen(false);

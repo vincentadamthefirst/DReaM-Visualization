@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using Importer.XMLHandlers;
 using Newtonsoft.Json;
+using UnityEditor;
 using UnityEngine;
 
 namespace Settings {
@@ -25,6 +26,7 @@ namespace Settings {
         public bool useSidePanel = true;
 
         // Video settings
+        public bool fullscreen;
         public string resolution = "1920x1080";
         public int framerate = 50;
     }
@@ -33,6 +35,13 @@ namespace Settings {
         public static SettingsManager Instance { get; private set; }
 
         public Settings Settings { get; private set; }
+
+        public void ApplySettings() {
+            var resWidth = int.Parse(Settings.resolution.Split("x")[0]);
+            var resHeight = int.Parse(Settings.resolution.Split("x")[1]);
+            
+            Screen.SetResolution(resWidth, resHeight, Settings.fullscreen, Settings.framerate);
+        }
 
         private void Awake() {
             if (Instance != null && Instance != this) {
