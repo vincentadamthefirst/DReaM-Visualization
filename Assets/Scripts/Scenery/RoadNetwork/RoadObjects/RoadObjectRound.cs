@@ -19,8 +19,6 @@ namespace Scenery.RoadNetwork.RoadObjects {
         private Material[][] _nonOccludedMaterials;
         private Material[][] _occludedMaterials;
 
-        private float _additionalMultiplier = 1f;
-
         private Mesh _colliderMesh;
 
         private void Repeat() {

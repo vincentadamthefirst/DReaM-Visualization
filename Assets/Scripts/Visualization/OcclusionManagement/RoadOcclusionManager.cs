@@ -9,7 +9,7 @@ namespace Visualization.OcclusionManagement {
     /// it will move certain roads to the road_targets layer to display them through other objects.
     /// </summary>
     public class RoadOcclusionManager : MonoBehaviour {
-        private readonly HashSet<VisualizationElement> _currentRoadIds = new HashSet<VisualizationElement>();
+        private readonly HashSet<VisualizationElement> _currentRoadIds = new();
 
         /// <summary>
         /// Adds a road Id to the set containing all active roads for the current point in time.

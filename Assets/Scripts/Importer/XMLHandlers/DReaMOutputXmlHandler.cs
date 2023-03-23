@@ -80,29 +80,6 @@ namespace Importer.XMLHandlers {
 
         public override XmlType GetXmlType() => XmlType.DReaM;
 
-        public override string GetDetails() {
-            if (xmlDocument.Root == null) return "<color=\"red\"><b>XML Error</b>";
-        
-            var supported = new Version("0.3.0");
-            
-            var versionInFile = xmlDocument.Root.Attribute("SchemaVersion")?.Value;
-            var versionString = "<color=\"orange\">Version unknown";
-
-            if (versionInFile != null) {
-                var fileVersion = new Version(versionInFile);
-                versionString = fileVersion.CompareTo(supported) >= 0
-                    ? "<color=\"green\">Version " + versionInFile
-                    : "<color=\"red\">Version " + versionInFile;
-            }
-            
-            var returnString = versionString + "<color=\"white\">";
-            
-            var runResults = xmlDocument.Root.Element("RunResults")?.Elements("RunResult");
-            returnString += " <b>|</b> RunResults: " + runResults?.Count();
-
-            return returnString;
-        }
-
         public void StartImport() {
             if (xmlDocument.Root == null)
                 throw new Exception("XML is not formatted correctly.");

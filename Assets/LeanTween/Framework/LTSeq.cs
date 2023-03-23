@@ -33,7 +33,7 @@ public class LTSeq {
 
 	public uint counter;
 
-	public bool toggle = false;
+	public bool toggle;
 
 	private uint _id;
 

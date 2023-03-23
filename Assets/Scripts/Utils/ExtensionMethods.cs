@@ -16,12 +16,6 @@ namespace Utils {
             v.y = v.x * sinAngle + v.y * cosAngle;
             v.x = tmpX;
         }
-        
-        public static int RoundUpToMultipleOf(this int toRound, int multiple) {
-            var remainder = toRound % multiple;
-            if (remainder == 0) return toRound;
-            return toRound + multiple - remainder;
-        }
 
         public static int RoundDownToMultipleOf(this int toRound, int multiple) {
             return toRound - (toRound % multiple);
@@ -100,13 +94,6 @@ namespace Utils {
             material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
             material.renderQueue = (int) UnityEngine.Rendering.RenderQueue.Transparent;
             material.SetShaderPassEnabled("ShadowCaster", false);
-        }
-        
-        public static void SetLayerRecursive(this GameObject obj, int layer) {
-            obj.layer = layer;
-            foreach (Transform child in obj.transform) {
-                SetLayerRecursive(child.gameObject, layer);
-            }
         }
     }
 }

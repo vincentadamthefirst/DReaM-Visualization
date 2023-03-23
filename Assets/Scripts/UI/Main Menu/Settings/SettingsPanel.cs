@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using UnityEngine;
 
 namespace UI.Main_Menu.Settings {
@@ -83,7 +82,7 @@ namespace UI.Main_Menu.Settings {
                     case InputField inputField:
                         PlayerPrefs.SetString(settingName, inputField.GetValue());
                         break;
-                    case DropDown _:
+                    case DropDown:
                         // TODO
                         break;
                 }
@@ -102,7 +101,7 @@ namespace UI.Main_Menu.Settings {
                     case InputField inputField:
                         inputField.SetValue(PlayerPrefs.GetString(settingName));
                         break;
-                    case DropDown _:
+                    case DropDown:
                         // TODO
                         break;
                 }

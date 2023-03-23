@@ -9,18 +9,17 @@ using Scenery.RoadNetwork.RoadObjects;
 using Scenery.RoadNetwork.RoadSignals;
 using UnityEngine;
 using ContactPoint = Scenery.RoadNetwork.ContactPoint;
-using Version = Utils.VersionSystem.Version;
 
 namespace Importer.XMLHandlers {
     [SuppressMessage("ReSharper", "ConvertSwitchStatementToSwitchExpression")]
-    public class SceneryXmlHandler : XmlHandler {
+    public sealed class SceneryXmlHandler : XmlHandler {
         public RoadNetworkHolder roadNetworkHolder;
 
         private int _roadIdCounter;
         
         public override XmlType GetXmlType() => XmlType.Scenery;
 
-        public virtual void StartImport() {
+        public void StartImport() {
             if (xmlDocument.Root == null) return; // TODO Error handling
             
             ImportRoads();
@@ -28,27 +27,7 @@ namespace Importer.XMLHandlers {
             roadNetworkHolder.CreateMeshes();
         }
 
-        public override string GetDetails() {
-            if (xmlDocument.Root?.Element("header") == null) return "<color=\"red\"><b>XML Error</b>";
-
-            var supported = new Version("1.4");
-
-            var header = xmlDocument.Root.Element("header");
-            var revMajor = header?.Attribute("revMajor")?.Value;
-            var revMinor = header?.Attribute("revMinor")?.Value;
-            var versionString = "<color=\"orange\">Version unknown";
-
-            if (revMajor != null && revMinor != null) {
-                var fileVersion = new Version(revMajor + "." + revMinor);
-                versionString = fileVersion.CompareTo(supported) >= 0
-                    ? "<color=\"green\">Version " + revMajor + "." + revMinor
-                    : "<color=\"red\">Version " + revMajor + "." + revMinor;
-            }
-
-            return versionString + "<color=\"white\"> <b>|</b> " + "Date: " + (header?.Attribute("date")?.Value ?? "") +
-                   " <b>|</b> " + "Name: " +  (header?.Attribute("name")?.Value ?? "");
-        }
-
+        [SuppressMessage("ReSharper", "RedundantIfElseBlock")]
         private void ImportRoads() {
             var roadElements = xmlDocument.Root?.Elements("road");
             var junctionElements = xmlDocument.Root?.Elements("junction");
@@ -98,7 +77,7 @@ namespace Importer.XMLHandlers {
                     var toAttribute = laneLink.Attribute("to");
 
                     if (fromAttribute != null && toAttribute != null) {
-                        laneLinks.Add(new LaneLink() {From = fromAttribute.Value, To = toAttribute.Value});
+                        laneLinks.Add(new LaneLink {From = fromAttribute.Value, To = toAttribute.Value});
                     }
                 }
 
@@ -444,7 +423,7 @@ namespace Importer.XMLHandlers {
             }
         }
 
-        private void CreateLaneSections([System.Diagnostics.CodeAnalysis.NotNull] XContainer laneSectionsParent, Road road) {
+        private void CreateLaneSections([NotNull] XContainer laneSectionsParent, Road road) {
             foreach (var laneSection in laneSectionsParent.Elements("laneSection")) {
                 var s = float.Parse(
                     laneSection.Attribute("s")?.Value ??
@@ -476,7 +455,7 @@ namespace Importer.XMLHandlers {
             }
         }
 
-        private void CreateLane([System.Diagnostics.CodeAnalysis.NotNull] XElement lane, LaneSection parentSection, LaneDirection laneDirection) {
+        private void CreateLane([NotNull] XElement lane, LaneSection parentSection, LaneDirection laneDirection) {
             var id = lane.Attribute("id")?.Value ?? "x";
             
             if (id == "x")

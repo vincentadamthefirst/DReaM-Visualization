@@ -10,7 +10,7 @@ namespace Habrador_Computational_Geometry.Marching_Squares
         //So L is between TL and BL
         public Node L, T, R, B;
         //The marching square configuration for this square (16 possibilities)
-        public int configuration = 0;
+        public int configuration;
 
         public Square(ControlNode TL, ControlNode TR, ControlNode BR, ControlNode BL)
         {

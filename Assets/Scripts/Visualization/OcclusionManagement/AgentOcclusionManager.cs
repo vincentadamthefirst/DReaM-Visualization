@@ -82,11 +82,12 @@ namespace Visualization.OcclusionManagement {
             Disable = false;
         }
 
+        // ReSharper disable once Unity.RedundantEventFunction
         /// <summary>
         /// After the position of all objects was updated the occlusion detection will be performed.
         /// </summary>
         private void LateUpdate() {
-            if (Disable) return; // disable this process
+            // if (Disable) return; // disable this process
             // Detector.Trigger(); TODO re-enable
         }
     }

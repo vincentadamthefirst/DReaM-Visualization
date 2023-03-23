@@ -41,7 +41,7 @@ namespace Habrador_Computational_Geometry
             this.planeTrans = planeTrans;
         }
 
-        public Plane3 Plane3 => new Plane3(Position, Normal);
+        public Plane3 Plane3 => new(Position, Normal);
 
         public MyVector3 Position => planeTrans.position.ToMyVector3();
 

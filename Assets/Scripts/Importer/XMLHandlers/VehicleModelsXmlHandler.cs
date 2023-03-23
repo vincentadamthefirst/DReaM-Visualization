@@ -4,11 +4,11 @@ using Visualization;
 using Visualization.Agents;
 
 namespace Importer.XMLHandlers {
-    public class VehicleModelsXmlHandler : XmlHandler {
+    public sealed class VehicleModelsXmlHandler : XmlHandler {
         
         public override XmlType GetXmlType() => XmlType.VehicleModels;
 
-        public virtual void StartImport() {
+        public void StartImport() {
             if (xmlDocument.Root == null) return;
 
             ImportAgentModels();
@@ -59,10 +59,6 @@ namespace Importer.XMLHandlers {
                 
                 VisualizationMaster.Instance.VehicleModelCatalog.Add(name, info);
             }
-        }
-
-        public override string GetDetails() {
-            return "...";
         }
     }
 }

@@ -39,7 +39,7 @@ namespace Importer.XMLHandlers {
                 var height = float.Parse(dimension?.Attribute("height")?.Value ?? "1.8",
                     CultureInfo.InvariantCulture.NumberFormat);
 
-                var info = new PedestrianModelInformation() {
+                var info = new PedestrianModelInformation {
                     Width = width,
                     Length = length,
                     Height = height,
@@ -48,10 +48,6 @@ namespace Importer.XMLHandlers {
                 
                 VisualizationMaster.Instance.PedestrianModelCatalog.Add(name, info);
             }
-        }
-
-        public override string GetDetails() {
-            return "...";
         }
     }
 }

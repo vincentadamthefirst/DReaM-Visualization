@@ -6,7 +6,6 @@ using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.XPath;
-using Scenery;
 using UnityEngine;
 using Visualization;
 using Visualization.Agents;
@@ -116,57 +115,15 @@ namespace Importer.XMLHandlers {
             var max = int.MinValue;
 
             _samples = samples.ToList();
-            var step = GetInt(_samples[1], "Time", 0) - GetInt(_samples[0], "Time", 0);
+            var step = GetInt(_samples[1], "Time") - GetInt(_samples[0], "Time");
             _sampleStep = step;
 
-            foreach (var time in _samples.Select(sample => GetInt(sample, "Time", 0))) {
+            foreach (var time in _samples.Select(sample => GetInt(sample, "Time"))) {
                 if (time > max) max = time;
                 if (time < min) min = time;
             }
 
             return new Tuple<int, int, int, int>(min, max, _samples.Count, step);
-        }
-
-        public override string GetDetails() {
-            if (xmlDocument.Root == null) return "<color=\"red\"><b>XML Error</b>";
-
-            var supported = new Version("0.3.0");
-
-            var versionInFile = xmlDocument.Root?.Attribute("SchemaVersion")?.Value;
-            var versionString = "<color=\"orange\">Version unknown";
-
-            if (versionInFile != null) {
-                var fileVersion = new Version(versionInFile);
-                versionString = fileVersion.CompareTo(supported) >= 0
-                    ? "<color=\"green\">Version " + versionInFile
-                    : "<color=\"red\">Version " + versionInFile;
-            }
-
-            var statistics = _runResult.Element("RunStatistics");
-            var events = _runResult.Element("Events");
-            var agents = _runResult.Element("Agents");
-
-            if (statistics == null) {
-                return versionString + " <color=\"red\"> RunResults missing!";
-            }
-
-            var returnString = versionString + "<color=\"white\">";
-
-            if (events != null) {
-                returnString += " <b>|</b> Events: " + events.Elements("Event").Count();
-            }
-
-            if (statistics.Element("StopReason") != null) {
-                returnString += " <b>|</b> Stop: " + String.Concat(statistics.Element("StopReason").Nodes());
-            }
-
-            if (agents != null && agents.Elements("Agent").Count() != 0) {
-                returnString += " <b>|</b> Agents: " + agents.Elements("Agent").Count();
-            } else {
-                returnString += " <b>|</b><color=\"red\"> Agents missing!";
-            }
-
-            return returnString;
         }
 
         private void ParseEvents() {

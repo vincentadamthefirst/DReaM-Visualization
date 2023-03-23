@@ -2,7 +2,6 @@
 using Scenery;
 using Scenery.RoadNetwork;
 using UnityEngine;
-using UnityEngine.Serialization;
 using Visualization.Labels.BasicLabels;
 
 namespace Visualization.POIs {

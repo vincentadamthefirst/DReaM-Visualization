@@ -15,7 +15,7 @@ namespace Scenery.RoadNetwork {
         /// <summary>
         /// List of all RoadGeometries for this Road
         /// </summary>
-        public List<RoadGeometry> RoadGeometries { get; private set; } = new List<RoadGeometry>();
+        public List<RoadGeometry> RoadGeometries { get; private set; } = new();
         
         /// <summary>
         /// Length of this Road
@@ -55,17 +55,17 @@ namespace Scenery.RoadNetwork {
         /// <summary>
         /// All LaneSections on this Road
         /// </summary>
-        public List<LaneSection> LaneSections { get; private set; } = new List<LaneSection>();
+        public List<LaneSection> LaneSections { get; private set; } = new();
         
         /// <summary>
         /// All RoadObjects along this Road
         /// </summary>
-        public List<RoadObject> RoadObjects { get; }  = new List<RoadObject>();
+        public List<RoadObject> RoadObjects { get; }  = new();
         
         /// <summary>
         /// All TrafficSigns along this Road
         /// </summary>
-        public List<TrafficSign> TrafficSigns { get; } = new List<TrafficSign>();
+        public List<TrafficSign> TrafficSigns { get; } = new();
 
         /// <summary>
         /// Adds a new RoadGeometry to this Road and sorts the list based on s value.

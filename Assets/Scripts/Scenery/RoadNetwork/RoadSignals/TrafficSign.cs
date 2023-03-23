@@ -78,8 +78,53 @@ namespace Scenery.RoadNetwork.RoadSignals {
                 case TrafficSignType.MaximumSpeedLimit:
                     trafficSign.transform.Find("Text").GetComponent<TextMeshPro>().text = SubType;
                     break;
-                default:
+                case TrafficSignType.Undefined:
                     break;
+                case TrafficSignType.MinimumSpeedLimit:
+                    break;
+                case TrafficSignType.EndOfMaximumSpeedLimit:
+                    break;
+                case TrafficSignType.EndOfMinimumSpeedLimit:
+                    break;
+                case TrafficSignType.EndOffAllSpeedLimitsAndOvertakingRestrictions:
+                    break;
+                case TrafficSignType.TownBegin:
+                    break;
+                case TrafficSignType.TownEnd:
+                    break;
+                case TrafficSignType.Zone30Begin:
+                    break;
+                case TrafficSignType.Zone30End:
+                    break;
+                case TrafficSignType.TrafficCalmedDistrictBegin:
+                    break;
+                case TrafficSignType.TrafficCalmedDistrictEnd:
+                    break;
+                case TrafficSignType.EnvironmentalZoneBegin:
+                    break;
+                case TrafficSignType.EnvironmentalZoneEnd:
+                    break;
+                case TrafficSignType.OvertakingBanBegin:
+                    break;
+                case TrafficSignType.OvertakingBanEnd:
+                    break;
+                case TrafficSignType.OvertakingBanForTrucksBegin:
+                    break;
+                case TrafficSignType.OvertakingBanForTrucksEnd:
+                    break;
+                case TrafficSignType.RightOfWayBegin:
+                    break;
+                case TrafficSignType.RightOfWayEnd:
+                    break;
+                case TrafficSignType.DoNotEnter:
+                    break;
+                case TrafficSignType.HighWayBegin:
+                    break;
+                case TrafficSignType.HighWayEnd:
+                    break;
+                case TrafficSignType.HighWayExit:
+                    break;
+                default:
                     throw new ArgumentOutOfRangeException();
             }
         }

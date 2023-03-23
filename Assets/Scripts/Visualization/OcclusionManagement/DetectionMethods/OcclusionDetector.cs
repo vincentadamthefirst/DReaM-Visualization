@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Scenery;
-using UnityEngine;
 using Utils;
 
 namespace Visualization.OcclusionManagement.DetectionMethods {

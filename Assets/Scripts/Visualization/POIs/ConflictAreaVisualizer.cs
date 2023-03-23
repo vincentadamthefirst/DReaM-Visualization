@@ -36,7 +36,6 @@ namespace Visualization.POIs {
         public Material conflictAreaMaterial;
 
         private readonly List<IntersectionGroup> _junctionGroups = new();
-        private readonly List<ConflictArea> _conflictAreas = new();
 
         private void BuildConflictArea(Road roadA, Road roadB, ConflictAreaInfo areaInfo, float colorLerp) {
             var laneA = roadA.LaneSections[0].LaneIdMappings["" + areaInfo.laneIdA];
@@ -163,7 +162,7 @@ namespace Visualization.POIs {
             }
         }
 
-        public void StartSearch() {
+        public void StartSearch() { // FIXME enable search
             ClearSearch();
             foreach (var jg in _junctionGroups.Where(jg => !jg.Search(searchInput.text))) {
                 jg.gameObject.SetActive(false);

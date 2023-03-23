@@ -2,10 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Serialization;
-using UnityEngine.UI;
-using Visualization.Agents;
-using Visualization.Labels;
 
 namespace Visualization {
     [CreateAssetMenu(menuName = "AgentDesigns")]
@@ -22,9 +18,9 @@ namespace Visualization {
             var models = found as AgentModel[] ?? found.ToArray();
             if (models.Count() != 0) {
                 return models.First();
-            } else {
-                return agentType == AgentType.Vehicle ? GetAgentModel(agentType, "fallback") : agentModels[0];
             }
+
+            return agentType == AgentType.Vehicle ? GetAgentModel(agentType, "fallback") : agentModels[0];
         }
     }
 

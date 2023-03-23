@@ -12,7 +12,7 @@ namespace Scenery.RoadNetwork {
         /// <summary>
         /// Dictionary containing all Roads based on their id
         /// </summary>
-        public Dictionary<string, Road> Roads { get; } = new Dictionary<string, Road>();
+        public Dictionary<string, Road> Roads { get; } = new();
 
         /// <summary>
         /// The RoadDesign to be used for displaying the road network
@@ -27,7 +27,7 @@ namespace Scenery.RoadNetwork {
         /// <summary>
         /// The Connections of this Junction
         /// </summary>
-        public List<Connection> Connections { get; } = new List<Connection>();
+        public List<Connection> Connections { get; } = new();
 
         /// <summary>
         /// Adds a Road to this Junction
@@ -126,7 +126,7 @@ namespace Scenery.RoadNetwork {
         /// <summary>
         /// List of all LaneLinks in this Connection
         /// </summary>
-        public List<LaneLink> LaneLinks { get; set; } = new List<LaneLink>();
+        public List<LaneLink> LaneLinks { get; set; } = new();
     }
 
     /// <summary>

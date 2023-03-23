@@ -25,13 +25,13 @@ namespace Utils.AdditionalMath {
             });
 
             var sortQuery = Enumerable.Range(0, initialPoints.Count)
-                .Where((i) => (i != iMin))
-                .Select((i) =>
+                .Where(i => i != iMin)
+                .Select(i =>
                     new KeyValuePair<double, Vector2>(
                         Math.Atan2(initialPoints[i].y - initialPoints[iMin].y,
                             initialPoints[i].x - initialPoints[iMin].x), initialPoints[i]))
-                .OrderBy((pair) => pair.Key)
-                .Select((pair) => pair.Value);
+                .OrderBy(pair => pair.Key)
+                .Select(pair => pair.Value);
             var points = new List<Vector2>(initialPoints.Count) {initialPoints[iMin]};
             points.AddRange(sortQuery);
 
@@ -45,7 +45,7 @@ namespace Utils.AdditionalMath {
                     while (true) {
                         var flag = ConvexHelper.WhichToRemoveFromBoundary(points[M - 1], points[M], points[i]);
                         if (flag == RemovalFlag.None) break;
-                        else if (flag == RemovalFlag.MidPoint) {
+                        if (flag == RemovalFlag.MidPoint) {
                             if (M > 0)
                                 M--;
                             if (M == 0) 

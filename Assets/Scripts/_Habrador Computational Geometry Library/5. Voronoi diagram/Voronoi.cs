@@ -31,7 +31,7 @@ namespace Habrador_Computational_Geometry
         //Is also a vertex in the delaunay triangulation
         public MyVector2 sitePos;
 
-        public List<VoronoiEdge2> edges = new List<VoronoiEdge2>();
+        public List<VoronoiEdge2> edges = new();
 
         public VoronoiCell2(MyVector2 sitePos)
         {
@@ -69,7 +69,7 @@ namespace Habrador_Computational_Geometry
         //Is also a vertex in the delaunay triangulation
         public MyVector3 sitePos;
 
-        public List<VoronoiEdge3> edges = new List<VoronoiEdge3>();
+        public List<VoronoiEdge3> edges = new();
 
         public VoronoiCell3(MyVector3 sitePos)
         {

@@ -11,7 +11,7 @@ namespace Visualization.Agents {
         public float Rotation { get; set; }
 
         public Vector3 Position3D { get; set; }
-        public Vector2 Position2D => new Vector2(Position3D.x, Position3D.z);
+        public Vector2 Position2D => new(Position3D.x, Position3D.z);
 
         public bool Active { get; set; }
 

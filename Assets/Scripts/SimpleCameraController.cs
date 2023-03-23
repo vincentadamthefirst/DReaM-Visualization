@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 using Utils;
 using Visualization.Agents;
 
@@ -67,8 +66,8 @@ public class SimpleCameraController : MonoBehaviour {
         }
     }
 
-    public CameraState targetCameraState = new CameraState();
-    public CameraState interpolatingCameraState = new CameraState();
+    public CameraState targetCameraState = new();
+    public CameraState interpolatingCameraState = new();
 
     [Header("Movement Settings")] [Tooltip("Exponential boost factor on translation, controllable by mouse wheel.")]
     public float boost = 3.5f;
@@ -78,8 +77,7 @@ public class SimpleCameraController : MonoBehaviour {
 
     [Header("Rotation Settings")]
     [Tooltip("X = Change in mouse position.\nY = Multiplicative factor for camera rotation.")]
-    public AnimationCurve mouseSensitivityCurve =
-        new AnimationCurve(new Keyframe(0f, 0.5f, 0f, 5f), new Keyframe(1f, 2.5f, 0f, 0f));
+    public AnimationCurve mouseSensitivityCurve = new(new Keyframe(0f, 0.5f, 0f, 5f), new Keyframe(1f, 2.5f, 0f, 0f));
 
     [Tooltip("Time it takes to interpolate camera rotation 99% of the way to the target."), Range(0.001f, 1f)]
     public float rotationLerpTime = 0.01f;
@@ -90,7 +88,7 @@ public class SimpleCameraController : MonoBehaviour {
     /// <summary>
     /// Set if the Quantitative Evaluation is performed and the camera is moved throughout the scene.
     /// </summary>
-    public bool AutomaticMovement { get; set; }
+    private bool _automaticMovement;
     
     /// <summary>
     /// The current Agent to follow with the camera.
@@ -172,7 +170,7 @@ public class SimpleCameraController : MonoBehaviour {
     }
 
     private void Update() {
-        if (SettingsOpen || AutomaticMovement) return;
+        if (SettingsOpen || _automaticMovement) return;
 
         // Hide and lock cursor when right mouse button pressed
         if (Input.GetMouseButtonDown(1)) {

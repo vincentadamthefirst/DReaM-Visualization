@@ -20,7 +20,7 @@ namespace Settings {
         public int showSampleSelectionThreshold = -1;
 
         // visualization settings
-        public bool handleOcclusions = false;
+        public bool handleOcclusions;
         public float minimalOpacity = .3f;
         public bool useSidePanel = true;
 

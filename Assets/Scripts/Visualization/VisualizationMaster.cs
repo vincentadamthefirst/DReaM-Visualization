@@ -5,11 +5,10 @@ using UI.Visualization;
 using UnityEngine;
 using Visualization.Agents;
 using Visualization.Labels.BasicLabels;
-using Visualization.OcclusionManagement;
 
 namespace Visualization {
     public class ActiveModules {
-        public bool DReaM { get; set; } = false;
+        public bool DReaM { get; set; }
     }
 
     public class VisualizationMaster : MonoBehaviour {

@@ -10,11 +10,11 @@ namespace UI.POIs.ConflictAreas {
 
         public Toggle toggle;
 
-        public List<LaneToLaneConflictArea> ConflictAreas { get; } = new List<LaneToLaneConflictArea>();
+        public List<LaneToLaneConflictArea> ConflictAreas { get; } = new();
         
         public RoadAGroup Parent { get; set; }
 
-        private bool _matchesCurrentSearch = false;
+        private bool _matchesCurrentSearch;
 
         public void InitializeData(string otherRoad) {
             roadBText.text = otherRoad;

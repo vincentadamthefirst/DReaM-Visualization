@@ -2,6 +2,7 @@
 using Meta.Numerics.Functions;
 using UnityEngine;
 using Utils;
+// ReSharper disable PrivateFieldCanBeConvertedToLocalVariable
 
 namespace Scenery.RoadNetwork.RoadGeometries {
     
@@ -13,23 +14,12 @@ namespace Scenery.RoadNetwork.RoadGeometries {
         // the parameters
         private readonly float _curvatureStart;
         private readonly float _curvatureEnd;
-        
-        private static readonly float SqrtPiHalf = Mathf.Sqrt(Mathf.PI / 2);
-
 
         private readonly float _cDot;
         private readonly float _lStart;
         private readonly float _lEnd;
 
         private readonly float _tStart, _a, _sign;
-        
-        private static readonly long SignMask = BitConverter.DoubleToInt64Bits(-0.0) ^
-                                                BitConverter.DoubleToInt64Bits(+0.0);
-
-        public static bool signbit(float arg)
-        {
-            return (BitConverter.DoubleToInt64Bits(arg) & SignMask) == SignMask;
-        }
 
         public SpiralGeometry(float sStart, float x, float y, float hdg, float length, float curvatureStart,
             float curvatureEnd) : base(sStart, x, y, hdg, length) {

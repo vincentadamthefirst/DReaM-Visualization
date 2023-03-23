@@ -16,7 +16,7 @@ namespace UI.POIs.ConflictAreas {
 
         private ConflictAreaInfo _conflictAreaInfo;
         
-        private bool _matchesCurrentSearch = false;
+        private bool _matchesCurrentSearch;
 
         public void InitializeData(ConflictAreaInfo conflictAreaInfo) {
             _conflictAreaInfo = conflictAreaInfo;

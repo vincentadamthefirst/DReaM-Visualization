@@ -2,7 +2,6 @@
 using System.Globalization;
 using System.Runtime.Serialization;
 using System.Xml.Linq;
-using Visualization;
 using Version = Utils.VersionSystem.Version;
 
 namespace Importer.XMLHandlers {
@@ -30,8 +29,6 @@ namespace Importer.XMLHandlers {
 
         public abstract XmlType GetXmlType();
 
-        public abstract string GetDetails();
-        
         protected static float GetFloat(XElement element, string name, float fallback = 0) {
             return float.Parse(element.Attribute(name)?.Value ?? $"{fallback}", CultureInfo.InvariantCulture);
         }

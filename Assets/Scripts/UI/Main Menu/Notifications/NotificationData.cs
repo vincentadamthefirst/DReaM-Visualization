@@ -7,7 +7,7 @@ namespace UI.Main_Menu.Notifications {
     [CreateAssetMenu(menuName = "NotificationData")]
     public class NotificationData : ScriptableObject {
 
-        public List<NotificationDesign> designs = new List<NotificationDesign>();
+        public List<NotificationDesign> designs = new();
 
         public NotificationDesign GetDesign(NotificationType type) {
             return designs.Find(x => x.type == type);

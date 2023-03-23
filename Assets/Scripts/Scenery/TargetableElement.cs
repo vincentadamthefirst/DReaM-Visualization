@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using Scenery.RoadNetwork;
 using UnityEngine;
 
@@ -24,7 +22,7 @@ namespace Scenery {
             IsTarget = !IsTarget;
         }
 
-        public virtual Bounds AABB => new Bounds();
+        public virtual Bounds AABB => new();
 
         /// <summary>
         /// Returns a list of necessary points to check against based on the current method for finding the points

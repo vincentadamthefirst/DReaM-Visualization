@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Scenery {
     public class MouseClickPropagator : MonoBehaviour {

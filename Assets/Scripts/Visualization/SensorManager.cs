@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using UI.Main_Menu.Utils;
 using UnityEngine;
 using Visualization.Agents;

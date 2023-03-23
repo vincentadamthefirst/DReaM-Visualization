@@ -38,9 +38,5 @@ namespace Importer.XMLHandlers {
         }
         
         public override XmlType GetXmlType() => XmlType.ProfilesCatalog;
-        
-        public override string GetDetails() {
-            return "details";
-        }
     }
 }
