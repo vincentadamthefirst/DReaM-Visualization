@@ -16,25 +16,22 @@ namespace UI.Main_Menu {
         
         public void StartSceneLoad(DataMover dataMover) {
             _dataMover = dataMover;
-            
-            if (PlayerPrefs.GetInt("app_wip_features") > 0) {
-                // first perform a check on how many samples there are
-                // if it is over a user-defined value, display a range selection
+            // first perform a check on how many samples there are
+            // if it is over a user-defined value, display a range selection
 
-                var sampleInfo = dataMover.SimulationOutputXmlHandler.GetSampleSize();
+            var sampleInfo = dataMover.SimulationOutputXmlHandler.GetSampleSize();
 
-                if (SettingsManager.Instance.Settings.showSampleSelectionThreshold > 0 &&
-                    sampleInfo.Item3 > SettingsManager.Instance.Settings.showSampleSelectionThreshold) {
-                    userInput.SetActive(true);
-                    _stepSize = sampleInfo.Item4;
-                    minMaxSlider.onValueChanged.AddListener(SliderValueChanged);
-                    minMaxSlider.SetLimits(sampleInfo.Item1, sampleInfo.Item2);
-                    minMaxSlider.SetValues(sampleInfo.Item1, sampleInfo.Item2, false);
-                    _enterListener = true;
-                    return;
-                }
+            if (SettingsManager.Instance.Settings.showSampleSelectionThreshold > 0 &&
+                sampleInfo.Item3 > SettingsManager.Instance.Settings.showSampleSelectionThreshold) {
+                userInput.SetActive(true);
+                _stepSize = sampleInfo.Item4;
+                minMaxSlider.onValueChanged.AddListener(SliderValueChanged);
+                minMaxSlider.SetLimits(sampleInfo.Item1, sampleInfo.Item2);
+                minMaxSlider.SetValues(sampleInfo.Item1, sampleInfo.Item2, false);
+                _enterListener = true;
+                return;
             }
-            
+
             DefaultSceneLoad();
         }
 

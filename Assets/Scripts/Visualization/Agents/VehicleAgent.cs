@@ -128,11 +128,11 @@ namespace Visualization.Agents {
         }
 
         private void UpdateBrakes() {
-            var material = _modelMeshRenderer.materials;
-            material[4] = ((AdditionalVehicleInformation) DynamicData.ActiveSimulationStep.AdditionalInformation).Brake
+            var materials = _modelMeshRenderer.sharedMaterials;
+            materials[4] = ((AdditionalVehicleInformation) DynamicData.ActiveSimulationStep.AdditionalInformation).Brake
                 ? brakeOnMaterial
                 : brakeOffMaterial;
-            _modelMeshRenderer.materials = material;
+            _modelMeshRenderer.sharedMaterials = materials;
         }
         
         /// <summary>
@@ -150,7 +150,7 @@ namespace Visualization.Agents {
         private void ChangeIndicatorLightMaterial() {
             var to = _wasIndicatorOn ? indicatorOffMaterial : indicatorOnMaterial;
             // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
-            var materials = _modelMeshRenderer.materials;
+            var materials = _modelMeshRenderer.sharedMaterials;
             switch (((AdditionalVehicleInformation) DynamicData.ActiveSimulationStep.AdditionalInformation).IndicatorState) {
                 case IndicatorState.None:
                     materials[2] = indicatorOffMaterial;
@@ -170,7 +170,7 @@ namespace Visualization.Agents {
                     break;
             }
 
-            _modelMeshRenderer.materials = materials;
+            _modelMeshRenderer.sharedMaterials = materials;
         }
 
         protected override void UpdateRotation() {

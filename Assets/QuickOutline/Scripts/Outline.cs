@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UI;
 
 [DisallowMultipleComponent]
 public class Outline : MonoBehaviour {
@@ -92,11 +93,14 @@ public class Outline : MonoBehaviour {
         needsUpdate = true;
     }
 
+    private int _maskIndex;
+    private int _fillIndex;
+
     void OnEnable() {
         foreach (var renderer in renderers) {
             // Append outline shaders
             var materials = renderer.sharedMaterials.ToList();
-
+            
             materials.Add(outlineMaskMaterial);
             materials.Add(outlineFillMaterial);
 
@@ -132,7 +136,7 @@ public class Outline : MonoBehaviour {
         foreach (var renderer in renderers) {
             // Remove outline shaders
             var materials = renderer.sharedMaterials.ToList();
-
+            
             materials.Remove(outlineMaskMaterial);
             materials.Remove(outlineFillMaterial);
 

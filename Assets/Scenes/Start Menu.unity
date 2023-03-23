@@ -6250,8 +6250,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   scrollField: {fileID: 618230699}
-  spacing: 30
-  startSpacing: 20
 --- !u!1 &1728951902
 GameObject:
   m_ObjectHideFlags: 0
