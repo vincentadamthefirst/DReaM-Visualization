@@ -184,7 +184,9 @@ namespace Scenery.RoadNetwork {
         /// <param name="lane">The Lane for which to generate the Mesh for</param>
         private static void CloseSidewalkMeshForLane(ref Mesh mesh, Lane lane) {
             if (lane.Successor == null) return;
-
+            
+            //Debug.Log($"Successor for {lane.Parent.Parent.Id}:{lane.Id} is {lane.Successor.Parent.Parent.Id}:{lane.Successor.Id}");
+     
             var ps = mesh.vertices.ToList();
             var ts0 = mesh.GetTriangles(0).ToList();
             var ts1 = mesh.GetTriangles(1).ToList();
@@ -192,30 +194,29 @@ namespace Scenery.RoadNetwork {
             var uvs = mesh.uv.ToList();
             var w = lane.RoadDesign.sidewalkCurbWidth; // curb width
             var ld = lane.LaneDirection; // direction of the lane
-            var sr = lane.Parent.Parent.Successor; // successor road
             var sl = lane.Successor; // successor lane
             var innerH = sl.InnerHeight; // height of sidewalk at inner edge
             var outerH = sl.OuterHeight; // height of sidewalk at outer edge
-            var sln = sl.InnerNeighbor;
-            var m = lane.Multiplier; // direction multiplier
+            var succLaneInnerNeighbor = sl.InnerNeighbor;
+            var multiplier = lane.Multiplier; // direction multiplier
+            var succLaneSection = sl.Parent; // successor lane section
             var s = 0f; // distance to evaluate the point of (depends on contact point)
-            var sls = sl.Parent;
             if (lane.SuccessorContactPoint == ContactPoint.End) {
-                s += sl.Parent.Length;
-                m *= -1;
+                s = succLaneSection.Length;
+                multiplier *= -1;
             }
-            
+
             var i = ps.Count - 8;
             
             ps.AddRange(new[] {
-                sls.EvaluatePoint(s, m * sln.EvaluateWidth(s)), 
-                sls.EvaluatePoint(s, m * sln.EvaluateWidth(s), innerH),
-                sls.EvaluatePoint(s, m * (sln.EvaluateWidth(s) + w), innerH),
-                sls.EvaluatePoint(s, m * (sln.EvaluateWidth(s) + w), innerH),
-                sls.EvaluatePoint(s, m * (sl.EvaluateWidth(s) - w), outerH),
-                sls.EvaluatePoint(s, m * (sl.EvaluateWidth(s) - w), outerH),
-                sls.EvaluatePoint(s, m * sl.EvaluateWidth(s), outerH), 
-                sls.EvaluatePoint(s, m * sl.EvaluateWidth(s)),
+                succLaneSection.EvaluatePoint(s, multiplier * succLaneInnerNeighbor.EvaluateWidth(s)), 
+                succLaneSection.EvaluatePoint(s, multiplier * succLaneInnerNeighbor.EvaluateWidth(s), innerH),
+                succLaneSection.EvaluatePoint(s, multiplier * (succLaneInnerNeighbor.EvaluateWidth(s) + w), innerH),
+                succLaneSection.EvaluatePoint(s, multiplier * (succLaneInnerNeighbor.EvaluateWidth(s) + w), innerH),
+                succLaneSection.EvaluatePoint(s, multiplier * (sl.EvaluateWidth(s) - w), outerH),
+                succLaneSection.EvaluatePoint(s, multiplier * (sl.EvaluateWidth(s) - w), outerH),
+                succLaneSection.EvaluatePoint(s, multiplier * sl.EvaluateWidth(s), outerH), 
+                succLaneSection.EvaluatePoint(s, multiplier * sl.EvaluateWidth(s)),
             });
 
             var percentageUvCurbInner = innerH / (innerH + w);

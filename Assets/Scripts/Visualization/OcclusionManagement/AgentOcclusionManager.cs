@@ -87,7 +87,7 @@ namespace Visualization.OcclusionManagement {
         /// </summary>
         private void LateUpdate() {
             if (Disable) return; // disable this process
-            Detector.Trigger();
+            // Detector.Trigger(); TODO re-enable
         }
     }
 }
