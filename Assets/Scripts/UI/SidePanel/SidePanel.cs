@@ -60,7 +60,9 @@ namespace UI.SidePanel {
 
             // remove all entries
             while (_entries.Count > 0) {
-                Destroy(_entries[0].gameObject);
+                var toDestroy = _entries[0];
+                _entries.Remove(toDestroy);
+                Destroy(toDestroy.gameObject);
             }
 
             // create new entries

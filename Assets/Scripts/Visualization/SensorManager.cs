@@ -43,7 +43,7 @@ namespace Visualization {
                     Destroy(sensor.gameObject);
                 }
             } else {
-                foreach (var (_, sensorSetup) in agent.StaticData.UniqueSensors) {
+                foreach (var (n, sensorSetup) in agent.StaticData.UniqueSensors) { 
                     var sensorPrefab = Resources.Load<AgentSensor>("Prefabs/Objects/AgentSensor");
                     var sensor = Instantiate(sensorPrefab, agent.transform.parent);
                     sensor.SensorSetup = sensorSetup;

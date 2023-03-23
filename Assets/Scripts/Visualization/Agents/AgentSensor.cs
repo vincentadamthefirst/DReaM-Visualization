@@ -93,7 +93,7 @@ namespace Visualization.Agents {
             var agent = sender as Agent;
             var sensorInfo = agent.GetSensorData(SensorSetup.sensorName);
             if (sensorInfo.ValuesChangedTowardsNeighbors || _newSensor) {
-                UpdateOpeningAngle(sensorInfo.OpeningAngle, sensorInfo.Distance);
+                UpdateOpeningAngle(sensorInfo.OpeningAngle * Mathf.Deg2Rad, sensorInfo.Distance);
                 _newSensor = false;
             }
             var localPos = new Vector3(sensorInfo.LocalPosition.x, 0, sensorInfo.LocalPosition.y);
