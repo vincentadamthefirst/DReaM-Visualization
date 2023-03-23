@@ -87,7 +87,7 @@ namespace Visualization.POIs {
                         textLabelObject.GetComponent<TMP_Text>().fontSize = 2;
                         textLabelObject.GetComponent<TMP_Text>().SetText(
                             $"{stoppingPoint.type}<br>" +
-                            $"Road: {stoppingPoint.roadId} | Lane: {stoppingPoint.roadId}<br>" +
+                            $"Road: {stoppingPoint.roadId} | Lane: {stoppingPoint.laneId}<br>" +
                             $"Position: {stoppingPoint.position.x}, {stoppingPoint.position.y}");
                         textLabelObject.gameObject.SetActive(false);
                         spObject.InfoLabel = textLabelObject;

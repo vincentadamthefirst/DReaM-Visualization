@@ -166,12 +166,20 @@ namespace Visualization.Labels.Detail {
                     _agent.StaticData.AgentCamera.WorldToViewportPoint(new Vector3(current[i].Item1.x, 0, current[i].Item1.y));
 
                 var actualPosition = new Vector2((localPosition.x - 0.5f) * 194, (localPosition.y - 0.5f) * 194);
+                if (actualPosition.x is > 96 or < -96 || actualPosition.y is > 96 or < -96) {
+                    toDestroy.Add(_otherAgents[i]);
+                    continue;
+                }
+
                 _otherAgents[i].localPosition = actualPosition;
                 _otherAgents[i].localRotation = Quaternion.identity; //Quaternion.Euler(0, 0, Mathf.Rad2Deg * current[i].Item2);
             }
 
             while (toDestroy.Count > 0) {
-                Destroy(toDestroy[0]);
+                var d = toDestroy[0];
+                toDestroy.Remove(d);
+                _otherAgents.Remove(d);
+                Destroy(d.gameObject);
             }
         }
     }
