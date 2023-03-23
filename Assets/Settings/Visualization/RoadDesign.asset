@@ -12,11 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f41c3e770f84c7382783aff04e186d8, type: 3}
   m_Name: RoadDesign
   m_EditorClassIdentifier: 
-  roadPrefab: {fileID: 30504008684144915, guid: 8e0eebc53ed28fd4692f294821aa9bdc, type: 3}
-  lanePrefab: {fileID: 6720255902914634455, guid: aed3a6119c214c3498466efa6c06bb75, type: 3}
-  laneSectionPrefab: {fileID: 3958004189400049946, guid: 014fdef07401bb443a92a1ea914669e9, type: 3}
-  junctionPrefab: {fileID: 8144626824674827851, guid: 85e4b06cd66cf354ba117ecfcd37cb1e, type: 3}
-  roadMarkPrefab: {fileID: 3689535253008410456, guid: 3245dccf41f655d4b97a8b74d74de4d2, type: 3}
   samplePrecision: 100
   sidewalkCurbWidth: 0.15
   offsetHeight: 0.0001
@@ -57,35 +52,35 @@ MonoBehaviour:
   disableStraightSidewalkOnJunction: 1
   disableSidewalkOnJunction: 0
   roadObjectPrefabs:
-  - prefab: {fileID: 5757223129374973841, guid: 5c205c03eab942a4c9f103c7e0bc9ae1, type: 3}
+  - prefabName: Trees/TreeC
     type: 1
     subType: tree_c
     baseHeight: 10
     baseRadius: 7
     baseWidth: 1
     baseLength: 1
-  - prefab: {fileID: 1936655541643297703, guid: a41a92284e81a3b47b9a9af9f2f8ee77, type: 3}
+  - prefabName: Trees/TreeA
     type: 1
     subType: tree_a
     baseHeight: 10
     baseRadius: 8
     baseWidth: 1
     baseLength: 1
-  - prefab: {fileID: 8712757401458445344, guid: 2f4099b5433b208458260b0037acb921, type: 3}
+  - prefabName: StreetLight
     type: 3
     subType: 
     baseHeight: 1
     baseRadius: 0.3
     baseWidth: 1
     baseLength: 1
-  - prefab: {fileID: 3704800687811875084, guid: 8b510f9b52e48c84bba89b98d0622b8a, type: 3}
+  - prefabName: Pole
     type: 4
     subType: 
     baseHeight: 1
     baseRadius: 0.2
     baseWidth: 1
     baseLength: 1
-  - prefab: {fileID: 7081723442093972839, guid: fb1291a56521de945a85027dbc7af630, type: 3}
+  - prefabName: Trees/TreeB
     type: 1
     subType: tree_b
     baseHeight: 11
@@ -117,12 +112,3 @@ MonoBehaviour:
   - material: {fileID: 2100000, guid: 27122d51c1ffa9e4fa3bc2fe2f564905, type: 2}
     type: 5
     subType: 
-  trafficSignPrefabs:
-  - prefab: {fileID: 6760280118958841856, guid: d115d44a0cf6a984d9088c1ffa8725ad, type: 3}
-    type: 274
-  - prefab: {fileID: 919132149155446097, guid: 6122a0599815dd64093d7343bbad35e7, type: 3}
-    type: 205
-  - prefab: {fileID: 4631760446976050200, guid: 705c37ccee080b1489bf2bc3edb21224, type: 3}
-    type: 301
-  - prefab: {fileID: 4531006397634666016, guid: 023eb60246654904d97e48e5fc441ca8, type: 3}
-    type: 206

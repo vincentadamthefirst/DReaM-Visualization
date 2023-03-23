@@ -1,10 +1,9 @@
 
 using UnityEngine;
-using System.Collections.Generic;
 
 public class LeanAudioStream {
 
-	public int position = 0;
+	public int position;
 
 	public AudioClip audioClip;
 	public float[] audioArr;
@@ -38,7 +37,7 @@ public class LeanAudio : object {
 	public static float MIN_FREQEUNCY_PERIOD = 0.000115f;
 	public static int PROCESSING_ITERATIONS_MAX = 50000;
 	public static float[] generatedWaveDistances;
-	public static int generatedWaveDistancesCount = 0;
+	public static int generatedWaveDistancesCount;
 
 	private static float[] longList;
 

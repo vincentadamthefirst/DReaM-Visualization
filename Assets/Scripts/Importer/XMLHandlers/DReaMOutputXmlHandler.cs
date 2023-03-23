@@ -12,8 +12,8 @@ using Visualization.POIs;
 namespace Importer.XMLHandlers {
 
     public class ValueMapper {
-        private readonly Dictionary<string, int> _defaultPositionMapping = new Dictionary<string, int>();
-        private readonly Dictionary<string, int> _listPositionMapping = new Dictionary<string, int>();
+        private readonly Dictionary<string, int> _defaultPositionMapping = new();
+        private readonly Dictionary<string, int> _listPositionMapping = new();
 
         private string[] _currentSplitSample;
         
@@ -60,10 +60,9 @@ namespace Importer.XMLHandlers {
         
         private Dictionary<int, List<string>> _agentValueMapping;
 
-        public List<IntersectionStoppingPoints> StoppingPoints = new List<IntersectionStoppingPoints>();
+        public List<IntersectionStoppingPoints> StoppingPoints = new();
 
-        public Dictionary<string, List<ConflictArea>> ConflictAreaMapping { get; } =
-            new Dictionary<string, List<ConflictArea>>();
+        public Dictionary<string, List<ConflictAreaInfo>> ConflictAreaMapping { get; } = new();
 
         private ValueMapper _valueMapper;
 
@@ -79,43 +78,16 @@ namespace Importer.XMLHandlers {
             _maxSampleTime = max;
         }
 
-        public override string GetName() {
-            return "dream";
-        }
-
-        public override string GetDetails() {
-            if (xmlDocument.Root == null) return "<color=\"red\"><b>XML Error</b>";
-        
-            var supported = new Version("0.3.0");
-            
-            var versionInFile = xmlDocument.Root?.Attribute("SchemaVersion")?.Value;
-            var versionString = "<color=\"orange\">Version unknown";
-
-            if (versionInFile != null) {
-                var fileVersion = new Version(versionInFile);
-                versionString = fileVersion.CompareTo(supported) >= 0
-                    ? "<color=\"green\">Version " + versionInFile
-                    : "<color=\"red\">Version " + versionInFile;
-            }
-            
-            var returnString = versionString + "<color=\"white\">";
-            
-            var samples = xmlDocument.Root.Element("RunResults")?.Element("RunResult")?.Element("Cyclics")?.Element("Samples");
-            
-            if (samples != null && samples.Elements("Sample").Count() != 0) {
-                returnString += " <b>|</b> Samples: " + samples.Elements("Sample").Count();
-            } else {
-                returnString += " <b>|</b><color=\"red\"> Samples missing!";
-            }
-
-            return returnString;
-        }
+        public override XmlType GetXmlType() => XmlType.DReaM;
 
         public void StartImport() {
             if (xmlDocument.Root == null)
                 throw new Exception("XML is not formatted correctly.");
 
             var allRunResults = xmlDocument.Root.Element("RunResults")?.Elements("RunResult");
+            if (allRunResults == null) {
+                throw new ArgumentMissingException("No RunResults found in DReaMOutput. Aborting.");
+            } 
             foreach (var runResult in allRunResults) {
                 if (!GetString(runResult, "RunId").Contains(RunId)) continue;
                 _runResult = runResult;
@@ -123,37 +95,40 @@ namespace Importer.XMLHandlers {
             }
             
             if (_runResult == null)
-                throw new XmlException("No RunResult found!");
+                throw new XmlException("No RunResult with the same id as SimulationOutput found!");
+
+            var infrastructureDataElement = xmlDocument.Root.Element("InfrastructureData");
+            if (infrastructureDataElement != null) {
+                ImportStoppingPoints(infrastructureDataElement);
+                ImportConflictAreas(infrastructureDataElement);
+            } else {
+                Debug.Log(
+                    "No InfrastructureData found in DReaMOutput, skipping display of Stopping Points and Conflict Areas.");
+            }
             
             PrepareValueMapping();
-            
-            ImportStoppingPoints();
-            ImportConflictAreas();
             ImportSamples();
         }
 
         private void ImportSamples() {
             var samples = _runResult.Element("Cyclics")?.Element("Samples")?.Elements("Sample") ??
                           throw new ArgumentMissingException("Samples not given correctly.");
-            
+
             foreach (var sample in samples) {
                 var sampleTime = GetInt(sample, "time", -1);
                 if (sampleTime < 0) 
                     throw new ArgumentMissingException("Negative time values are not supported.");
-                if (sampleTime < _minSampleTime || sampleTime > _maxSampleTime)
+                if (sampleTime < _minSampleTime || sampleTime > _maxSampleTime) {
+                    Debug.Log("Continuing due to " + sampleTime);
                     continue;
+                }
 
-                var sampleAgents = sample.Elements("A").ToList();
+                var sampleAgents = sample.Elements("Agent").ToList();
 
                 foreach (var sampleAgent in sampleAgents) {
-                    var id = GetInt(sampleAgent, "id", -1);
-                    // VisualizationMaster.Agents.ForEach(x => Debug.Log(x.Id));
-                    
-                    var agent = VisualizationMaster.Agents.First(x => x.Id == id);
+                    var id = GetString(sampleAgent, "id", "-1");
+                    var agent = VisualizationMaster.Instance.Agents.First(x => x.Id == id);
 
-                    // if (agent == null)
-                    //     Debug.Log($"Error, could not find agent {id} in samples.");
-                            
                     var agentSample = string.Concat(sampleAgent.Nodes());
                     _valueMapper.SetCurrentSample(agentSample);
 
@@ -162,8 +137,11 @@ namespace Importer.XMLHandlers {
 
                     // extract basic string info
                     info.ScanAoI = _valueMapper.GetString("ScanAOI");
+                    step.AllInfo.Add("ScanAOI", info.ScanAoI);
                     info.GlanceType = _valueMapper.GetString("GazeType");
+                    step.AllInfo.Add("GazeType", info.GlanceType);
                     info.CrossingPhase = _valueMapper.GetString("crossingPhase");
+                    step.AllInfo.Add("crossingPhase", info.CrossingPhase);
 
                     // extract sensor information
                     var sensorInformation = new SensorInformation {
@@ -171,8 +149,10 @@ namespace Importer.XMLHandlers {
                         Heading = _valueMapper.GetFloat("ufovAngle"),
                         OpeningAngle = _valueMapper.GetFloat("openingAngle")
                     };
-
-                    // Debug.Log($"Agent {id}: {sensorInformation.Heading} & {sensorInformation.OpeningAngle} & {sensorInformation.Distance}");
+                    
+                    step.AllInfo.Add("viewDistance", sensorInformation.Distance);
+                    step.AllInfo.Add("ufovAngle", sensorInformation.Heading);
+                    step.AllInfo.Add("openingAngle", sensorInformation.OpeningAngle);
 
                     step.SensorInformation.Add("driver", sensorInformation);
 
@@ -188,22 +168,31 @@ namespace Importer.XMLHandlers {
                     }
 
                     info.OtherAgents = otherAgents.ToArray();
+                    step.AllInfo.Add("otherAgents", otherAgents.ToArray());
                 }
             }
         }
 
-        private void ImportConflictAreas() {
-            var caJunctions = _runResult.Element("ConflictAreas")?.Elements("Junction") ??
-                              throw new ArgumentMissingException("Simulation Output contains no Cyclics.");
-            
+        private void ImportConflictAreas(XContainer infrastructureData) {
+            var caElement = infrastructureData.Element("ConflictAreas");
+            if (caElement == null) {
+                Debug.Log("No ConflictAreas found in DReaMOutput.");
+                return;
+            }
+            var caJunctions = caElement.Elements("Junction").ToArray();
+            if (!caJunctions.Any()) {
+                Debug.Log("No Junctions found for ConflictAreas in DReaMOutput.");
+                return;
+            }
+
             foreach (var junction in caJunctions) {
                 var junctionId = junction.Attribute("id")?.Value.ToLower() ?? "not on junction";
                 if (!ConflictAreaMapping.ContainsKey(junctionId))
-                    ConflictAreaMapping.Add(junctionId, new List<ConflictArea>());
-                
+                    ConflictAreaMapping.Add(junctionId, new List<ConflictAreaInfo>());
+
                 var conflictAreas = junction.Elements("ConflictArea");
                 foreach (var conflictArea in conflictAreas) {
-                    ConflictAreaMapping[junctionId].Add(new ConflictArea {
+                    ConflictAreaMapping[junctionId].Add(new ConflictAreaInfo {
                         startSa = GetFloat(conflictArea, "startA"),
                         endSa = GetFloat(conflictArea, "endA"),
                         startSb = GetFloat(conflictArea, "startB"),
@@ -217,13 +206,19 @@ namespace Importer.XMLHandlers {
             }
         }
 
-        private void ImportStoppingPoints() {
-            var junctions = _runResult.Element("StoppingPoints")?.Elements("Junction");
-
-            if (junctions == null)
+        private void ImportStoppingPoints(XContainer infrastructureData) {
+            var spElement = infrastructureData.Element("StoppingPoints");
+            if (spElement == null) {
+                Debug.Log("No StoppingPoints found in DReaMOutput.");
                 return;
+            }
+            var spJunctions = spElement.Elements("Junction").ToArray();
+            if (!spJunctions.Any()) {
+                Debug.Log("No Junctions found for StoppingPoints in DReaMOutput.");
+                return;
+            }
 
-            foreach (var junction in junctions) {
+            foreach (var junction in spJunctions) {
                 var intersectionId = GetString(junction, "id", "UNKNOWN");
                 var isp = new IntersectionStoppingPoints
                     { IntersectionId = intersectionId, laneStoppingPoints = new List<LaneStoppingPoints>() };
@@ -235,7 +230,7 @@ namespace Importer.XMLHandlers {
                         stoppingPoints = new List<StoppingPoint>()
                     };
 
-                    var points = lane.Elements("Point");
+                    var points = lane.Elements("Point").ToArray();
                     if (!points.Any())
                         continue;
 
@@ -247,8 +242,10 @@ namespace Importer.XMLHandlers {
                             type = GetString(stoppingPoint, "type")
                         });
                     }
+
                     isp.laneStoppingPoints.Add(lsp);
                 }
+
                 StoppingPoints.Add(isp);
             }
         }

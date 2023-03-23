@@ -185,20 +185,20 @@ namespace Habrador_Computational_Geometry
 
             List<Edge3> edges = new List<Edge3>()
             {
-                new Edge3(topFR, topFL),
-                new Edge3(topFL, topBL),
-                new Edge3(topBL, topBR),
-                new Edge3(topBR, topFR),
+                new(topFR, topFL),
+                new(topFL, topBL),
+                new(topBL, topBR),
+                new(topBR, topFR),
 
-                new Edge3(bottomFR, bottomFL),
-                new Edge3(bottomFL, bottomBL),
-                new Edge3(bottomBL, bottomBR),
-                new Edge3(bottomBR, bottomFR),
+                new(bottomFR, bottomFL),
+                new(bottomFL, bottomBL),
+                new(bottomBL, bottomBR),
+                new(bottomBR, bottomFR),
 
-                new Edge3(topFR, bottomFR),
-                new Edge3(topFL, bottomFL),
-                new Edge3(topBL, bottomBL),
-                new Edge3(topBR, bottomBR),
+                new(topFR, bottomFR),
+                new(topFL, bottomFL),
+                new(topBL, bottomBL),
+                new(topBR, bottomBR),
             };
 
             return edges;

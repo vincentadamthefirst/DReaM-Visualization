@@ -1,11 +1,9 @@
-﻿using UnityEngine;
-
-namespace Scenery.RoadNetwork.RoadObjects {
+﻿namespace Scenery.RoadNetwork.RoadObjects {
     
     /// <summary>
     /// Abstract class representing an object along a road in OpenDrive.
     /// </summary>
-    public abstract class RoadObject : VisualizationElement {
+    public abstract class RoadObject : OccluderElement {
         
         /// <summary>
         /// The type of object
@@ -75,13 +73,5 @@ namespace Scenery.RoadNetwork.RoadObjects {
 
         // internal bool, an object with a repeat will be deleted after all its "children" have been generated
         protected bool markedForDelete;
-
-        protected override Vector3[] GetReferencePointsRenderer() {
-            return new Vector3[0]; // assume objects along the road are never targets
-        }
-
-        protected override Vector3[] GetReferencePointsCustom() {
-            return new Vector3[0]; // assume objects along the road are never targets
-        }
     }
 }

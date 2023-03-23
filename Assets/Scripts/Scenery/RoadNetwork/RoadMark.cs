@@ -33,8 +33,6 @@ namespace Scenery.RoadNetwork {
         /// The width of this RoadMark
         /// </summary>
         public float Width { get; set; }
-        
-        public override bool IsDistractor => false;
 
         /// <summary>
         /// Starts the generation of the Mesh for this RoadMark.
@@ -62,30 +60,10 @@ namespace Scenery.RoadNetwork {
             var p = material.GetTextureScale(BaseMap);
             var v = new Vector2(p.x, ParentLane.Parent.Length * p.y);
             material.SetTextureScale(BaseMap, v);
-            material.SetColor(Color, RoadMarkColor);
+            material.SetColor(ShaderColor, RoadMarkColor);
             meshRenderer.material = material;
         }
-
-        /// <summary>
-        /// Scenery will not be handled on occlusion, ignore
-        /// </summary>
-        public override void HandleHit() {
-            // Ignore
-        }
-
-        /// <summary>
-        /// Scenery will not be handled on occlusion, ignore
-        /// </summary>
-        public override void HandleNonHit() {
-            // Ignore
-        }
-
-        protected override Vector3[] GetReferencePointsRenderer() {
-            return new Vector3[0]; // assume scenery is never target, Ignore
-        }
-
-        protected override Vector3[] GetReferencePointsCustom() {
-            return new Vector3[0]; // assume scenery is never target, Ignore
-        }
+        
+        public override ElementOrigin ElementOrigin => ElementOrigin.OpenDrive;
     }
 }

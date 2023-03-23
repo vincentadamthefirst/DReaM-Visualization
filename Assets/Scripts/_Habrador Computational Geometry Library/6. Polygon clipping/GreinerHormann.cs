@@ -729,7 +729,7 @@ namespace Habrador_Computational_Geometry
         public ClipVertex nextPoly;
 
         //True if this is an intersection vertex
-        public bool isIntersection = false;
+        public bool isIntersection;
 
         //Is an intersect an entry to a neighbor polygon, otherwise its an exit from a polygon
         public bool isEntry;
@@ -738,7 +738,7 @@ namespace Habrador_Computational_Geometry
         public ClipVertex neighbor;
 
         //HIf this is an intersection vertex, this is how far is is between two vertices that are not intersecting
-        public float alpha = 0f;
+        public float alpha;
 
         //Is this vertex taken by the final polygon, which is more efficient than removing from a list
         //when we create the final polygon

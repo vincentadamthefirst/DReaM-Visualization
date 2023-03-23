@@ -6,100 +6,93 @@ using UI.Main_Menu.Utils;
 using UI.POIs.ConflictAreas;
 using UnityEngine;
 using UnityEngine.UI;
+using Visualization.Labels.BasicLabels;
 
 namespace Visualization.POIs {
 
-    public class ConflictArea {
+    public class ConflictAreaInfo {
         public float startSa;
         public float endSa;
         public float startSb;
         public float endSb;
-        
+
         public string roadIdA;
         public int laneIdA;
-        
+
         public string roadIdB;
         public int laneIdB;
 
         public Color color;
-        public GameObject obj;
+        public ConflictArea conflictArea;
     }
 
     public class ConflictAreaVisualizer : MonoBehaviour {
 
-        [Header("UI Elements")] 
-        public JunctionGroup junctionGroupPrefab;
-        public RoadAGroup roadAGroupPrefab;
-        public RoadBGroup roadBGroupPrefab;
-        public LaneToLaneConflictArea laneToLaneConflictAreaPrefab;
-        public RectTransform container;
+        [Header("UI Elements")] public RectTransform container;
         public TMP_InputField searchInput;
 
-        public Dictionary<string, List<ConflictArea>> ConflictAreaMapping { get; set; } =
-            new Dictionary<string, List<ConflictArea>>();
+        public Dictionary<string, List<ConflictAreaInfo>> ConflictAreaMapping { get; set; } = new();
 
         public Material conflictAreaMaterial;
 
-        private List<JunctionGroup> _junctionGroups = new List<JunctionGroup>();
+        private readonly List<IntersectionGroup> _junctionGroups = new();
 
-        // (current road -> (other road -> (current lane, other lanes)))
-        private readonly Dictionary<string, Dictionary<string, Dictionary<int, List<ConflictArea>>>> _mapping =
-            new Dictionary<string, Dictionary<string, Dictionary<int, List<ConflictArea>>>>();
-
-        private void BuildConflictArea(Road roadA, Road roadB, ConflictArea area, float colorLerp) {
-            var laneA = roadA.LaneSections[0].LaneIdMappings["" + area.laneIdA];
-            var laneB = roadB.LaneSections[0].LaneIdMappings["" + area.laneIdB];
+        private void BuildConflictArea(Road roadA, Road roadB, ConflictAreaInfo areaInfo, float colorLerp) {
+            var laneA = roadA.LaneSections[0].LaneIdMappings["" + areaInfo.laneIdA];
+            var laneB = roadB.LaneSections[0].LaneIdMappings["" + areaInfo.laneIdB];
 
             var meshA = new Mesh();
             var meshB = new Mesh();
 
-            RoadHelper.GenerateSimpleMeshForLane(ref meshA, laneA, area.startSa, area.endSa);
-            RoadHelper.GenerateSimpleMeshForLane(ref meshB, laneB, area.startSb, area.endSb);
+            RoadHelper.GenerateSimpleMeshForLane(ref meshA, laneA, areaInfo.startSa, areaInfo.endSa);
+            RoadHelper.GenerateSimpleMeshForLane(ref meshB, laneB, areaInfo.startSb, areaInfo.endSb);
 
-            var newObj = new GameObject {
-                transform = {
-                    name = $"ConflictArea {roadA.OpenDriveId} & {roadB.OpenDriveId}",
-                    parent = transform
-                }
-            };
+            var conflictAreaPrefab = Resources.Load<ConflictArea>("Prefabs/Objects/ConflictArea");
+            var conflictArea = Instantiate(conflictAreaPrefab, transform);
+            conflictArea.name = $"ConflictArea {roadA.Id} & {roadB.Id}";
 
-            var meshFilter = newObj.AddComponent<MeshFilter>();
-            var meshRenderer = newObj.AddComponent<MeshRenderer>();
-
-            var mesh2 = new Mesh();
+            var mesh = new Mesh();
             var totalVertices = meshA.vertices.ToList();
             totalVertices.AddRange(meshB.vertices);
-            mesh2.vertices = totalVertices.Select(x => x + Vector3.up * .2f).ToArray();
+            mesh.vertices = totalVertices.Select(x => x + Vector3.up * .2f).ToArray();
 
-            mesh2.subMeshCount = 2;
-            mesh2.SetTriangles(meshA.triangles, 0);
-            mesh2.SetTriangles(meshB.triangles.Select(x => x + meshA.vertices.Length).ToArray(), 1);
-            
-            mesh2.Optimize();
-            mesh2.RecalculateBounds();
-            mesh2.RecalculateNormals();
-            
-            var col2 = Color.HSVToRGB(colorLerp, .9f, .7f, false);
-            area.color = col2;
+            mesh.subMeshCount = 2;
+            mesh.SetTriangles(meshA.triangles, 0);
+            mesh.SetTriangles(meshB.triangles.Select(x => x + meshA.vertices.Length).ToArray(), 1);
 
+            mesh.Optimize();
+            mesh.RecalculateBounds();
+            mesh.RecalculateNormals();
+
+            var color = Color.HSVToRGB(colorLerp, .9f, .7f, false);
+            areaInfo.color = color;
+            
             var mat2 = new Material(conflictAreaMaterial) {
-                color = col2.WithAlpha(.2f)
+                color = color.WithAlpha(.2f)
             };
-            meshRenderer.materials = new [] {mat2, mat2};
+            var materials = new[] { mat2, mat2 };
 
-            meshFilter.mesh = mesh2;
-            
-            newObj.SetActive(false);
-            area.obj = newObj;
+            conflictArea.SetMeshData(mesh, materials);
 
-            // if (!_mapping.ContainsKey(roadA.OpenDriveId))
-            //     _mapping.Add(roadA.OpenDriveId, new Dictionary<string, Dictionary<int, List<ConflictArea>>>());
-            // if (!_mapping[roadA.OpenDriveId].ContainsKey(roadB.OpenDriveId))
-            //     _mapping[roadA.OpenDriveId].Add(roadB.OpenDriveId, new Dictionary<int, List<ConflictArea>>());
-            // if (!_mapping[roadA.OpenDriveId][roadB.OpenDriveId].ContainsKey(area.laneIdA))
-            //     _mapping[roadA.OpenDriveId][roadB.OpenDriveId].Add(area.laneIdA, new List<ConflictArea>());
-            //
-            // _mapping[roadA.OpenDriveId][roadB.OpenDriveId][area.laneIdA].Add(area);
+            var centroid = new Vector2 {
+                x = mesh.vertices.Sum(vertex => vertex.x) / mesh.vertices.Length,
+                y = mesh.vertices.Sum(vertex => vertex.z) / mesh.vertices.Length
+            };
+
+            var textLabelPrefab = Resources.Load<TextLabel>("Prefabs/UI/Visualization/Labels/TextLabel");
+            var textLabel = Instantiate(textLabelPrefab, conflictArea.transform);
+            textLabel.name = "Label";
+            textLabel.transform.localPosition = new Vector3(centroid.x, 1.5f, centroid.y);
+            textLabel.MainCamera = Camera.main;
+            textLabel.GetComponent<TMP_Text>().fontSize = 3.5f;
+            textLabel.GetComponent<TMP_Text>().SetText(
+                $"Road {areaInfo.roadIdA}, Lane {areaInfo.laneIdA} <br>" +
+                $"Road {areaInfo.roadIdB}, Lane {areaInfo.laneIdB}");
+            textLabel.gameObject.SetActive(false);
+            conflictArea.InfoLabel = textLabel;
+
+            conflictArea.MeshObject.SetActive(false);
+            areaInfo.conflictArea = conflictArea;
         }
 
         public void GenerateObjects() {
@@ -110,6 +103,9 @@ namespace Visualization.POIs {
             var currentIndex = 0;
 
             foreach (var junction in ConflictAreaMapping) {
+                var junctionGroupPrefab =
+                    Resources.Load<IntersectionGroup>(
+                        "Prefabs/UI/Visualization/RuntimeMenu/ConflictAreas/IntersectionGroup");
                 var newJunctionGroup = Instantiate(junctionGroupPrefab, container);
                 newJunctionGroup.InitializeData(junction.Key);
 
@@ -119,24 +115,30 @@ namespace Visualization.POIs {
 
                     BuildConflictArea(roadA, roadB, conflictArea, currentIndex / (float)totalCount);
 
-                    if (!newJunctionGroup.RoadAGroups.Any(x => x.roadAText.text == roadA.OpenDriveId)) {
+                    if (newJunctionGroup.RoadAGroups.All(x => x.roadAText.text != roadA.Id)) {
+                        var roadAGroupPrefab =
+                            Resources.Load<RoadAGroup>("Prefabs/UI/Visualization/RuntimeMenu/ConflictAreas/RoadAGroup");
                         var newRoadAGroup = Instantiate(roadAGroupPrefab, container);
-                        newRoadAGroup.InitializeData(roadA.OpenDriveId);
+                        newRoadAGroup.InitializeData(roadA.Id);
                         newRoadAGroup.Parent = newJunctionGroup;
                         newJunctionGroup.RoadAGroups.Add(newRoadAGroup);
                     }
 
-                    var roadAGroup = newJunctionGroup.RoadAGroups.First(x => x.roadAText.text == roadA.OpenDriveId);
-                    if (!roadAGroup.RoadBGroups.Any(x => x.roadBText.text == roadB.OpenDriveId)) {
+                    var roadAGroup = newJunctionGroup.RoadAGroups.First(x => x.roadAText.text == roadA.Id);
+                    if (roadAGroup.RoadBGroups.All(x => x.roadBText.text != roadB.Id)) {
+                        var roadBGroupPrefab =
+                            Resources.Load<RoadBGroup>("Prefabs/UI/Visualization/RuntimeMenu/ConflictAreas/RoadBGroup");
                         var newRoadBGroup = Instantiate(roadBGroupPrefab, container);
-                        newRoadBGroup.InitializeData(roadB.OpenDriveId);
+                        newRoadBGroup.InitializeData(roadB.Id);
                         newRoadBGroup.Parent = roadAGroup;
                         roadAGroup.RoadBGroups.Add(newRoadBGroup);
                     }
 
-                    var roadBGroup = roadAGroup.RoadBGroups.First(x => x.roadBText.text == roadB.OpenDriveId);
+                    var roadBGroup = roadAGroup.RoadBGroups.First(x => x.roadBText.text == roadB.Id);
 
-                    var newLaneToLane = Instantiate(laneToLaneConflictAreaPrefab, container);
+                    var laneToLaneConflictArea = Resources.Load<LaneToLaneConflictArea>(
+                        "Prefabs/UI/Visualization/RuntimeMenu/ConflictAreas/LaneToLaneConflictArea");
+                    var newLaneToLane = Instantiate(laneToLaneConflictArea, container);
                     newLaneToLane.InitializeData(conflictArea);
                     newLaneToLane.Parent = roadBGroup;
                     roadBGroup.ConflictAreas.Add(newLaneToLane);
@@ -148,7 +150,7 @@ namespace Visualization.POIs {
             }
 
             LayoutRebuilder.ForceRebuildLayoutImmediate(container);
-            
+
             // scroll up
             container.parent.parent.GetComponent<ScrollRect>().verticalNormalizedPosition = 1f;
         }
@@ -160,11 +162,10 @@ namespace Visualization.POIs {
             }
         }
 
-        public void StartSearch() {
+        public void StartSearch() { // FIXME enable search
             ClearSearch();
-            foreach (var jg in _junctionGroups) {
-                if (!jg.Search(searchInput.text))
-                    jg.gameObject.SetActive(false);
+            foreach (var jg in _junctionGroups.Where(jg => !jg.Search(searchInput.text))) {
+                jg.gameObject.SetActive(false);
             }
         }
     }

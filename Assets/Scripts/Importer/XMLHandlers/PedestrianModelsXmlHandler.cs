@@ -1,15 +1,13 @@
 ﻿using System.Globalization;
 using UnityEngine;
+using Visualization;
 using Visualization.Agents;
 
 namespace Importer.XMLHandlers {
-    public class PedestrianModelsXmlHandler : XmlHandler {
+    public sealed class PedestrianModelsXmlHandler : XmlHandler {
+        public override XmlType GetXmlType() => XmlType.PedestrianModels;
 
-        public override string GetName() {
-            return "ped";
-        }
-
-        public virtual void StartImport() {
+        public void StartImport() {
             ImportPedestrianModels();
         }
         
@@ -41,19 +39,15 @@ namespace Importer.XMLHandlers {
                 var height = float.Parse(dimension?.Attribute("height")?.Value ?? "1.8",
                     CultureInfo.InvariantCulture.NumberFormat);
 
-                var info = new PedestrianModelInformation() {
+                var info = new PedestrianModelInformation {
                     Width = width,
                     Length = length,
                     Height = height,
                     Center = centerPoint,
                 };
                 
-                VisualizationMaster.PedestrianModelCatalog.Add(name, info);
+                VisualizationMaster.Instance.PedestrianModelCatalog.Add(name, info);
             }
-        }
-
-        public override string GetDetails() {
-            return "...";
         }
     }
 }

@@ -12,34 +12,30 @@ using Visualization.Agents;
 using Visualization.SimulationEvents;
 
 namespace Importer.XMLHandlers {
-    
-    public  class XmlAgent {
-        public int Id { get; set; }
+    public class XmlAgent {
+        public string Id { get; set; }
         public string AgentGroup { get; set; }
-            
+
         public string AgentTypeString { get; set; }
-            
+
         public AgentType AgentType { get; set; }
-            
+
         public string ModelType { get; set; }
-            
+
         public Agent ActualAgent { get; set; }
-            
-        public Dictionary<string, int> ValuePositions { get; } = new Dictionary<string, int>();
 
-        public List<string> UnknownDataNames { get; } = new List<string>();
+        public Dictionary<string, int> ValuePositions { get; } = new();
 
-        public Dictionary<int, SimulationStep> SimulationSteps { get; } = new Dictionary<int, SimulationStep>();
+        public Dictionary<int, SimulationStep> SimulationSteps { get; } = new();
     }
 
-    public class SimulationOutputXmlHandler : XmlHandler {
+    public sealed class SimulationOutputXmlHandler : XmlHandler {
+        private Dictionary<string, XmlAgent> _xmlAgents;
 
-        private Dictionary<int, XmlAgent> _xmlAgents;
-
-        private Dictionary<int, List<SimulationEvent>> _events = new Dictionary<int, List<SimulationEvent>>();
+        private readonly Dictionary<int, List<SimulationEvent>> _events = new();
 
         private List<XElement> _samples;
-        
+
         public string RunId { get; set; }
 
         private XElement _runResult;
@@ -48,18 +44,15 @@ namespace Importer.XMLHandlers {
         private int _maxSampleTime = int.MinValue;
         private int _sampleStep = -1;
 
-        private static readonly List<string> KnownAttributes = new List<string>
+        private static readonly List<string> KnownAttributes = new()
             { "AccelerationEgo", "BrakeLight", "IndicatorState", "XPosition", "YPosition", "VelocityEgo", "YawAngle" };
-
 
         public void SetSampleTimeLimits(int min, int max) {
             _minSampleTime = min;
             _maxSampleTime = max;
         }
 
-        public override string GetName() {
-            return "out";
-        }
+        public override XmlType GetXmlType() => XmlType.SimulationOutput;
 
         public List<string> GetRuns() {
             if (xmlDocument.Root == null) {
@@ -83,29 +76,24 @@ namespace Importer.XMLHandlers {
             }
         }
 
-        public virtual void StartImport() {
-            _xmlAgents = new Dictionary<int, XmlAgent>();
-            
+        public void StartImport() {
+            _xmlAgents = new Dictionary<string, XmlAgent>();
+
             FindRunResult();
 
             if (_runResult == null)
                 throw new XmlException("No RunResult found!");
 
             GetSampleSize();
-            
-            VisualizationMaster.MaxSampleTime = _maxSampleTime;
-            VisualizationMaster.MinSampleTime = _minSampleTime;
-            VisualizationMaster.SampleStep = _sampleStep;
-            
+
+            VisualizationMaster.Instance.MaxSampleTime = _maxSampleTime;
+            VisualizationMaster.Instance.MinSampleTime = _minSampleTime;
+            VisualizationMaster.Instance.SampleStep = _sampleStep;
+
             ParseEvents();
             ParseXmlAgents();
             ParseAgentData();
             CreateAgents();
-        }
-
-        public string[] GetUnknownAttributeNames() {
-            var firstAgentAttributeNames = _xmlAgents[_xmlAgents.Keys.First()].UnknownDataNames;
-            return firstAgentAttributeNames.ToArray();
         }
 
         /// <summary>
@@ -127,10 +115,10 @@ namespace Importer.XMLHandlers {
             var max = int.MinValue;
 
             _samples = samples.ToList();
-            var step = GetInt(_samples[1], "Time", 0) - GetInt(_samples[0], "Time", 0);
+            var step = GetInt(_samples[1], "Time") - GetInt(_samples[0], "Time");
             _sampleStep = step;
-            
-            foreach (var time in _samples.Select(sample => GetInt(sample, "Time", 0))) {
+
+            foreach (var time in _samples.Select(sample => GetInt(sample, "Time"))) {
                 if (time > max) max = time;
                 if (time < min) min = time;
             }
@@ -138,60 +126,18 @@ namespace Importer.XMLHandlers {
             return new Tuple<int, int, int, int>(min, max, _samples.Count, step);
         }
 
-        public override string GetDetails() {
-            if (xmlDocument.Root == null) return "<color=\"red\"><b>XML Error</b>";
-
-            var supported = new Version("0.3.0");
-            
-            var versionInFile = xmlDocument.Root?.Attribute("SchemaVersion")?.Value;
-            var versionString = "<color=\"orange\">Version unknown";
-
-            if (versionInFile != null) {
-                var fileVersion = new Version(versionInFile);
-                versionString = fileVersion.CompareTo(supported) >= 0
-                    ? "<color=\"green\">Version " + versionInFile
-                    : "<color=\"red\">Version " + versionInFile;
-            }
-
-            var statistics = _runResult.Element("RunStatistics");
-            var events = _runResult.Element("Events");
-            var agents = _runResult.Element("Agents");
-
-            if (statistics == null) {
-                return versionString + " <color=\"red\"> RunResults missing!";
-            }
-
-            var returnString = versionString + "<color=\"white\">";
-
-            if (events != null) {
-                returnString += " <b>|</b> Events: " + events.Elements("Event").Count();
-            }
-
-            if (statistics.Element("StopReason") != null) {
-                returnString += " <b>|</b> Stop: " + String.Concat(statistics.Element("StopReason").Nodes());
-            }
-
-            if (agents != null && agents.Elements("Agent").Count() != 0) {
-                returnString += " <b>|</b> Agents: " + agents.Elements("Agent").Count();
-            } else {
-                returnString += " <b>|</b><color=\"red\"> Agents missing!";
-            }
-
-            return returnString;
-        }
-
         private void ParseEvents() {
             if (xmlDocument.Root == null) return;
             var events = xmlDocument.Root.XPathSelectElement("//Events")?.XPathSelectElements("Event");
             if (events == null) return;
-            
+
             foreach (var eventElement in events) {
                 var type = eventElement.Attribute("Type");
                 if (type == null) continue;
                 var timeStep = int.Parse(eventElement.Attribute("Time")?.Value ?? "-1");
                 if (timeStep == -1) continue;
 
-                var newEvent = new SimulationEvent {TimeStep = timeStep};
+                var newEvent = new SimulationEvent { TimeStep = timeStep };
                 switch (type.Value) {
                     case "AEBActive":
                         newEvent.EventType = SimulationEventType.AEBActive;
@@ -204,20 +150,21 @@ namespace Importer.XMLHandlers {
                         break;
                 }
 
-                if (newEvent.EventType == SimulationEventType.AEBActive || newEvent.EventType == SimulationEventType.AEBInactive) {
-                    var agentIdAttribute = eventElement.XPathSelectElement("EventParameter[@Key='AgentId']")?.Attribute("Value");
+                if (newEvent.EventType == SimulationEventType.AEBActive ||
+                    newEvent.EventType == SimulationEventType.AEBInactive) {
+                    var agentIdAttribute = eventElement.XPathSelectElement("EventParameter[@Key='AgentId']")
+                        ?.Attribute("Value");
                     if (agentIdAttribute == null) {
                         continue;
                     }
 
-                    var id = int.Parse(agentIdAttribute.Value);
-                    newEvent.AgentId = id;
+                    newEvent.AgentId = agentIdAttribute.Value;
                 }
-                
+
                 if (_events.ContainsKey(timeStep))
                     _events[timeStep].Add(newEvent);
                 else
-                    _events.Add(timeStep, new List<SimulationEvent> {newEvent});
+                    _events.Add(timeStep, new List<SimulationEvent> { newEvent });
             }
         }
 
@@ -225,17 +172,17 @@ namespace Importer.XMLHandlers {
             foreach (var xmlAgent in _xmlAgents.Values) {
                 switch (xmlAgent.AgentType) {
                     case AgentType.Pedestrian:
-                        xmlAgent.ActualAgent = VisualizationMaster.InstantiatePedestrian(xmlAgent.ModelType, xmlAgent.Id);
+                        xmlAgent.ActualAgent =
+                            VisualizationMaster.Instance.InstantiatePedestrian(xmlAgent.ModelType, xmlAgent.Id);
                         xmlAgent.ActualAgent.name = "Ped #" + xmlAgent.Id + " [" + xmlAgent.ModelType + "]";
                         break;
                     default:
-                        xmlAgent.ActualAgent = VisualizationMaster.InstantiateVehicleAgent(xmlAgent.ModelType, xmlAgent.Id);
+                        xmlAgent.ActualAgent =
+                            VisualizationMaster.Instance.InstantiateVehicleAgent(xmlAgent.ModelType, xmlAgent.Id);
                         xmlAgent.ActualAgent.name = "Car #" + xmlAgent.Id + " [" + xmlAgent.ModelType + "]";
                         break;
                 }
-                
-                xmlAgent.ActualAgent.Id = xmlAgent.Id;
-                xmlAgent.ActualAgent.OpenDriveId = xmlAgent.Id + "";
+
                 xmlAgent.ActualAgent.SimulationSteps = xmlAgent.SimulationSteps;
             }
         }
@@ -244,18 +191,18 @@ namespace Importer.XMLHandlers {
             if (xmlDocument.Root == null) return;
 
             foreach (var sample in _samples) {
-                var sampleTime = GetInt(sample, "Time", -1); 
+                var sampleTime = GetInt(sample, "Time", -1);
                 if (sampleTime < _minSampleTime || sampleTime > _maxSampleTime)
                     continue;
-                
+
                 var sampleString = string.Concat(sample.Nodes());
-                var sampleSplit = sampleString.Split(new[] {","}, StringSplitOptions.None);
-                
+                var sampleSplit = sampleString.Split(new[] { "," }, StringSplitOptions.None);
+
                 foreach (var xmlAgent in _xmlAgents.Values) {
                     var st = new SimulationStep();
-                    
+
                     if (!ParseSampleBaseValues(st, xmlAgent, sampleTime, sampleSplit)) continue;
-                    
+
                     switch (xmlAgent.AgentType) {
                         case AgentType.Vehicle:
                             ParseVehicleSampleValues(st, xmlAgent, sampleSplit);
@@ -266,7 +213,7 @@ namespace Importer.XMLHandlers {
                         default:
                             throw new ArgumentOutOfRangeException();
                     }
-                    
+
                     xmlAgent.SimulationSteps.Add(st.Time, st);
                 }
             }
@@ -278,17 +225,15 @@ namespace Importer.XMLHandlers {
 
             if (agent.ValuePositions.ContainsKey("BrakeLight") &&
                 agent.ValuePositions["BrakeLight"] <= sampleSplit.Length - 1) {
-
                 var brakeInfo = sampleSplit[agent.ValuePositions["BrakeLight"]];
                 info.Brake = brakeInfo.Replace(" ", "") == "1";
             }
 
             if (agent.ValuePositions.ContainsKey("IndicatorState") &&
                 agent.ValuePositions["IndicatorState"] <= sampleSplit.Length - 1) {
-
                 var indicatorInfo = sampleSplit[agent.ValuePositions["IndicatorState"]];
                 var indicatorState = IndicatorState.None;
-                
+
                 // ReSharper disable once ConvertSwitchStatementToSwitchExpression
                 switch (indicatorInfo.Replace(" ", "")) {
                     case "0":
@@ -315,7 +260,6 @@ namespace Importer.XMLHandlers {
 
             if (agent.ValuePositions.ContainsKey("BrakeLight") &&
                 agent.ValuePositions["BrakeLight"] <= sampleSplit.Length - 1) {
-
                 var brakeInfo = sampleSplit[agent.ValuePositions["BrakeLight"]];
                 info.Stopping = brakeInfo.Replace(" ", "") == "1";
             }
@@ -330,14 +274,15 @@ namespace Importer.XMLHandlers {
 
             foreach (var agent in agents) {
                 var newAgent = new XmlAgent {
-                    Id = GetInt(agent, "Id", -1),
+                    Id = GetString(agent, "Id", "-1"),
                     AgentGroup = agent.Attribute("AgentTypeGroupName")?.Value ?? "none",
                     AgentTypeString = agent.Attribute("AgentTypeName")?.Value ?? "none",
                     ModelType = agent.Attribute("VehicleModelType")?.Value ?? "none"
                 };
-                
-                if (newAgent.Id < 0)
-                    throw new ArgumentException($"Agent Ids must be non-negative integers. (agent {agent.Attribute("id")?.Value})");
+
+                if (newAgent.Id == "-1")
+                    throw new ArgumentException(
+                        $"Agent Ids must be non-negative integers. (agent {agent.Attribute("id")?.Value})");
 
                 if (_xmlAgents.ContainsKey(newAgent.Id))
                     throw new ArgumentException($"Agent Ids must be unique! (agent {newAgent.Id})");
@@ -349,22 +294,17 @@ namespace Importer.XMLHandlers {
                 _xmlAgents.Add(newAgent.Id, newAgent);
             }
 
-            var headerSplit = string.Concat(header.Nodes()).Split(new[] {","}, StringSplitOptions.None);
+            var headerSplit = string.Concat(header.Nodes()).Split(new[] { "," }, StringSplitOptions.None);
 
             for (var i = 0; i < headerSplit.Length; i++) {
-                var elementSplit = headerSplit[i].Split(new[] {":"}, StringSplitOptions.None);
+                var elementSplit = headerSplit[i].Split(new[] { ":" }, StringSplitOptions.None);
                 if (elementSplit.Length != 2)
                     throw new ArgumentException("Header is not formatted correctly.");
 
-                var agentId = int.Parse(elementSplit[0].Replace(" ", ""));
+                var agentId = int.Parse(elementSplit[0].Replace(" ", "")) + "";
                 var paramName = elementSplit[1].Replace(" ", "");
-                
-                _xmlAgents[agentId].ValuePositions.Add(paramName, i);
 
-                // if the attribute is not known it will be stored as such to be displayed as text later
-                if (!KnownAttributes.Contains(paramName)) {
-                    _xmlAgents[agentId].UnknownDataNames.Add(paramName);
-                }
+                _xmlAgents[agentId].ValuePositions.Add(paramName, i);
             }
         }
 
@@ -376,7 +316,7 @@ namespace Importer.XMLHandlers {
 
             if (posXString == "" || posYString == "") {
                 return false;
-            } 
+            }
 
             step.Velocity = float.Parse(sampleSplit[agent.ValuePositions["VelocityEgo"]],
                 CultureInfo.InvariantCulture.NumberFormat);
@@ -389,9 +329,9 @@ namespace Importer.XMLHandlers {
 
             var posX = float.Parse(posXString, CultureInfo.InvariantCulture.NumberFormat);
             var posY = float.Parse(posYString, CultureInfo.InvariantCulture.NumberFormat);
-            
+
             step.Position = new Vector2(posX, posY);
-            
+
             if (_events.ContainsKey(step.Time)) {
                 var foundEvent = _events[step.Time].Find(x => x.AgentId == agent.Id);
                 if (foundEvent != null) {
@@ -399,13 +339,14 @@ namespace Importer.XMLHandlers {
                 }
             }
 
-            foreach (var unknownDataName in agent.UnknownDataNames) {
-                var text = sampleSplit[agent.ValuePositions[unknownDataName]];
+            // adding all values found to the samples
+            foreach (var (valueName, index) in agent.ValuePositions) {
+                var text = sampleSplit[index];
 
                 if (Regex.IsMatch(text, @"[0-9]+.[0-9]+")) {
-                    step.UnknownInformation.Add(float.Parse(text, CultureInfo.InvariantCulture.NumberFormat));
+                    step.AllInfo.Add(valueName, float.Parse(text, CultureInfo.InvariantCulture.NumberFormat));
                 } else {
-                    step.UnknownInformation.Add(text);
+                    step.AllInfo.Add(valueName, text);
                 }
             }
 

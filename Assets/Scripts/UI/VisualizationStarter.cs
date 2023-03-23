@@ -1,9 +1,10 @@
 ﻿using Scenery.RoadNetwork;
+using Settings;
 using UI.Main_Menu;
-using UI.Settings;
 using UI.Visualization;
 using UnityEngine;
 using Visualization;
+using Visualization.Labels;
 using Visualization.OcclusionManagement;
 using Visualization.POIs;
 
@@ -13,26 +14,24 @@ namespace UI {
         public VisualizationMaster visualizationMaster;
         public RoadNetworkHolder roadNetworkHolder;
         public Terrain terrain;
-
-        private LabelOcclusionManager _labelOcclusionManager;
+        
         private AgentOcclusionManager _agentOcclusionManager;
-        // private SettingsPanel _settingsPanel;
         private TargetController _targetController;
         private PlaybackControl _playbackControl;
         private DataMover _dataMover;
 
         private void Start() {
-            FindObjectOfType<LabelOcclusionManager>().Disable = true;
             FindObjectOfType<AgentOcclusionManager>().Disable = true;
-
-            // _settingsPanel = FindObjectOfType<SettingsPanel>();
+            
             _targetController = FindObjectOfType<TargetController>();
             _playbackControl = FindObjectOfType<PlaybackControl>();
             _agentOcclusionManager = FindObjectOfType<AgentOcclusionManager>();
-            _labelOcclusionManager = FindObjectOfType<LabelOcclusionManager>();
             _dataMover = FindObjectOfType<DataMover>();
-
+            
+            VisualizationMaster.Instance.ActiveModules.DReaM = _dataMover.DReaMOutputXmlHandler != null;
             LoadAll();
+            LabelManager.Instance.CollectAgents();
+            SensorManager.Instance.CollectAgents();
 
             _dataMover.SceneryXmlHandler = null;
             _dataMover.PedestrianModelsXmlHandler = null;
@@ -83,64 +82,26 @@ namespace UI {
             visualizationMaster.SmallUpdate();
 
             // enabling the occlusion managers
-            if (_dataMover.DReaMOutputXmlHandler == null) {
-                var loc = FindObjectOfType<LabelOcclusionManager>();
-                loc.DisableAllLabels();
-                loc.Disable = true;
-
-                // foreach (var label in loc.AllLabels) {
-                //     label.gameObject.SetActive(false);
-                //     label.AgentCamera.gameObject.SetActive(false);
-                // }
-                //
-                // loc.gameObject.SetActive(false);
-            } else {
-                FindObjectOfType<LabelOcclusionManager>().Disable = false;
+            if (_dataMover.DReaMOutputXmlHandler != null) {
                 FindObjectOfType<AgentOcclusionManager>().Disable = false;
             }
 
             // prepare side panel
             var sidePanel = FindObjectOfType<SidePanel.SidePanel>();
-            if (PlayerPrefs.GetInt("app_wip_features") > 0) {
-                sidePanel.Setup(_dataMover.SimulationOutputXmlHandler.GetUnknownAttributeNames());
+            if (SettingsManager.Instance.Settings.useSidePanel) {
+                sidePanel.CollectAgents();
             } else {
-                sidePanel.gameObject.SetActive(false);
+                Destroy(sidePanel.gameObject);
             }
         }
 
         private void Prerequisites() {
             // finding necessary elements in the different components
-            // _settingsPanel.FindAll();
             _playbackControl.FindAll();
             visualizationMaster.FindAll();
             _agentOcclusionManager.FindAll();
             _targetController.FindAll();
-            _labelOcclusionManager.FindAll();
-            
-            Debug.Log(PlayerPrefs.GetString("app_occ_min_opacity_agent").Replace(',', '.'));
-            // TODO actually parse values
-
-            var appSettings = new ApplicationSettings {
-                checkOcclusion = PlayerPrefs.GetInt("app_handleOcclusions") > 0,
-                fullscreen = PlayerPrefs.GetInt("app_fullscreen") > 0,
-                minimumAgentOpacity = .7f, // float.Parse(PlayerPrefs.GetString("app_occ_min_opacity_agent").Replace(',', '.'), CultureInfo.InvariantCulture),
-                minimumObjectOpacity = .3f //float.Parse(PlayerPrefs.GetString("app_occ_min_opacity_object").Replace(',', '.'), CultureInfo.InvariantCulture),
-            };
-            
-            visualizationMaster.settings = appSettings;
             visualizationMaster.DisableLabels = _dataMover.DReaMOutputXmlHandler == null;
-            
-            roadNetworkHolder.settings = appSettings;
-            _agentOcclusionManager.Settings = appSettings;
-
-            // setting the Visualization Master
-            _dataMover.SceneryXmlHandler.VisualizationMaster = visualizationMaster;
-            _dataMover.SimulationOutputXmlHandler.VisualizationMaster = visualizationMaster;
-            _dataMover.PedestrianModelsXmlHandler.VisualizationMaster = visualizationMaster;
-            _dataMover.VehicleModelsXmlHandler.VisualizationMaster = visualizationMaster;
-            _dataMover.ProfilesCatalogXmlHandler.VisualizationMaster = visualizationMaster;
-            if (_dataMover.DReaMOutputXmlHandler != null)
-                _dataMover.DReaMOutputXmlHandler.VisualizationMaster = visualizationMaster;
         }
     }
 }

@@ -1,48 +1,63 @@
-﻿using TMPro;
+﻿using System;
+using TMPro;
+using Unity.VectorGraphics;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using Visualization.OcclusionManagement;
+using Visualization;
+using Visualization.Agents;
 
 namespace UI {
-    public class AgentCard : MonoBehaviour {
 
-        public TargetController TargetController { get; set; }
-        
+    [Serializable]
+    public struct AgentIcons {
+        public Sprite pedestrian;
+        public Sprite bike;
+        public Sprite motorcycle;
+        public Sprite car;
+        public Sprite truck;
+    }
+    
+    public class AgentCard : MonoBehaviour, IPointerClickHandler {
         public RectTransform Parent { get; set; }
+        public Agent Agent { get; set; }
+
+        public AgentIcons agentIcons;
+        
+        public event EventHandler CardClicked;
         
         private RectTransform _mainObject;
+        public TextMeshProUGUI text;
+        public SVGImage iconImage;
+        public Image colorBand;
 
-        private TextMeshProUGUI _text;
-
-        private Image _mainImage;
-
-        private Color _normalColor;
-        private Color _highlightedColor;
-
-        public void Awake() {
+        private void Awake() {
             _mainObject = GetComponent<RectTransform>();
-            _text = transform.GetChild(0).GetComponent<TextMeshProUGUI>();
-            _mainImage = GetComponent<Image>();
         }
 
-        public void SetText(string text) {
-            _text.text = text;
+        public void Initialize() {
+            _mainObject.localScale = Vector3.one * 1f;
+
+            colorBand.color = Agent.StaticData.ColorMaterial.color;
+            text.text = Agent.name.Split(new [] {" ["}, StringSplitOptions.None)[0];
+            iconImage.sprite = Agent.StaticData.AgentTypeDetail switch {
+                AgentTypeDetail.Unknown => agentIcons.car,
+                AgentTypeDetail.Car => agentIcons.car,
+                AgentTypeDetail.Truck => agentIcons.truck,
+                AgentTypeDetail.Bike => agentIcons.bike,
+                AgentTypeDetail.Motorcycle => agentIcons.motorcycle,
+                AgentTypeDetail.Pedestrian => agentIcons.pedestrian,
+                _ => throw new ArgumentOutOfRangeException()
+            };
         }
 
-        public void SetColor(Color color) {
-            _mainImage.color = new Color(color.r, color.g, color.b, 0.9f);
-            _highlightedColor = new Color(color.r, color.g, color.b, 0.9f);
-            _normalColor = new Color(color.r, color.g, color.b, 0.7f);
-        }
-
-        public void SetIsTarget(bool value) {
-            _mainObject.localScale = value ? Vector3.one * 0.9f : Vector3.one * 0.7f;
-            _mainImage.color = value ? _highlightedColor : _normalColor;
+        public void TargetStatusChanged(object sender, bool value) {
+            _mainObject.localScale = value ? Vector3.one * 1.1f : Vector3.one * 1f;
             LayoutRebuilder.ForceRebuildLayoutImmediate(Parent);
         }
 
-        public void Clicked() {
-            TargetController.HandleCardClick(this);
+        public void OnPointerClick(PointerEventData eventData) {
+            CardClicked?.Invoke(this, EventArgs.Empty);
         }
     }
 }

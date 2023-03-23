@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 /**
 * Internal Representation of a Sequence<br>
@@ -35,7 +33,7 @@ public class LTSeq {
 
 	public uint counter;
 
-	public bool toggle = false;
+	public bool toggle;
 
 	private uint _id;
 

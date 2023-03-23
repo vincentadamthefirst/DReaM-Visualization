@@ -30,12 +30,7 @@ namespace Scenery.RoadNetwork.RoadGeometries {
         public override Vector2 Evaluate(float s, float t) {
             if (Math.Abs(_aV) < Tolerance && Math.Abs(_bV) < Tolerance && Math.Abs(_cV) < Tolerance &&
                 Math.Abs(_dV) < Tolerance) {
-                var offsetLine = new Vector2(s, t);
-                offsetLine.RotateRadians(hdg);
-                offsetLine.x += x;
-                offsetLine.y += y;
-
-                return offsetLine;
+                return LineGeometry.GetLine(s, t, x, y, hdg);
             }
 
             var k = 0f;
@@ -48,11 +43,20 @@ namespace Scenery.RoadNetwork.RoadGeometries {
                 lastPosition = position;
                 p += 1 / Length;
 
-                position.x = _aU + _bU * p + _cU * p * p + _dU * p * p * p;
-                position.y = _aV + _bV * p + _cV * p * p + _dV * p * p * p;
+                var stepSize = 1f;
+                var deltaLength = float.MaxValue;
 
-                delta = position - lastPosition;
-                var deltaLength = delta.magnitude;
+                while (deltaLength > 0.1) {
+                    var pNew = p + stepSize;
+                    position.x = _aU + _bU * pNew + _cU * pNew * pNew + _dU * pNew * pNew * pNew;
+                    position.y = _aV + _bV * pNew + _cV * pNew * pNew + _dV * pNew * pNew * pNew;
+
+                    delta = position - lastPosition;
+                    deltaLength = delta.magnitude;
+                    stepSize *= .5f;
+                }
+
+                p += stepSize;
 
                 if (Math.Abs(deltaLength) < Tolerance) {
                     throw new RoadGeometryGenerationException("ParamPoly3 generation could not be finished.");
@@ -89,19 +93,26 @@ namespace Scenery.RoadNetwork.RoadGeometries {
             }
             
             var k = 0f;
+            var lastPosition = new Vector2();
             var delta = new Vector2();
             var p = 0f;
             var position = new Vector2(_aU, _aV);
 
             while (k < s) {
-                var lastPosition = position;
-                p += 1 / Length;
+                lastPosition = position; 
+                var stepSize = 1f;
+                var deltaLength = float.MaxValue;
 
-                position.x = _aU + _bU * p + _cU * p * p + _dU * p * p * p;
-                position.y = _aV + _bV * p + _cV * p * p + _dV * p * p * p;
+                while (deltaLength > 0.1) {
+                    var pNew = p + stepSize;
+                    position.x = _aU + _bU * pNew + _cU * pNew * pNew + _dU * pNew * pNew * pNew;
+                    position.y = _aV + _bV * pNew + _cV * pNew * pNew + _dV * pNew * pNew * pNew;
 
-                delta = position - lastPosition;
-                var deltaLength = delta.magnitude;
+                    delta = position - lastPosition;
+                    deltaLength = delta.magnitude;
+                    stepSize *= .5f;
+                }
+                p += stepSize;
 
                 if (Math.Abs(deltaLength) < Tolerance) {
                     throw new RoadGeometryGenerationException("ParamPoly3 generation could not be finished.");
@@ -115,20 +126,11 @@ namespace Scenery.RoadNetwork.RoadGeometries {
 
                 k += deltaLength;
             }
+            
+            var dU = _bU + 2 * _cU * p + 3 * _dU * p * p;
+            var dV = _bV + 2 * _cV * p + 3 * _dV * p * p;
 
-            var direction = new Vector2();
-            if (s > 0) direction = delta;
-            else direction.x = 1f;
-
-            direction.RotateRadians(hdg);
-            direction.Normalize();
-
-            if (direction.y > 1f) direction.y = 1f;
-            if (direction.y < -1f) direction.y = -1f;
-
-            var angle = Mathf.Asin(direction.y);
-            if (direction.x >= 0f) return angle;
-            return Mathf.PI - angle;
+            return hdg + Mathf.Atan2(dV, dU);
         }
     }
 }

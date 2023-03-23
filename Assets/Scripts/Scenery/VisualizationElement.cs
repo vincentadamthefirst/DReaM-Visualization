@@ -1,87 +1,50 @@
-﻿using UI.Settings;
+﻿using System;
 using UnityEngine;
 
 namespace Scenery {
+
+    public enum ElementOrigin {
+        OpenDrive, OpenPass, Generated
+    }
+
+    /**
+     * Every Element in the scene is considered a VisualizationElement.
+     * This class provides basic information about the element as well as the current visualization.
+     */
     public abstract class VisualizationElement : MonoBehaviour {
+        public string Id { get; set; }
+
+        public abstract ElementOrigin ElementOrigin { get; }
         
-        /// <summary>
-        /// The OpenDrive Id of this object, can be null if this object is not an OpenDrive object.
-        /// </summary>
-        public string OpenDriveId { get; set; }
+        /**
+         * Invoked whenever this element is clicked.
+         */
+        public event EventHandler ElementClicked;
 
-        /// <summary>
-        /// The actual world anchor of the object. This might differ from the anchor of the object the script is on
-        /// (e.g. for any Agent this would be the position of its Model)
-        /// </summary>
-        public virtual Vector3 WorldAnchor { get; }
+        private void OnMouseDown() => MouseClicked();
 
-        public abstract bool IsDistractor { get; }
+        private void OnMouseEnter() => MouseEnter();
 
-        // tolerance for checking if floating point number is 0
-        protected const float Tolerance = 0.00001f;
+        private void OnMouseExit() => MouseExit();
+
+        public virtual void MouseClicked() {
+            ElementClicked?.Invoke(this, EventArgs.Empty);
+        }
+
+        public virtual void MouseEnter() {
+            // may be overridden
+        }
         
-        // if the element is a target object
-        protected bool isTarget = false;
-
-        public virtual bool IsActive => true;
-
-        public virtual Bounds AxisAlignedBoundingBox => new Bounds();
-
-        public ApplicationSettings settings;
+        public virtual void MouseExit() {
+            // may be overriden
+        }
 
         // Properties for materials
         protected static readonly int BumpMap = Shader.PropertyToID("_BumpMap");
         protected static readonly int BaseMap = Shader.PropertyToID("_BaseMap");
         protected static readonly int OcclusionMap = Shader.PropertyToID("_OcclusionMap");
         protected static readonly int BaseColor = Shader.PropertyToID("_BaseColor");
-        protected static readonly int Color = Shader.PropertyToID("_Color");
+        protected static readonly int ShaderColor = Shader.PropertyToID("_Color");
         protected static readonly int Surface = Shader.PropertyToID("_Surface");
-
-        public virtual void SetLayer(int layer) {
-            // implemented in junction and road
-        }
-
-        /// <summary>
-        /// Used to setup all materials used for transparency.
-        /// </summary>
-        public virtual void SetupOccludedMaterials() {
-            
-        }
-
-        /// <summary>
-        /// Handles that this object is overlapping a target object.
-        /// </summary>
-        public abstract void HandleHit();
-
-        /// <summary>
-        /// Handles that the object is no longer occluding a target.
-        /// </summary>
-        public abstract void HandleNonHit();
-
-        /// <summary>
-        /// Returns a list of necessary points to check against based on the current method for finding the points
-        /// specified in 
-        /// </summary>
-        /// <returns></returns>
-        public virtual Vector3[] GetReferencePoints() {
-            //return GetReferencePointsCustom();
-            return GetReferencePointsRenderer();
-        }
-        
-        public virtual void SetIsTarget(bool target) {
-            isTarget = target;
-        }
-
-        public bool IsTarget() {
-            return isTarget;
-        }
-
-        /// <summary>
-        /// Returns the reference points based on the Renderer(s) of this object and its children.
-        /// </summary>
-        /// <returns>Bounding Points of the Renderers</returns>
-        protected abstract Vector3[] GetReferencePointsRenderer();
-
-        protected abstract Vector3[] GetReferencePointsCustom();
     }
 }

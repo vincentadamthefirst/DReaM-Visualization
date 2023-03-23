@@ -1,10 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
+using TMPro;
 using UI.Main_Menu.Utils;
 using UI.POIs.StoppingPoints;
 using UnityEngine;
 using UnityEngine.UI;
+using Visualization.Labels.BasicLabels;
+
+// ReSharper disable Unity.InefficientPropertyAccess
 
 namespace Visualization.POIs {
 
@@ -29,25 +33,20 @@ namespace Visualization.POIs {
         public bool masterActive;
 
         public void Update() {
-            gameObject.SetActive(masterActive && active);
+            stoppingPointMarker!.gameObject.SetActive(masterActive && active);
         }
 
-        [CanBeNull] public GameObject gameObject;
+        [CanBeNull] public StoppingPointMarker stoppingPointMarker;
     }
     
     public class StoppingPointVisualizer : MonoBehaviour {
-
-        public GameObject stoppingPointMarkerPrefab;
+        
         public Material stoppingPointMarkerMaterial;
 
         [Header("UI Elements")] 
         public RectTransform container;
-        public IntersectionGroup intersectionGroupPrefab;
-        public LaneGroup laneGroupPrefab;
-        public StoppingPointEntry stoppingPointEntryPrefab;
 
-        public List<IntersectionStoppingPoints> IntersectionStoppingPoints { get; set; } =
-            new List<IntersectionStoppingPoints>();
+        public List<IntersectionStoppingPoints> IntersectionStoppingPoints { get; set; } = new();
 
         private bool _currentlyActive;
 
@@ -55,30 +54,49 @@ namespace Visualization.POIs {
             var index = 0;
             var max = 0;
             IntersectionStoppingPoints.ForEach(x => max += x.laneStoppingPoints.Count);
-            
+
             foreach (var intersectionPoints in IntersectionStoppingPoints) {
-                var newIntEntry = Instantiate(intersectionGroupPrefab, container);
+                var intersectionGroup =
+                    Resources.Load<IntersectionGroup>(
+                        "Prefabs/UI/Visualization/RuntimeMenu/StoppingPoints/IntersectionGroup");
+                var newIntEntry = Instantiate(intersectionGroup, container);
                 newIntEntry.InitializeData(intersectionPoints.IntersectionId);
-                
+
                 foreach (var laneStoppingPoint in intersectionPoints.laneStoppingPoints) {
                     laneStoppingPoint.color = Color.HSVToRGB(index / (float) max, .9f, .7f, false);
                     
-                    var newLaneEntry = Instantiate(laneGroupPrefab, container);
+                    var laneGroup = Resources.Load<LaneGroup>("Prefabs/UI/Visualization/RuntimeMenu/StoppingPoints/LaneGroup");
+                    var newLaneEntry = Instantiate(laneGroup, container);
                     newLaneEntry.InitializeData(laneStoppingPoint.LaneId, laneStoppingPoint.color);
                     newLaneEntry.Parent = newIntEntry;
 
                     foreach (var stoppingPoint in laneStoppingPoint.stoppingPoints) {
-                        var newStoppingPointEntry = Instantiate(stoppingPointEntryPrefab, container);
+                        var stoppingPointEntry = Resources.Load<StoppingPointEntry>("Prefabs/UI/Visualization/RuntimeMenu/StoppingPoints/StoppingPointEntry");
+                        var newStoppingPointEntry = Instantiate(stoppingPointEntry, container);
                         newStoppingPointEntry.InitializeData(stoppingPoint);
                         newStoppingPointEntry.Parent = newLaneEntry;
                         
-                        var spObject = Instantiate(stoppingPointMarkerPrefab,
+                        var stoppingPointMarker = Resources.Load<StoppingPointMarker>("Prefabs/Objects/StoppingPointMarker");
+                        var spObject = Instantiate(stoppingPointMarker,
                             new Vector3(stoppingPoint.position.x, .9f, stoppingPoint.position.y), Quaternion.identity);
+
+                        var textLabelPrefab = Resources.Load<TextLabel>("Prefabs/UI/Visualization/Labels/TextLabel");
+                        var textLabelObject = Instantiate(textLabelPrefab, spObject.transform);
+                        textLabelObject.transform.localPosition = new Vector3(0, -1.5f, 0);
+                        textLabelObject.MainCamera = Camera.main;
+                        textLabelObject.GetComponent<TMP_Text>().fontSize = 2;
+                        textLabelObject.GetComponent<TMP_Text>().SetText(
+                            $"{stoppingPoint.type}<br>" +
+                            $"Road: {stoppingPoint.roadId} | Lane: {stoppingPoint.laneId}<br>" +
+                            $"Position: {stoppingPoint.position.x}, {stoppingPoint.position.y}");
+                        textLabelObject.gameObject.SetActive(false);
+                        spObject.InfoLabel = textLabelObject;
+                        
                         spObject.transform.Rotate(Vector3.forward, 180f);
                         spObject.transform.localScale = Vector3.one * 1.8f; 
                         spObject.transform.parent = transform;
-                        stoppingPoint.gameObject = spObject;
-                        spObject.SetActive(false);
+                        stoppingPoint.stoppingPointMarker = spObject;
+                        spObject.gameObject.SetActive(false);
                         var mat = new Material(stoppingPointMarkerMaterial) {
                             color = laneStoppingPoint.color.WithAlpha(.4f)
                         };
@@ -94,7 +112,6 @@ namespace Visualization.POIs {
 
             // scroll up
             container.parent.parent.GetComponent<ScrollRect>().verticalNormalizedPosition = 1f;
-            
             LayoutRebuilder.ForceRebuildLayoutImmediate(container);
         }
 
@@ -124,12 +141,11 @@ namespace Visualization.POIs {
 
         private void Update() {
             // check for key input to toggle the stopping points
-            if (Input.GetKeyUp(KeyCode.P)) {
-                if (_currentlyActive)
-                    Deactivate();
-                else {
-                    Activate();
-                }
+            if (!Input.GetKeyUp(KeyCode.P)) return;
+            if (_currentlyActive)
+                Deactivate();
+            else {
+                Activate();
             }
         }
     }

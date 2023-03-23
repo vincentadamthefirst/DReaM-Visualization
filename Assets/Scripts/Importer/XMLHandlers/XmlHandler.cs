@@ -2,17 +2,21 @@
 using System.Globalization;
 using System.Runtime.Serialization;
 using System.Xml.Linq;
-using Visualization;
 using Version = Utils.VersionSystem.Version;
 
 namespace Importer.XMLHandlers {
+    
+    /// <summary>
+    /// The different xml-types that are inputs for the OpenPass simulation.
+    /// </summary>
+    public enum XmlType {
+        Scenario, PedestrianModels, VehicleModels, Scenery, SimulationOutput, ProfilesCatalog, DReaM, Unsupported
+    }
 
     public abstract class XmlHandler {
         private Version _fileVersion;
         private string _filePath;
         protected XDocument xmlDocument;
-        
-        public VisualizationMaster VisualizationMaster { get; set; }
 
         public void SetFilePath(string path) {
             _filePath = path;
@@ -23,10 +27,8 @@ namespace Importer.XMLHandlers {
             return _filePath;
         }
 
-        public abstract string GetName();
+        public abstract XmlType GetXmlType();
 
-        public abstract string GetDetails();
-        
         protected static float GetFloat(XElement element, string name, float fallback = 0) {
             return float.Parse(element.Attribute(name)?.Value ?? $"{fallback}", CultureInfo.InvariantCulture);
         }

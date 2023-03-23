@@ -1,10 +1,13 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Scenery;
+using Settings;
 using TMPro;
 using UI.Main_Menu.Settings;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using Utils;
 using Visualization.OcclusionManagement;
 
 namespace UI.Visualization {
@@ -22,9 +25,15 @@ namespace UI.Visualization {
         private SimpleCameraController _cameraController;
         private PlaybackControl _playbackControl;
         private TargetController _targetController;
+        private GameObject _shadow;
+        private List<Outline> _outlines;
         
-        public List<VisualizationElement> Elements { get; } = new List<VisualizationElement>();
-        
+        public List<VisualizationElement> Elements { get; } = new();
+
+        private void Awake() {
+            _shadow = transform.Find("Shadow").gameObject;
+        }
+
         protected override void AfterButtonSetup() {
             mainMenuButton.onClick.AddListener(UnloadVisualization);
             exitButton.onClick.AddListener(ExitApplication);
@@ -36,54 +45,46 @@ namespace UI.Visualization {
             _cameraController = FindObjectOfType<SimpleCameraController>();
             _playbackControl = FindObjectOfType<PlaybackControl>();
             _targetController = FindObjectOfType<TargetController>();
-        }
-        
-        public void Rebuild() {
-            // // clearing all entries
-            // foreach (Transform child in objectsContent.transform) {
-            //     Destroy(child);
-            // }
-            //
-            // // adding all elements
-            // foreach (var element in Elements) {
-            //     var newEntry = Instantiate(objectEntryPrefab, objectsContent);
-            //     newEntry.Object = element;
-            //     newEntry.name = element.name;
-            //     newEntry.SetText(element.name);
-            // }
-
-            // LayoutRebuilder.ForceRebuildLayoutImmediate(objectsContent);
+            _outlines = FindObjectsOfType<Outline>().ToList();
         }
 
         private void SetupSettingsPanel() {
             // Occlusion Settings
-            settingsPanel.AddHeading("hdg_occ", "Verdeckungs - Einstellungen");
-            settingsPanel.AddCheckBox("app_handleOcclusions", "Verdeckungen Vermeiden:", true, "hdg_occ");
-            var inField1 = settingsPanel.AddInputField("app_occ_min_opacity_agent", "Minimale Agent-Sichtbarkeit",
-                "Komma-Zahl", "0,7", "app_handleOcclusions");
-            inField1.inputField.contentType = TMP_InputField.ContentType.DecimalNumber;
-            var inField2 = settingsPanel.AddInputField("app_occ_min_opacity_other", "Minimale Objekt-Sichtbarkeit",
-                "Komma-Zahl", "0,3", "app_handleOcclusions");
-            inField2.inputField.contentType = TMP_InputField.ContentType.DecimalNumber;
+            settingsPanel.AddHeading("hdg_occ", "Occlusion");
+            settingsPanel.AddCheckBox("handle_occ", "Reduce Occlusion:",
+                new Reference<bool>(() => SettingsManager.Instance.Settings.handleOcclusions,
+                    x => SettingsManager.Instance.Settings.handleOcclusions = x));
+            var minOpacityInput = settingsPanel.AddInputField("min_opacity", "Minimum Object Opacity", "Decimal Value",
+                new Reference<string>(() => $"{SettingsManager.Instance.Settings.minimalOpacity:F2}",
+                    x => SettingsManager.Instance.Settings.minimalOpacity = float.Parse(x)));
+            minOpacityInput.Field.contentType = TMP_InputField.ContentType.DecimalNumber;
             settingsPanel.AddRuler(2);
 
             // Resolution Settings
-            settingsPanel.AddHeading("hdg_look", "Grafik - Einstellungen");
-            settingsPanel.AddCheckBox("app_fullscreen", "Fullscreen:", true, "hdg_look");
+            settingsPanel.AddHeading("hdg_look", "Graphics");
+            settingsPanel.AddCheckBox("fullscreen", "Fullscreen:",
+                new Reference<bool>(() => SettingsManager.Instance.Settings.fullscreen,
+                    x => SettingsManager.Instance.Settings.fullscreen = x));
             // TODO resolution
+            settingsPanel.AddRuler(2);
 
             settingsPanel.LoadSettings();
         }
 
         private void Update() {
             if (!Input.GetKeyDown(KeyCode.Escape)) return;
+            _outlines.ForEach(x => x.enabled = false);
+            
             if (menuPanel.gameObject.activeSelf) {
+                SettingsManager.Instance.ApplySettings();
                 menuPanel.gameObject.SetActive(false);
+                _shadow.SetActive(false);
                 _cameraController.SetMenuOpen(false);
                 _targetController.SetMenuOpen(false);
                 _playbackControl.Disable = false;
             } else {
                 menuPanel.gameObject.SetActive(true);
+                _shadow.SetActive(true);
                 _playbackControl.Disable = true;
                 _cameraController.SetMenuOpen(true);
                 _targetController.SetMenuOpen(true);

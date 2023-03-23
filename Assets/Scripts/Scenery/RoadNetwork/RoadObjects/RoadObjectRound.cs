@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Settings;
 using UnityEngine;
 using Utils;
 
@@ -18,13 +19,7 @@ namespace Scenery.RoadNetwork.RoadObjects {
         private Material[][] _nonOccludedMaterials;
         private Material[][] _occludedMaterials;
 
-        private float _additionalMultiplier = 1f;
-
         private Mesh _colliderMesh;
-        
-        public override bool IsDistractor => true;
-        
-        public override Bounds AxisAlignedBoundingBox => _colliderMesh.bounds;
 
         private void Repeat() {
             if (RepeatParameters == null) return;
@@ -49,7 +44,6 @@ namespace Scenery.RoadNetwork.RoadObjects {
                 newChild.RoadDesign = RoadDesign;
                 newChild.name = name;
                 newChild.Radius = Radius;
-                newChild.settings = settings;
                 newChild.Show();
             }
 
@@ -97,6 +91,22 @@ namespace Scenery.RoadNetwork.RoadObjects {
             AddCollider();
         }
 
+        public void SetLayer(int layer) {
+            throw new System.NotImplementedException();
+        }
+
+        public override void OcclusionStart() {
+            for (var i = 0; i < _modelRenderers.Length; i++) {
+                _modelRenderers[i].materials = _occludedMaterials[i];
+            }
+        }
+
+        public override void OcclusionEnd() {
+            for (var i = 0; i < _modelRenderers.Length; i++) {
+                _modelRenderers[i].materials = _nonOccludedMaterials[i];
+            }
+        }
+
         public override void SetupOccludedMaterials() {
             _occludedMaterials = new Material[_modelRenderers.Length][];
 
@@ -106,7 +116,7 @@ namespace Scenery.RoadNetwork.RoadObjects {
                 tmp = new Material[_modelRenderers[i].materials.Length];
                 for (var j = 0; j < _modelRenderers[i].materials.Length; j++) {
                     tmp[j] = new Material(_nonOccludedMaterials[i][j]);
-                    tmp[j].ChangeToTransparent(settings.minimumObjectOpacity *
+                    tmp[j].ChangeToTransparent(SettingsManager.Instance.Settings.minimalOpacity *
                                                (RoadObjectType == RoadObjectType.Tree ? .5f : 1f));
                 }
                 
@@ -122,8 +132,9 @@ namespace Scenery.RoadNetwork.RoadObjects {
 
         private void ShowStreetLamp(RoadObjectPrefab rop) {
             if (rop == null) return;
-            
-            var streetLamp = Instantiate(rop.prefab, transform, true);
+
+            var prefab = Resources.Load<GameObject>($"Prefabs/Objects/RoadNetwork/RoadObjects/{rop.prefabName}");
+            var streetLamp = Instantiate(prefab, transform, true);
             streetLamp.layer = 19;
             Height -= 1;
 
@@ -142,7 +153,8 @@ namespace Scenery.RoadNetwork.RoadObjects {
         private void ShowPole(RoadObjectPrefab rop) {
             if (rop == null) return;
             
-            var pole = Instantiate(rop.prefab, transform, true);
+            var prefab = Resources.Load<GameObject>($"Prefabs/Objects/RoadNetwork/RoadObjects/{rop.prefabName}");
+            var pole = Instantiate(prefab, transform, true);
             pole.layer = 19;
 
             var middleLocalScale = pole.transform.GetChild(0).localScale;
@@ -161,7 +173,8 @@ namespace Scenery.RoadNetwork.RoadObjects {
         private void ShowTree(RoadObjectPrefab rop) {
             if (rop == null) return;
             
-            var tree = Instantiate(rop.prefab, transform, true);
+            var prefab = Resources.Load<GameObject>($"Prefabs/Objects/RoadNetwork/RoadObjects/{rop.prefabName}");
+            var tree = Instantiate(prefab, transform, true);
             tree.layer = 19;
             
             var scaleA = 2 * Radius / rop.baseRadius;
@@ -232,20 +245,6 @@ namespace Scenery.RoadNetwork.RoadObjects {
             coll.sharedMesh = _colliderMesh;
         }
 
-        public override void HandleHit() {
-            for (var i = 0; i < _modelRenderers.Length; i++) {
-                _modelRenderers[i].materials = _occludedMaterials[i];
-            }
-        }
-
-        public override void HandleNonHit() {
-            for (var i = 0; i < _modelRenderers.Length; i++) {
-                _modelRenderers[i].materials = _nonOccludedMaterials[i];
-            }
-        }
-
-        public override Vector3[] GetReferencePoints() {
-            return _colliderMesh.vertices;
-        }
+        public override ElementOrigin ElementOrigin => ElementOrigin.OpenDrive;
     }
 }

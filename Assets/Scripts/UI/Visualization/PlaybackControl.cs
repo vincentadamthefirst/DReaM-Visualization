@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using TMPro;
+using Unity.VectorGraphics;
 using UnityEngine;
 using UnityEngine.UI;
 using Visualization;
@@ -10,16 +12,12 @@ namespace UI.Visualization {
 
     [Serializable]
     public struct PlaybackButtonData {
-        public Image playPauseButtonImage;
-        public Image directionButtonImage;
-
         public Sprite pauseSymbol;
         public Sprite playSymbol;
-
-        public Sprite backwardSymbol;
-        public Sprite forwardSymbol;
+        public Sprite forwardBackwardSymbol;
     }
     
+    [SuppressMessage("ReSharper", "Unity.PerformanceCriticalCodeInvocation")]
     public class PlaybackControl : MonoBehaviour {
         [Header("Text Elements")]
         public TextMeshProUGUI totalTime;
@@ -29,18 +27,18 @@ namespace UI.Visualization {
         public Slider timeSlider;
         public Button playPause;
         public Button playDirection;
-
+        
         [Header("Button Info")] 
         public PlaybackButtonData buttonData;
         
-        private VisualizationMaster _visualizationMaster;
         private RectTransform _selfTransform;
+        
+        public event EventHandler<bool> PauseStatusChanged;
+        public event EventHandler<bool> PlayBackwardsStatusChanged;
 
         public bool Disable { get; set; }
 
         public void FindAll() {
-            _visualizationMaster = FindObjectOfType<VisualizationMaster>();
-
             currentTime.onValueChanged.AddListener(TimeInput);
             playPause.onClick.AddListener(PlayPauseChanged);
             playDirection.onClick.AddListener(PlayDirectionChanged);
@@ -50,7 +48,7 @@ namespace UI.Visualization {
         }
 
         private void TimeInput(string input) {
-            _visualizationMaster.Pause = true;
+            VisualizationMaster.Instance.Pause = true;
             int newTime;
             try {
                 newTime = int.Parse(input);
@@ -58,19 +56,19 @@ namespace UI.Visualization {
                 return;
             }
 
-            if (newTime < _visualizationMaster.MinSampleTime) {
-                currentTime.SetTextWithoutNotify(_visualizationMaster.MinSampleTime + "");
-                newTime = _visualizationMaster.MinSampleTime;
+            if (newTime < VisualizationMaster.Instance.MinSampleTime) {
+                currentTime.SetTextWithoutNotify(VisualizationMaster.Instance.MinSampleTime + "");
+                newTime = VisualizationMaster.Instance.MinSampleTime;
             }
 
-            if (newTime > _visualizationMaster.MaxSampleTime) {
-                currentTime.SetTextWithoutNotify(_visualizationMaster.MaxSampleTime + "");
-                newTime = _visualizationMaster.MaxSampleTime;
+            if (newTime > VisualizationMaster.Instance.MaxSampleTime) {
+                currentTime.SetTextWithoutNotify(VisualizationMaster.Instance.MaxSampleTime + "");
+                newTime = VisualizationMaster.Instance.MaxSampleTime;
             }
 
-            _visualizationMaster.CurrentTime = newTime;
-            if (_visualizationMaster.Pause) {
-                _visualizationMaster.SmallUpdate();
+            VisualizationMaster.Instance.CurrentTime = newTime;
+            if (VisualizationMaster.Instance.Pause) {
+                VisualizationMaster.Instance.SmallUpdate();
             }
         }
 
@@ -99,23 +97,23 @@ namespace UI.Visualization {
         }
 
         private void PlayPauseChanged() {
-            _visualizationMaster.Pause = !_visualizationMaster.Pause;
-            buttonData.playPauseButtonImage.sprite = _visualizationMaster.Pause
+            VisualizationMaster.Instance.Pause = !VisualizationMaster.Instance.Pause;
+            playPause.GetComponentInChildren<SVGImage>().sprite = VisualizationMaster.Instance.Pause
                 ? buttonData.playSymbol
                 : buttonData.pauseSymbol;
+            PauseStatusChanged?.Invoke(this, VisualizationMaster.Instance.Pause);
         }
 
         private void PlayDirectionChanged() {
-            _visualizationMaster.PlayBackwards = !_visualizationMaster.PlayBackwards;
-            buttonData.directionButtonImage.sprite = _visualizationMaster.PlayBackwards
-                ? buttonData.forwardSymbol
-                : buttonData.backwardSymbol;
+            VisualizationMaster.Instance.PlayBackwards = !VisualizationMaster.Instance.PlayBackwards;
+            playDirection.transform.SetLocalPositionAndRotation(playDirection.transform.localPosition, Quaternion.Euler(0, 0, VisualizationMaster.Instance.PlayBackwards ? 0 : 180));
+            PlayBackwardsStatusChanged?.Invoke(this, VisualizationMaster.Instance.PlayBackwards);
         }
 
-        public void TimeSliderValueChanged(float current) {
-            _visualizationMaster.CurrentTime = Mathf.RoundToInt(current);
-            if (_visualizationMaster.Pause) {
-                _visualizationMaster.SmallUpdate();
+        private void TimeSliderValueChanged(float current) {
+            VisualizationMaster.Instance.CurrentTime = Mathf.RoundToInt(current);
+            if (VisualizationMaster.Instance.Pause) {
+                VisualizationMaster.Instance.SmallUpdate();
             }
         }
     }

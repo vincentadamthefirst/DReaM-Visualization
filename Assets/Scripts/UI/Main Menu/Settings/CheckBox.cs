@@ -1,34 +1,28 @@
-﻿using TMPro;
+﻿using System;
+using TMPro;
 using UnityEngine.UI;
 
 namespace UI.Main_Menu.Settings {
-    public class CheckBox : Setting {
-        public Toggle toggle;
-        public TMP_Text infoText;
+    public class CheckBox : Setting<bool> {
+        private Toggle _toggle;
+        private TMP_Text _infoText;
         
         private string _text;
         private bool _defaultValue;
 
-        public void SetData(string text, bool defaultValue) {
-            _text = text;
-            _defaultValue = defaultValue;
+        public override void SetInfo(params string[] infos) {
+            _toggle = transform.Find("Toggle").GetComponent<Toggle>();
+            _infoText = transform.Find("Text").GetComponent<TMP_Text>();
+            
+            _infoText.SetText(infos[0]);
         }
 
-        public void SetValue(bool value) {
-            _defaultValue = value;
-            toggle.SetIsOnWithoutNotify(_defaultValue);
-        }
-        
-        public void Start() {
-            toggle = transform.GetComponentInChildren<Toggle>();
-            infoText = transform.GetComponentInChildren<TMP_Text>();
-
-            toggle.SetIsOnWithoutNotify(_defaultValue);
-            infoText.SetText(_text);
+        public override void StoreData() {
+            Reference.Value = _toggle.isOn;
         }
 
-        public bool IsOn() {
-            return toggle.isOn;
+        public override void LoadData() {
+            _toggle.SetIsOnWithoutNotify(Reference.Value);
         }
     }
 }

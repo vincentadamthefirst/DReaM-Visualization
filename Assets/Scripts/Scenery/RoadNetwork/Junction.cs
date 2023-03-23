@@ -12,7 +12,7 @@ namespace Scenery.RoadNetwork {
         /// <summary>
         /// Dictionary containing all Roads based on their id
         /// </summary>
-        public Dictionary<string, Road> Roads { get; } = new Dictionary<string, Road>();
+        public Dictionary<string, Road> Roads { get; } = new();
 
         /// <summary>
         /// The RoadDesign to be used for displaying the road network
@@ -27,48 +27,14 @@ namespace Scenery.RoadNetwork {
         /// <summary>
         /// The Connections of this Junction
         /// </summary>
-        public List<Connection> Connections { get; } = new List<Connection>();
-
-        public override bool IsDistractor => false;
-
-        /// <summary>
-        /// Sets the layer for this Junction by setting the layer for all Roads belonging to this Junction.
-        /// </summary>
-        /// <param name="layer">The new layer for all Roads</param>
-        public override void SetLayer(int layer) {
-            foreach (var road in Roads) {
-                road.Value.SetLayer(layer);
-            }
-        }
-
-        /// <summary>
-        /// Scenery will not be handled on occlusion, ignore
-        /// </summary>
-        public override void HandleHit() {
-            // Ignore
-        }
-
-        /// <summary>
-        /// Scenery will not be handled on occlusion, ignore
-        /// </summary>
-        public override void HandleNonHit() {
-            // Ignore
-        }
-
-        protected override Vector3[] GetReferencePointsRenderer() {
-            return new Vector3[0]; // assume scenery is never target, Ignore
-        }
-
-        protected override Vector3[] GetReferencePointsCustom() {
-            return new Vector3[0]; // assume scenery is never target, Ignore
-        }
+        public List<Connection> Connections { get; } = new();
 
         /// <summary>
         /// Adds a Road to this Junction
         /// </summary>
         /// <param name="road">The road object to be added</param>
         public void AddRoad(Road road) {
-            Roads.Add(road.OpenDriveId, road);
+            Roads.Add(road.Id, road);
         }
 
         /// <summary>
@@ -133,6 +99,8 @@ namespace Scenery.RoadNetwork {
                 ordered2[i].transform.position += new Vector3(0, i * RoadDesign.offsetHeight, 0);
             }
         }
+
+        public override ElementOrigin ElementOrigin => ElementOrigin.OpenDrive;
     }
 
     /// <summary>
@@ -158,7 +126,7 @@ namespace Scenery.RoadNetwork {
         /// <summary>
         /// List of all LaneLinks in this Connection
         /// </summary>
-        public List<LaneLink> LaneLinks { get; set; } = new List<LaneLink>();
+        public List<LaneLink> LaneLinks { get; set; } = new();
     }
 
     /// <summary>

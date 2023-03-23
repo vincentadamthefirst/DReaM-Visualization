@@ -51,21 +51,13 @@ namespace Scenery.RoadNetwork.RoadSignals {
         /// </summary>
         public Road Parent { get; set; }
 
-        public override void HandleHit() {
-            // TODO
-        }
-
-        public override void HandleNonHit() {
-            // TODO
-        }
-
         public override void Show() {
             transform.parent = Parent.transform;
 
-            var tsp = RoadDesign.GetTrafficSignPrefab(Type);
-            if (tsp == null) return;
+            var trafficSignPrefab = Resources.Load<GameObject>($"Prefabs/Objects/RoadNetwork/TrafficSigns/{Type.ToString()}");
+            if (trafficSignPrefab == null) return;
 
-            var trafficSign = Instantiate(tsp.prefab, transform, true);
+            var trafficSign = Instantiate(trafficSignPrefab, transform, true);
             trafficSign.layer = 19;
             var m = Orientation == RoadObjectOrientation.Negative ? -1 : 1;
             trafficSign.transform.position = Parent.EvaluatePoint(S, m * Mathf.Abs(T), ZOffset);
@@ -86,10 +78,69 @@ namespace Scenery.RoadNetwork.RoadSignals {
                 case TrafficSignType.MaximumSpeedLimit:
                     trafficSign.transform.Find("Text").GetComponent<TextMeshPro>().text = SubType;
                     break;
-                default:
+                case TrafficSignType.Undefined:
                     break;
+                case TrafficSignType.MinimumSpeedLimit:
+                    break;
+                case TrafficSignType.EndOfMaximumSpeedLimit:
+                    break;
+                case TrafficSignType.EndOfMinimumSpeedLimit:
+                    break;
+                case TrafficSignType.EndOffAllSpeedLimitsAndOvertakingRestrictions:
+                    break;
+                case TrafficSignType.TownBegin:
+                    break;
+                case TrafficSignType.TownEnd:
+                    break;
+                case TrafficSignType.Zone30Begin:
+                    break;
+                case TrafficSignType.Zone30End:
+                    break;
+                case TrafficSignType.TrafficCalmedDistrictBegin:
+                    break;
+                case TrafficSignType.TrafficCalmedDistrictEnd:
+                    break;
+                case TrafficSignType.EnvironmentalZoneBegin:
+                    break;
+                case TrafficSignType.EnvironmentalZoneEnd:
+                    break;
+                case TrafficSignType.OvertakingBanBegin:
+                    break;
+                case TrafficSignType.OvertakingBanEnd:
+                    break;
+                case TrafficSignType.OvertakingBanForTrucksBegin:
+                    break;
+                case TrafficSignType.OvertakingBanForTrucksEnd:
+                    break;
+                case TrafficSignType.RightOfWayBegin:
+                    break;
+                case TrafficSignType.RightOfWayEnd:
+                    break;
+                case TrafficSignType.DoNotEnter:
+                    break;
+                case TrafficSignType.HighWayBegin:
+                    break;
+                case TrafficSignType.HighWayEnd:
+                    break;
+                case TrafficSignType.HighWayExit:
+                    break;
+                default:
                     throw new ArgumentOutOfRangeException();
             }
+        }
+
+        public override ElementOrigin ElementOrigin => ElementOrigin.OpenDrive;
+
+        public override void OcclusionStart() {
+            throw new NotImplementedException();
+        }
+
+        public override void OcclusionEnd() {
+            throw new NotImplementedException();
+        }
+
+        public override void SetupOccludedMaterials() {
+            throw new NotImplementedException();
         }
     }
 }

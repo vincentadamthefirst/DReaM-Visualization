@@ -95,9 +95,7 @@ namespace Scenery.RoadNetwork {
         /// <summary>
         /// The widths of this Lane segment, ordered by sOffset (low to high)
         /// </summary>
-        private List<LaneWidth> Widths { get; set; } = new List<LaneWidth>();
-        
-        public override bool IsDistractor => false;
+        private List<LaneWidth> Widths { get; set; } = new();
 
         /// <summary>
         /// Adds a new width entry for this lane
@@ -147,8 +145,8 @@ namespace Scenery.RoadNetwork {
             
             var resultSelf = true;
             foreach (var widthEntry in Widths) {
-                resultSelf = resultSelf && Math.Abs(widthEntry.B) < Tolerance && Math.Abs(widthEntry.C) < Tolerance &&
-                         Math.Abs(widthEntry.D) < Tolerance;
+                resultSelf = resultSelf && Math.Abs(widthEntry.B) < 0.00001f && Math.Abs(widthEntry.C) < 0.00001f &&
+                         Math.Abs(widthEntry.D) < 0.00001f;
             }
 
             if (InnerNeighbor == null) return resultSelf;
@@ -241,27 +239,7 @@ namespace Scenery.RoadNetwork {
             }
         }
 
-        /// <summary>
-        /// Scenery will not be handled on occlusion, ignore
-        /// </summary>
-        public override void HandleHit() {
-            // Ignore
-        }
-
-        /// <summary>
-        /// Scenery will not be handled on occlusion, ignore
-        /// </summary>
-        public override void HandleNonHit() {
-            // Ignore
-        }
-
-        protected override Vector3[] GetReferencePointsRenderer() {
-            return new Vector3[0]; // assume scenery is never target, Ignore
-        }
-
-        protected override Vector3[] GetReferencePointsCustom() {
-            return new Vector3[0]; // assume scenery is never target, Ignore
-        }
+        public override ElementOrigin ElementOrigin => ElementOrigin.OpenDrive;
     }
 
     /// <summary>

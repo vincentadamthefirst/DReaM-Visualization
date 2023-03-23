@@ -4,22 +4,23 @@ using UnityEngine.UI;
 namespace UI.Main_Menu.Settings {
     
     [RequireComponent(typeof(Image))]
-    public class Ruler : Setting {
+    public class Ruler : Setting<string> {
         
         private Image _ruler;
         private int _thickness;
-        private Color _color;
 
-        public void SetData(int thickness, Color color) {
+        public void SetThickness(int thickness) {
             _thickness = thickness;
-            _color = color;
         }
         
         public void Start() {
             _ruler = GetComponent<Image>();
             var currentSizeDelta = _ruler.rectTransform.sizeDelta;
             _ruler.rectTransform.sizeDelta = new Vector2(currentSizeDelta.x, _thickness);
-            _ruler.color = _color;
         }
+
+        public override void StoreData() { }
+        public override void LoadData() { }
+        public override void SetInfo(params string[] infos) { }
     }
 }

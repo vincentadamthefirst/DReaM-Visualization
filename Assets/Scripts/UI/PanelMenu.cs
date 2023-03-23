@@ -12,7 +12,7 @@ namespace UI {
     }
 
     public abstract class PanelMenu : MonoBehaviour {
-        public List<CardMenuElement> cards = new List<CardMenuElement>();
+        public List<CardMenuElement> cards = new();
 
         public void Start() {
             for (var i = 0; i < cards.Count; i++) {

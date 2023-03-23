@@ -3,27 +3,23 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Xml.Linq;
-using JetBrains.Annotations;
 using Scenery.RoadNetwork;
 using Scenery.RoadNetwork.RoadGeometries;
 using Scenery.RoadNetwork.RoadObjects;
 using Scenery.RoadNetwork.RoadSignals;
 using UnityEngine;
 using ContactPoint = Scenery.RoadNetwork.ContactPoint;
-using Version = Utils.VersionSystem.Version;
 
 namespace Importer.XMLHandlers {
     [SuppressMessage("ReSharper", "ConvertSwitchStatementToSwitchExpression")]
-    public class SceneryXmlHandler : XmlHandler {
+    public sealed class SceneryXmlHandler : XmlHandler {
         public RoadNetworkHolder roadNetworkHolder;
 
         private int _roadIdCounter;
+        
+        public override XmlType GetXmlType() => XmlType.Scenery;
 
-        public override string GetName() {
-            return "scene";
-        }
-
-        public virtual void StartImport() {
+        public void StartImport() {
             if (xmlDocument.Root == null) return; // TODO Error handling
             
             ImportRoads();
@@ -31,27 +27,7 @@ namespace Importer.XMLHandlers {
             roadNetworkHolder.CreateMeshes();
         }
 
-        public override string GetDetails() {
-            if (xmlDocument.Root?.Element("header") == null) return "<color=\"red\"><b>XML Error</b>";
-
-            var supported = new Version("1.4");
-
-            var header = xmlDocument.Root.Element("header");
-            var revMajor = header?.Attribute("revMajor")?.Value;
-            var revMinor = header?.Attribute("revMinor")?.Value;
-            var versionString = "<color=\"orange\">Version unknown";
-
-            if (revMajor != null && revMinor != null) {
-                var fileVersion = new Version(revMajor + "." + revMinor);
-                versionString = fileVersion.CompareTo(supported) >= 0
-                    ? "<color=\"green\">Version " + revMajor + "." + revMinor
-                    : "<color=\"red\">Version " + revMajor + "." + revMinor;
-            }
-
-            return versionString + "<color=\"white\"> <b>|</b> " + "Date: " + (header?.Attribute("date")?.Value ?? "") +
-                   " <b>|</b> " + "Name: " +  (header?.Attribute("name")?.Value ?? "");
-        }
-
+        [SuppressMessage("ReSharper", "RedundantIfElseBlock")]
         private void ImportRoads() {
             var roadElements = xmlDocument.Root?.Elements("road");
             var junctionElements = xmlDocument.Root?.Elements("junction");
@@ -84,7 +60,7 @@ namespace Importer.XMLHandlers {
             junctionName += " [" + junctionId + "]";
 
             var junctionObject = roadNetworkHolder.CreateJunction(junctionId);
-            junctionObject.OpenDriveId = junctionId;
+            junctionObject.Id = junctionId;
             junctionObject.name = junctionName;
 
             foreach (var connection in junction.Elements("connection")) {
@@ -101,7 +77,7 @@ namespace Importer.XMLHandlers {
                     var toAttribute = laneLink.Attribute("to");
 
                     if (fromAttribute != null && toAttribute != null) {
-                        laneLinks.Add(new LaneLink() {From = fromAttribute.Value, To = toAttribute.Value});
+                        laneLinks.Add(new LaneLink {From = fromAttribute.Value, To = toAttribute.Value});
                     }
                 }
 
@@ -127,10 +103,10 @@ namespace Importer.XMLHandlers {
             // creating road and setting base parameters
             var roadObject = roadNetworkHolder.CreateRoad(roadId, junctionId);
             roadObject.name = roadName + " [" + roadId + "]";
-            roadObject.OpenDriveId = roadId.Replace(" ", "") + "";
+            roadObject.Id = roadId.Replace(" ", "") + "";
             roadObject.Length = float.Parse(road.Attribute("length")?.Value ??
                                             throw new ArgumentMissingException(
-                                                "s-value for geometry of road " + roadObject.OpenDriveId +
+                                                "s-value for geometry of road " + roadObject.Id +
                                                 " missing."), CultureInfo.InvariantCulture.NumberFormat);
             roadObject.OnJunction = int.Parse(road.Attribute("junction")?.Value ?? "-1") != -1;
 
@@ -167,13 +143,13 @@ namespace Importer.XMLHandlers {
             } catch (ArgumentUnknownException) {
                 if (roadObject.RoadGeometries.Count == 0) {
                     throw new ArgumentMissingException("No supported geometry values given for road " +
-                                                       roadObject.OpenDriveId);
+                                                       roadObject.Id);
                 }
             }
 
             CreateLaneSections(
                 road.Element("lanes") ??
-                throw new ArgumentMissingException("No lanes given for road " + roadObject.OpenDriveId), roadObject);
+                throw new ArgumentMissingException("No lanes given for road " + roadObject.Id), roadObject);
         }
 
         private void CreateRoadSignals(IEnumerable<XElement> roadSignals, Road road) {
@@ -359,30 +335,30 @@ namespace Importer.XMLHandlers {
             var geometries = road.Element("planView")?.Elements("geometry");
 
             if (geometries == null)
-                throw new ArgumentMissingException("No geometry given for road " + roadObject.OpenDriveId);
+                throw new ArgumentMissingException("No geometry given for road " + roadObject.Id);
             
             foreach (var geometry in geometries) {
                 var s = float.Parse(
                     geometry.Attribute("s")?.Value ??
-                    throw new ArgumentMissingException("s-value for geometry of road " + roadObject.OpenDriveId +
+                    throw new ArgumentMissingException("s-value for geometry of road " + roadObject.Id +
                                                        " missing."), CultureInfo.InvariantCulture.NumberFormat);
                 var x = float.Parse(
                     geometry.Attribute("x")?.Value ??
-                    throw new ArgumentMissingException("x-value for geometry of road " + roadObject.OpenDriveId +
+                    throw new ArgumentMissingException("x-value for geometry of road " + roadObject.Id +
                                                        " missing."), CultureInfo.InvariantCulture.NumberFormat);
                 var y = float.Parse(
                     geometry.Attribute("y")?.Value ??
-                    throw new ArgumentMissingException("y-value for geometry of road " + roadObject.OpenDriveId +
+                    throw new ArgumentMissingException("y-value for geometry of road " + roadObject.Id +
                                                        " missing."), CultureInfo.InvariantCulture.NumberFormat);
                 var hdg = float.Parse(
                     geometry.Attribute("hdg")?.Value ??
-                    throw new ArgumentMissingException("hdg-value for geometry of road " + roadObject.OpenDriveId +
+                    throw new ArgumentMissingException("hdg-value for geometry of road " + roadObject.Id +
                                                        " missing."), CultureInfo.InvariantCulture.NumberFormat);
                 var length =
                     float.Parse(
                         geometry.Attribute("length")?.Value ??
                         throw new ArgumentMissingException("length-value for geometry of road " +
-                                                           roadObject.OpenDriveId + " missing."),
+                                                           roadObject.Id + " missing."),
                         CultureInfo.InvariantCulture.NumberFormat);
 
                 if (geometry.Element("line") != null) {
@@ -391,16 +367,16 @@ namespace Importer.XMLHandlers {
                     var arcElement = geometry.Element("arc");
                     roadObject.AddRoadGeometry(new ArcGeometry(s, x, y, hdg, length, float.Parse(
                         arcElement?.Attribute("curvature")?.Value ?? throw new ArgumentMissingException(
-                            "curvature-value for geometry of road " + roadObject.OpenDriveId + " missing."),
+                            "curvature-value for geometry of road " + roadObject.Id + " missing."),
                         CultureInfo.InvariantCulture.NumberFormat)));
                 } else if (geometry.Element("spiral") != null) {
                     var spiralElement = geometry.Element("spiral");
                     roadObject.AddRoadGeometry(new SpiralGeometry(s, x, y, hdg, length, float.Parse(
                         spiralElement?.Attribute("curvStart")?.Value ?? throw new ArgumentMissingException(
-                            "curvature-value for geometry of road " + roadObject.OpenDriveId + " missing."),
+                            "curvature-value for geometry of road " + roadObject.Id + " missing."),
                         CultureInfo.InvariantCulture.NumberFormat), float.Parse(
                         spiralElement.Attribute("curvEnd")?.Value ?? throw new ArgumentMissingException(
-                            "curvature-value for geometry of road " + roadObject.OpenDriveId + " missing."),
+                            "curvature-value for geometry of road " + roadObject.Id + " missing."),
                         CultureInfo.InvariantCulture.NumberFormat)));
                 } else if (geometry.Element("poly3") != null) {
                     // TODO implement
@@ -409,39 +385,39 @@ namespace Importer.XMLHandlers {
                     roadObject.AddRoadGeometry(new ParamPoly3Geometry(s, x, y, hdg, length, float.Parse(
                             pp3Element?.Attribute("aV")?.Value ??
                             throw new ArgumentMissingException(
-                                "aV-value for geometry of road " + roadObject.OpenDriveId + " missing."),
+                                "aV-value for geometry of road " + roadObject.Id + " missing."),
                             CultureInfo.InvariantCulture.NumberFormat), float.Parse(
                             pp3Element.Attribute("aU")?.Value ??
                             throw new ArgumentMissingException(
-                                "aU-value for geometry of road " + roadObject.OpenDriveId + " missing."),
+                                "aU-value for geometry of road " + roadObject.Id + " missing."),
                             CultureInfo.InvariantCulture.NumberFormat), float.Parse(
                             pp3Element.Attribute("bV")?.Value ??
                             throw new ArgumentMissingException(
-                                "bV-value for geometry of road " + roadObject.OpenDriveId + " missing."),
+                                "bV-value for geometry of road " + roadObject.Id + " missing."),
                             CultureInfo.InvariantCulture.NumberFormat), float.Parse(
                             pp3Element.Attribute("bU")?.Value ??
                             throw new ArgumentMissingException(
-                                "bU-value for geometry of road " + roadObject.OpenDriveId + " missing."),
+                                "bU-value for geometry of road " + roadObject.Id + " missing."),
                             CultureInfo.InvariantCulture.NumberFormat), float.Parse(
                             pp3Element.Attribute("cV")?.Value ??
                             throw new ArgumentMissingException(
-                                "cV-value for geometry of road " + roadObject.OpenDriveId + " missing."),
+                                "cV-value for geometry of road " + roadObject.Id + " missing."),
                             CultureInfo.InvariantCulture.NumberFormat), float.Parse(
                             pp3Element.Attribute("cU")?.Value ??
                             throw new ArgumentMissingException(
-                                "cU-value for geometry of road " + roadObject.OpenDriveId + " missing."),
+                                "cU-value for geometry of road " + roadObject.Id + " missing."),
                             CultureInfo.InvariantCulture.NumberFormat), float.Parse(
                             pp3Element.Attribute("dV")?.Value ??
                             throw new ArgumentMissingException(
-                                "dV-value for geometry of road " + roadObject.OpenDriveId + " missing."),
+                                "dV-value for geometry of road " + roadObject.Id + " missing."),
                             CultureInfo.InvariantCulture.NumberFormat), float.Parse(
                             pp3Element.Attribute("dU")?.Value ??
                             throw new ArgumentMissingException(
-                                "dU-value for geometry of road " + roadObject.OpenDriveId + " missing."),
+                                "dU-value for geometry of road " + roadObject.Id + " missing."),
                             CultureInfo.InvariantCulture.NumberFormat)
                     ));
                 } else {
-                    throw new ArgumentUnknownException("<geometry>-tag for road " + roadObject.OpenDriveId +
+                    throw new ArgumentUnknownException("<geometry>-tag for road " + roadObject.Id +
                                                        " does not contain a valid geometry Element.");
                 }
             }
@@ -451,7 +427,7 @@ namespace Importer.XMLHandlers {
             foreach (var laneSection in laneSectionsParent.Elements("laneSection")) {
                 var s = float.Parse(
                     laneSection.Attribute("s")?.Value ??
-                    throw new ArgumentMissingException("s-value for lane section of road " + road.OpenDriveId +
+                    throw new ArgumentMissingException("s-value for lane section of road " + road.Id +
                                                        " missing."), CultureInfo.InvariantCulture.NumberFormat);
 
                 var laneSectionObject = roadNetworkHolder.CreateLaneSection(road);
@@ -483,7 +459,7 @@ namespace Importer.XMLHandlers {
             var id = lane.Attribute("id")?.Value ?? "x";
             
             if (id == "x")
-                throw new ArgumentMissingException("A lane of road " + parentSection.Parent.OpenDriveId +
+                throw new ArgumentMissingException("A lane of road " + parentSection.Parent.Id +
                                                    " has no id!");
 
             if (!int.TryParse(id, out var idInt))
@@ -521,7 +497,7 @@ namespace Importer.XMLHandlers {
             var laneObject = roadNetworkHolder.CreateLane(parentSection);
             laneObject.LaneId = id;
             laneObject.LaneIdInt = idInt;
-            laneObject.OpenDriveId = id + "";
+            laneObject.Id = id + "";
             laneObject.Parent = parentSection;
             laneObject.LaneDirection = laneDirection;
             laneObject.LaneType = laneType;
@@ -565,19 +541,19 @@ namespace Importer.XMLHandlers {
                 float.Parse(width.Attribute("sOffset")?.Value ?? "0", CultureInfo.InvariantCulture.NumberFormat),
                 float.Parse(width.Attribute("a")?.Value ??
                             throw new ArgumentMissingException("a-value missing for width of lane of road " + 
-                                                               laneObject.Parent.Parent.OpenDriveId),
+                                                               laneObject.Parent.Parent.Id),
                     CultureInfo.InvariantCulture.NumberFormat),
                 float.Parse(width.Attribute("b")?.Value ??
                             throw new ArgumentMissingException("b-value missing for width of lane of road " + 
-                                                               laneObject.Parent.Parent.OpenDriveId),
+                                                               laneObject.Parent.Parent.Id),
                     CultureInfo.InvariantCulture.NumberFormat),
                 float.Parse(width.Attribute("c")?.Value ??
                             throw new ArgumentMissingException("c-value missing for width of lane of road " + 
-                                                               laneObject.Parent.Parent.OpenDriveId),
+                                                               laneObject.Parent.Parent.Id),
                     CultureInfo.InvariantCulture.NumberFormat),
                 float.Parse(width.Attribute("d")?.Value ??
                             throw new ArgumentMissingException("d-value missing for width of lane of road " + 
-                                                               laneObject.Parent.Parent.OpenDriveId),
+                                                               laneObject.Parent.Parent.Id),
                     CultureInfo.InvariantCulture.NumberFormat)
             );
         }

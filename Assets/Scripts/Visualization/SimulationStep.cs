@@ -3,6 +3,7 @@ using UnityEngine;
 using Visualization.SimulationEvents;
 
 namespace Visualization {
+
     public class SimulationStep {
         /// <summary>
         /// The next SimulationStep, might be null if this is the last step.
@@ -43,7 +44,7 @@ namespace Visualization {
         /// The information of this Agents sensors at this step.
         /// The information of this Agents sensors at this step.
         /// </summary>
-        public Dictionary<string, SensorInformation> SensorInformation { get; } = new Dictionary<string, SensorInformation>();
+        public Dictionary<string, SensorInformation> SensorInformation { get; } = new();
         
         /// <summary>
         /// The additional information for an agent at this SimulationStep
@@ -58,30 +59,27 @@ namespace Visualization {
         /// <summary>
         /// List of all events that happen at this time for this agent.
         /// </summary>
-        public List<SimulationEvent> Events { get; } = new List<SimulationEvent>();
+        public List<SimulationEvent> Events { get; } = new();
         
         /// <summary>
-        /// Information that is not further classified and can be displayed in the side panel.
+        /// Dictionary containing all fields for an agent even if they cannot be displayed by normal means.
+        /// Key = name
+        /// Value = value
         /// </summary>
-        public List<object> UnknownInformation { get; } = new List<object>();
+        public Dictionary<string, object> AllInfo { get; } = new();
     }
 
     public class SensorInformation {
         /// <summary>
         /// The relative position of the sensor towards the center of the vehicle
         /// </summary>
-        public Vector2 RelativePosition { get; set; }
+        public Vector2 LocalPosition { get; set; }
 
         /// <summary>
-        /// Tells whether the opening angle of this Sensor Changed towards the previous SimulationStep
+        /// Has any of the stored values changed towards the next or previous SimulationStep
         /// </summary>
-        public bool OpeningChangedTowardsPrevious { get; set; }
-        
-        /// <summary>
-        /// Tells whether the opening angle of this Sensor Changed towards the next SimulationStep
-        /// </summary>
-        public bool OpeningChangedTowardsNext { get; set; }
-        
+        public bool ValuesChangedTowardsNeighbors { get; set; }
+
         /// <summary>
         /// Global heading the sensor looks at.
         /// </summary>

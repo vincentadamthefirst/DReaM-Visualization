@@ -2,7 +2,6 @@
 using System.Linq;
 using Scenery.RoadNetwork.RoadObjects;
 using Scenery.RoadNetwork.RoadSignals;
-using UI.Settings;
 using UnityEngine;
 
 namespace Scenery.RoadNetwork {
@@ -17,12 +16,12 @@ namespace Scenery.RoadNetwork {
         /// <summary>
         /// The Roads in the scene, referenced by their OpenDrive ID
         /// </summary>
-        public ConcurrentDictionary<string, Road> Roads { get; } = new ConcurrentDictionary<string, Road>();
+        public ConcurrentDictionary<string, Road> Roads { get; } = new();
         
         /// <summary>
         /// The Junctions in the scene, referenced by their OpenDrive ID
         /// </summary>
-        private ConcurrentDictionary<string, Junction> Junctions { get; } = new ConcurrentDictionary<string, Junction>();
+        private ConcurrentDictionary<string, Junction> Junctions { get; } = new();
 
         /// <summary>
         /// The RoadDesign to use for all scene elements
@@ -32,8 +31,6 @@ namespace Scenery.RoadNetwork {
         // integers to set the base layer for roads and objects
         private const int RoadLayer = 17;
         private const int ObjectLayer = 19;
-
-        public ApplicationSettings settings;
 
         /// <summary>
         /// Shows a simple Terrain that is big enough to fit under all scene elements by setting its size and position
@@ -121,9 +118,9 @@ namespace Scenery.RoadNetwork {
         /// <param name="junctionId">The OpenDrive Id of the junction the road is on</param>
         /// <returns>The generated Road</returns>
         public Road CreateRoad(string openDriveId, string junctionId) {
-            var newRoad = Instantiate(roadDesign.roadPrefab, Vector3.zero, Quaternion.identity, transform)
-                .GetComponent<Road>();
-            newRoad.OpenDriveId = openDriveId;
+            var roadPrefab = Resources.Load<Road>("Prefabs/Objects/RoadNetwork/Road");
+            var newRoad = Instantiate(roadPrefab, Vector3.zero, Quaternion.identity, transform);
+            newRoad.Id = openDriveId;
             newRoad.gameObject.layer = RoadLayer;
             Roads[openDriveId] = newRoad;
 
@@ -132,7 +129,6 @@ namespace Scenery.RoadNetwork {
             Junctions[junctionId].AddRoad(newRoad);
             newRoad.ParentJunction = Junctions[junctionId];
             newRoad.gameObject.isStatic = true;
-            newRoad.settings = settings;
 
             return newRoad;
         }
@@ -143,13 +139,12 @@ namespace Scenery.RoadNetwork {
         /// <param name="parentLaneSection">The LaneSection the lane is on</param>
         /// <returns>The generated Lane</returns>
         public Lane CreateLane(LaneSection parentLaneSection) {
-            var newLane = Instantiate(roadDesign.lanePrefab, Vector3.zero, Quaternion.identity, parentLaneSection.transform)
-                .GetComponent<Lane>();
+            var lanePrefab = Resources.Load<Lane>("Prefabs/Objects/RoadNetwork/Lane");
+            var newLane = Instantiate(lanePrefab, Vector3.zero, Quaternion.identity, parentLaneSection.transform);
             newLane.gameObject.layer = RoadLayer;
             newLane.RoadDesign = roadDesign;
             newLane.gameObject.isStatic = true;
-            newLane.settings = settings;
-            
+
             return newLane;
         }
 
@@ -159,12 +154,10 @@ namespace Scenery.RoadNetwork {
         /// <param name="parentRoad">The Road the laneSection is on.</param>
         /// <returns>The generated LaneSection</returns>
         public LaneSection CreateLaneSection(Road parentRoad) {
-            var newLaneSection =
-                Instantiate(roadDesign.laneSectionPrefab, Vector3.zero, Quaternion.identity, parentRoad.transform)
-                    .GetComponent<LaneSection>();
+            var laneSectionPrefab = Resources.Load<LaneSection>("Prefabs/Objects/RoadNetwork/LaneSection");
+            var newLaneSection = Instantiate(laneSectionPrefab, Vector3.zero, Quaternion.identity, parentRoad.transform);
             newLaneSection.gameObject.layer = RoadLayer;
             newLaneSection.gameObject.isStatic = true;
-            newLaneSection.settings = settings;
             
             return newLaneSection;
         }
@@ -175,13 +168,12 @@ namespace Scenery.RoadNetwork {
         /// <param name="openDriveId">The OpenDrive Id of the junction</param>
         /// <returns>The generated Junction</returns>
         public Junction CreateJunction(string openDriveId) {
-            var newJunction = Instantiate(roadDesign.junctionPrefab, Vector3.zero, Quaternion.identity, transform)
-                .GetComponent<Junction>();
-            newJunction.OpenDriveId = openDriveId;
+            var junctionPrefab = Resources.Load<Junction>("Prefabs/Objects/RoadNetwork/Junction");
+            var newJunction = Instantiate(junctionPrefab, Vector3.zero, Quaternion.identity, transform);
+            newJunction.Id = openDriveId;
             newJunction.gameObject.layer = RoadLayer;
             newJunction.RoadDesign = roadDesign;
             newJunction.gameObject.isStatic = true;
-            newJunction.settings = settings;
             
             Junctions[openDriveId] = newJunction;
             return newJunction;
@@ -193,15 +185,14 @@ namespace Scenery.RoadNetwork {
         /// <param name="parentLane">The parent Lane for the roadmark</param>
         /// <returns>The generated RoadMark</returns>
         public RoadMark CreateRoadMark(Lane parentLane) {
-            var newRoadMark = Instantiate(roadDesign.roadMarkPrefab, Vector3.zero, Quaternion.identity, transform)
-                .GetComponent<RoadMark>();
+            var roadMarkPrefab = Resources.Load<RoadMark>("Prefabs/Objects/RoadNetwork/RoadMark");
+            var newRoadMark = Instantiate(roadMarkPrefab, Vector3.zero, Quaternion.identity, transform);
             newRoadMark.gameObject.layer = RoadLayer;
             newRoadMark.transform.parent = parentLane.transform;
             newRoadMark.RoadDesign = roadDesign;
             newRoadMark.ParentLane = parentLane;
             parentLane.RoadMark = newRoadMark;
             newRoadMark.gameObject.isStatic = true;
-            newRoadMark.settings = settings;
             
             return newRoadMark;
         }
@@ -220,7 +211,6 @@ namespace Scenery.RoadNetwork {
             newRoadObjectRound.RoadDesign = roadDesign;
             parentRoad.RoadObjects.Add(newRoadObjectRound);
             newRoadObjectRound.gameObject.isStatic = true;
-            newRoadObjectRound.settings = settings;
             
             return newRoadObjectRound;
         }
@@ -239,7 +229,6 @@ namespace Scenery.RoadNetwork {
             newRoadObjectSquare.RoadDesign = roadDesign;
             parentRoad.RoadObjects.Add(newRoadObjectSquare);
             newRoadObjectSquare.gameObject.isStatic = true;
-            newRoadObjectSquare.settings = settings;
             
             return newRoadObjectSquare;
         }
@@ -256,7 +245,6 @@ namespace Scenery.RoadNetwork {
             var trafficSign = newObj.AddComponent<TrafficSign>();
             trafficSign.Parent = parentRoad;
             trafficSign.RoadDesign = roadDesign;
-            trafficSign.settings = settings;
             
             parentRoad.TrafficSigns.Add(trafficSign);
 

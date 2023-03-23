@@ -50,8 +50,6 @@ namespace Scenery.RoadNetwork {
         /// Lanes. Gets set in parent Road.
         /// </summary>
         public bool CompletelyOnLineSegment { get; set; }
-        
-        public override bool IsDistractor => false;
 
         public LaneSection() {
             LeftLanes = new List<Lane>();
@@ -69,7 +67,7 @@ namespace Scenery.RoadNetwork {
             var ordered = LeftLanes.AsEnumerable().OrderBy(l => l.LaneIdInt);
             LeftLanes = ordered.ToList();
 
-            LaneIdMappings[lane.OpenDriveId] = lane;
+            LaneIdMappings[lane.Id] = lane;
         }
         
         /// <summary>
@@ -82,7 +80,7 @@ namespace Scenery.RoadNetwork {
             var ordered = RightLanes.AsEnumerable().OrderByDescending(l => l.LaneIdInt);
             RightLanes = ordered.ToList();
             
-            LaneIdMappings[lane.OpenDriveId] = lane;
+            LaneIdMappings[lane.Id] = lane;
         }
 
         /// <summary>
@@ -91,7 +89,7 @@ namespace Scenery.RoadNetwork {
         /// <param name="lane">The new center Lane.</param>
         public void SetCenterLane(Lane lane) {
             CenterLane = lane;
-            LaneIdMappings[lane.OpenDriveId] = lane;
+            LaneIdMappings[lane.Id] = lane;
         }
 
         /// <summary>
@@ -144,26 +142,6 @@ namespace Scenery.RoadNetwork {
             return Parent.EvaluateHeading(S + s);
         }
 
-        /// <summary>
-        /// Scenery will not be handled on occlusion, ignore
-        /// </summary>
-        public override void HandleHit() {
-            // Ignore
-        }
-
-        /// <summary>
-        /// Scenery will not be handled on occlusion, ignore
-        /// </summary>
-        public override void HandleNonHit() {
-            // Ignore
-        }
-
-        protected override Vector3[] GetReferencePointsRenderer() {
-            return new Vector3[0]; // assume scenery is never target, Ignore
-        }
-
-        protected override Vector3[] GetReferencePointsCustom() {
-            return new Vector3[0]; // assume scenery is never target, Ignore
-        }
+        public override ElementOrigin ElementOrigin => ElementOrigin.OpenDrive;
     }
 }

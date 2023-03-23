@@ -1,19 +1,22 @@
 ﻿using UnityEngine;
+using Utils;
 
 namespace UI.Main_Menu.Settings {
-    public class Setting : MonoBehaviour {
-        public RectTransform spacer;
 
-        private int _spacing;
+    public abstract class Setting : MonoBehaviour {
+        public abstract void StoreData();
 
-        public void SetSpacing(int width) {
-            _spacing = width;
-            if (spacer != null)
-                spacer.sizeDelta = new Vector2(width, 1);
-        }
+        public abstract void LoadData();
+    }
+    
+    public abstract class Setting<T> : Setting {
+        public Reference<T> Reference { get; set; }
 
-        public int GetSpacing() {
-            return _spacing;
-        }
+        /// <summary>
+        /// Setter for information on this setting. Accepts any number of parameters that are treated differently
+        /// depending on the inheritor.
+        /// </summary>
+        /// <param name="infos">The infos to pass</param>
+        public abstract void SetInfo(params string[] infos);
     }
 }

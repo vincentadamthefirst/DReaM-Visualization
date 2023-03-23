@@ -15,21 +15,13 @@ namespace Scenery.RoadNetwork {
     [CreateAssetMenu(menuName = "RoadDesign", order = 0)]
     [SuppressMessage("ReSharper", "ConvertSwitchStatementToSwitchExpression")]
     public class RoadDesign : ScriptableObject {
-
-        [Header("Prefabs")] 
-        public GameObject roadPrefab;
-        public GameObject lanePrefab;
-        public GameObject laneSectionPrefab;
-        public GameObject junctionPrefab;
-        public GameObject roadMarkPrefab;
-
         [Header("Values")] 
         public int samplePrecision;
         public float sidewalkCurbWidth;
         public float offsetHeight = 0.0001f;
         
         [Header("Lane Materials")]
-        public List<LaneMaterial> laneMaterials = new List<LaneMaterial>();
+        public List<LaneMaterial> laneMaterials = new();
 
         [Header("RoadMark Options")] 
         public Material broken;
@@ -43,13 +35,10 @@ namespace Scenery.RoadNetwork {
         public bool disableSidewalkOnJunction;
 
         [Header("Prefabs")]
-        public List<RoadObjectPrefab> roadObjectPrefabs = new List<RoadObjectPrefab>();
+        public List<RoadObjectPrefab> roadObjectPrefabs = new();
         
         [Header("Road Object Materials")]
-        public List<RoadObjectMaterial> roadObjectMaterials = new List<RoadObjectMaterial>();
-        
-        [Header("Traffic Sign Prefabs")]
-        public List<TrafficSignPrefab> trafficSignPrefabs = new List<TrafficSignPrefab>();
+        public List<RoadObjectMaterial> roadObjectMaterials = new();
 
         // Random function that might be used
         private Random _random;
@@ -101,13 +90,6 @@ namespace Scenery.RoadNetwork {
 
             return toReturnA ?? toReturnB;
         }
-
-        public TrafficSignPrefab GetTrafficSignPrefab(TrafficSignType type) {
-            if (trafficSignPrefabs.Count(x => x.type == type) != 0) {
-                return trafficSignPrefabs.FirstOrDefault(x => x.type == type);
-            }
-            return null;
-        }
     }
 
     /// <summary>
@@ -115,7 +97,7 @@ namespace Scenery.RoadNetwork {
     /// </summary>
     [Serializable]
     public class RoadObjectPrefab {
-        public GameObject prefab;
+        public string prefabName;
         public RoadObjectType type;
         public string subType;
         public float baseHeight;

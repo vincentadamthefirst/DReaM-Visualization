@@ -12,6 +12,17 @@ using Visualization.Agents;
 ///     - Right click : Hold to move the camera (locks cursor)
 /// </summary>
 public class SimpleCameraController : MonoBehaviour {
+    
+    public static SimpleCameraController Instance { get; private set; }
+
+    private void Awake() {
+        if (Instance != null && Instance != this) {
+            Destroy(this);
+        } else {
+            Instance = this;
+        }
+    }
+
     public class CameraState {
         public float yaw;
         public float pitch;
@@ -55,8 +66,8 @@ public class SimpleCameraController : MonoBehaviour {
         }
     }
 
-    public CameraState targetCameraState = new CameraState();
-    public CameraState interpolatingCameraState = new CameraState();
+    public CameraState targetCameraState = new();
+    public CameraState interpolatingCameraState = new();
 
     [Header("Movement Settings")] [Tooltip("Exponential boost factor on translation, controllable by mouse wheel.")]
     public float boost = 3.5f;
@@ -66,8 +77,7 @@ public class SimpleCameraController : MonoBehaviour {
 
     [Header("Rotation Settings")]
     [Tooltip("X = Change in mouse position.\nY = Multiplicative factor for camera rotation.")]
-    public AnimationCurve mouseSensitivityCurve =
-        new AnimationCurve(new Keyframe(0f, 0.5f, 0f, 5f), new Keyframe(1f, 2.5f, 0f, 0f));
+    public AnimationCurve mouseSensitivityCurve = new(new Keyframe(0f, 0.5f, 0f, 5f), new Keyframe(1f, 2.5f, 0f, 0f));
 
     [Tooltip("Time it takes to interpolate camera rotation 99% of the way to the target."), Range(0.001f, 1f)]
     public float rotationLerpTime = 0.01f;
@@ -78,7 +88,7 @@ public class SimpleCameraController : MonoBehaviour {
     /// <summary>
     /// Set if the Quantitative Evaluation is performed and the camera is moved throughout the scene.
     /// </summary>
-    public bool AutomaticMovement { get; set; }
+    private bool _automaticMovement;
     
     /// <summary>
     /// The current Agent to follow with the camera.
@@ -105,14 +115,16 @@ public class SimpleCameraController : MonoBehaviour {
     private Vector3 _lastRotation;
     
     // if the settings panel is currently open
-    private bool _settingsOpen;
+    public bool SettingsOpen { get; private set; }
+    
+    public bool RightMouseClicked { get; private set; }
 
     /// <summary>
     /// Sets information on the state of the settings panel.
     /// </summary>
     /// <param name="value">If the settings panel has been opened</param>
     public void SetMenuOpen(bool value) {
-        _settingsOpen = value;
+        SettingsOpen = value;
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
     }
@@ -158,31 +170,33 @@ public class SimpleCameraController : MonoBehaviour {
     }
 
     private void Update() {
-        if (_settingsOpen || AutomaticMovement) return;
+        if (SettingsOpen || _automaticMovement) return;
 
         // Hide and lock cursor when right mouse button pressed
         if (Input.GetMouseButtonDown(1)) {
             Cursor.lockState = CursorLockMode.Locked;
             LockedOnAgentIsSet = false;
+            RightMouseClicked = true;
         }
 
         // Unlock and show cursor when right mouse button released
         if (Input.GetMouseButtonUp(1)) {
             Cursor.visible = true;
             Cursor.lockState = CursorLockMode.None;
+            RightMouseClicked = false;
         }
 
         // The camera should follow an agent
         if (LockedOnAgentIsSet) {
             var offsetVector2 = new Vector2(20, 0);
-            offsetVector2.RotateRadians(LockedOnAgent.CurrentRotation + Mathf.PI);
+            offsetVector2.RotateRadians(LockedOnAgent.DynamicData.Rotation + Mathf.PI);
 
-            var modelPosition = LockedOnAgent.Model.transform.position;
+            var modelPosition = LockedOnAgent.StaticData.Model.transform.position;
             transform.position = new Vector3(offsetVector2.x, 30, offsetVector2.y) +
                                  modelPosition;
             
             var secondOffsetVector = new Vector2(.5f, 0);
-            secondOffsetVector.RotateRadians(LockedOnAgent.CurrentRotation + Mathf.PI - Mathf.PI / 2f);
+            secondOffsetVector.RotateRadians(LockedOnAgent.DynamicData.Rotation + Mathf.PI - Mathf.PI / 2f);
             
             transform.LookAt(modelPosition + new Vector3(secondOffsetVector.x, 0, secondOffsetVector.y));
             return;

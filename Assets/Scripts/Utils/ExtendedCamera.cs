@@ -31,7 +31,7 @@ namespace Utils {
         /// </summary>
         private void Awake() {
             Camera = GetComponent<Camera>();
-            CameraController = Camera.GetComponent<SimpleCameraController>();
+            CameraController = SimpleCameraController.Instance;
         }
 
         /// <summary>

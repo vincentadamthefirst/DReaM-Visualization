@@ -1,5 +1,4 @@
-﻿using System;
-using TMPro;
+﻿using TMPro;
 using UI.Main_Menu.Utils;
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,19 +7,24 @@ namespace UI.SidePanel {
     
     
     [RequireComponent(typeof(Image))]
-    public class SidePanelEntry : MonoBehaviour {
+    public abstract class SidePanelEntry : MonoBehaviour {
         
-        public TMP_Text titleText;
-        protected Image image;
-        
-        public void Setup(string title, float alpha) {
-            image = GetComponent<Image>();
+        private TMP_Text _titleText;
+        private Image _image;
 
-            var tmpColor = image.color;
-            image.color = tmpColor.WithAlpha(alpha);
-            
-            titleText.SetText(title);
+        protected virtual void Awake() {
+            _titleText = transform.Find("Title").GetComponent<TMP_Text>();
+            _image = GetComponent<Image>();
         }
+
+        public void Initialize(string title, float alpha) {
+            var tmpColor = _image.color;
+            _image.color = tmpColor.WithAlpha(alpha);
+            
+            _titleText.SetText(title);
+        }
+        
+        public abstract void TriggerUpdate();
 
     }
 }

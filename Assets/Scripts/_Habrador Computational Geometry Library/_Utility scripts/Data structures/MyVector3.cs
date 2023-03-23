@@ -110,9 +110,9 @@ namespace Habrador_Computational_Geometry
         // Directions by using Unity's coordinate system
         //
 
-        public static MyVector3 Right   => new MyVector3(1f, 0f, 0f);
-        public static MyVector3 Forward => new MyVector3(0f, 0f, 1f);
-        public static MyVector3 Up      => new MyVector3(0f, 1f, 0f);
+        public static MyVector3 Right   => new(1f, 0f, 0f);
+        public static MyVector3 Forward => new(0f, 0f, 1f);
+        public static MyVector3 Up      => new(0f, 1f, 0f);
 
 
 

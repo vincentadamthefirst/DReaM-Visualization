@@ -16,12 +16,6 @@ namespace Utils {
             v.y = v.x * sinAngle + v.y * cosAngle;
             v.x = tmpX;
         }
-        
-        public static int RoundUpToMultipleOf(this int toRound, int multiple) {
-            var remainder = toRound % multiple;
-            if (remainder == 0) return toRound;
-            return toRound + multiple - remainder;
-        }
 
         public static int RoundDownToMultipleOf(this int toRound, int multiple) {
             return toRound - (toRound % multiple);
@@ -87,34 +81,6 @@ namespace Utils {
             transform.SetSizeZ(newZ);
         }
 
-        public static void SetSize(this Transform transform, float newSizeX, float newSizeY, float newSizeZ) {
-            var oldParent = transform.parent;
-
-            transform.parent = null;
-
-            var allBounds = new Bounds();
-            var renderers = transform.GetComponentsInChildren<Renderer>();
-            foreach (var renderer in renderers) {
-                allBounds.Encapsulate(renderer.bounds);
-            }
-
-            var sizeX = allBounds.size.x;
-            var sizeY = allBounds.size.y;
-            var sizeZ = allBounds.size.z;
-
-            var oldScale = transform.localScale;
-            
-            var newScale = new Vector3(
-                newSizeX * (oldScale.x / sizeX),
-                newSizeY * (oldScale.y / sizeY),
-                newSizeZ * (oldScale.z / sizeZ)
-            );
-
-            transform.localScale = newScale;
-
-            transform.parent = oldParent;
-        }
-
         public static void ChangeToTransparent(this Material material, float alpha) {
             var color = material.color;
             color.a = alpha;
@@ -128,13 +94,6 @@ namespace Utils {
             material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
             material.renderQueue = (int) UnityEngine.Rendering.RenderQueue.Transparent;
             material.SetShaderPassEnabled("ShadowCaster", false);
-        }
-        
-        public static void SetLayerRecursive(this GameObject obj, int layer) {
-            obj.layer = layer;
-            foreach (Transform child in obj.transform) {
-                SetLayerRecursive(child.gameObject, layer);
-            }
         }
     }
 }

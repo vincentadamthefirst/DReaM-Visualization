@@ -16,12 +16,12 @@ namespace Scenery.RoadNetwork.RoadGeometries {
 
             _curvature = curvature;
         }
-        
-        public override Vector2 Evaluate(float s, float t) {
-            var radius = 1f / _curvature;
-            var circumference = 2f * Mathf.PI / _curvature;
 
-            var fractionRad = (s % circumference) * _curvature;
+        public static Vector2 GetArc(float s, float t, float x, float y, float hdg, float curvature) {
+            var radius = 1f / curvature;
+            var circumference = 2f * Mathf.PI / curvature;
+
+            var fractionRad = (s % circumference) * curvature;
             var offset = new Vector2(0f, -radius + t);
             offset.RotateRadians(fractionRad);
 
@@ -33,12 +33,20 @@ namespace Scenery.RoadNetwork.RoadGeometries {
 
             return offset;
         }
+        
+        public override Vector2 Evaluate(float s, float t) {
+            return GetArc(s, t, x, y, hdg, _curvature);
+        }
+
+        public static float GetArgHeading(float s, float hdg, float curvature) {
+            var circumference = 2f * Mathf.PI / curvature;
+
+            var fractionRad = (s % circumference) * curvature;
+            return hdg + fractionRad;
+        }
 
         public override float EvaluateHeading(float s) {
-            var circumference = 2f * Mathf.PI / _curvature;
-
-            var fractionRad = (s % circumference) * _curvature;
-            return hdg + fractionRad;
+            return GetArgHeading(s, hdg, _curvature);
         }
     }
 }

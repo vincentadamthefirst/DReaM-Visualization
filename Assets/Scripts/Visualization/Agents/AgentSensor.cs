@@ -1,8 +1,20 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
 
 namespace Visualization.Agents {
-    
+
+    /**
+     * Setup information for a sensor.
+     */
+    public struct SensorSetup {
+        // name of this sensor
+        public string sensorName;
+        // color of this sensor
+        public Color color;
+    }
+
     /// <summary>
     /// Class representing a sensor in the scene. Has a child object containing the actual mesh representing the sensor
     /// view.
@@ -12,14 +24,16 @@ namespace Visualization.Agents {
         private Transform _child;
         private MeshFilter _meshFilter;
         private MeshRenderer _meshRenderer;
-
-        private bool _active = false;
+        
         private bool _on = true;
 
-        /// <summary>
-        /// Method to retrieve all necessary objects for this sensor (its child object and mesh rendering components)
-        /// </summary>
-        public void FindAll() {
+        public SensorInformation CurrentStatus { get; private set; } = new();
+
+        public SensorSetup SensorSetup { get; set; }
+
+        private bool _newSensor = true;
+
+        private void Awake() {
             _child = transform.GetChild(0);
             _meshFilter = _child.GetChild(0).GetComponent<MeshFilter>();
             _meshRenderer = _child.GetChild(0).GetComponent<MeshRenderer>();
@@ -36,10 +50,11 @@ namespace Visualization.Agents {
         /// <summary>
         /// Updates the position and rotation of this sensor.
         /// </summary>
-        /// <param name="position">the global position of this sensor</param>
+        /// <param name="agentPosition">the global position of the agent this sensor is attached to</param>
+        /// <param name="localPosition">the local position of this sensor inside the agent</param>
         /// <param name="globalRotation">the global rotation of this sensors view frustum</param>
-        public void UpdatePositionAndRotation(Vector3 position, float globalRotation) {
-            _child.position = position;
+        private void UpdatePositionAndRotation(Vector3 agentPosition, Vector3 localPosition, float globalRotation) {
+            _child.position = agentPosition + localPosition;
             _child.rotation = Quaternion.Euler(0, (-globalRotation) * Mathf.Rad2Deg, 0);
         }
 
@@ -48,7 +63,7 @@ namespace Visualization.Agents {
         /// </summary>
         /// <param name="angleRadians">The new opening angle in radians</param>
         /// <param name="distance">The new sensor viewing distance in units (meters)</param>
-        public void UpdateOpeningAngle(float angleRadians, float distance) {
+        private void UpdateOpeningAngle(float angleRadians, float distance) {
             var newMesh = new Mesh();
 
             var currentAngle = -angleRadians / 2f;
@@ -71,16 +86,19 @@ namespace Visualization.Agents {
 
             newMesh.RecalculateNormals();
             _meshFilter.mesh = newMesh;
+        }
 
-
-            // var newMesh = new Mesh();
-            // var height = Mathf.Sin(angleRadians / 2f) * distance;
-            // newMesh.vertices = new[]
-            //     {Vector3.zero, new Vector3(height, 0, distance), new Vector3(-height, 0, distance)};
-            // newMesh.triangles = new[] {0, 2, 1};
-            //
-            // newMesh.RecalculateNormals();
-            // _meshFilter.mesh = newMesh;
+        [SuppressMessage("ReSharper", "PossibleNullReferenceException")]
+        public void AgentUpdated(object sender, EventArgs _) {
+            var agent = sender as Agent;
+            var sensorInfo = agent.GetSensorData(SensorSetup.sensorName);
+            if (sensorInfo.ValuesChangedTowardsNeighbors || _newSensor) {
+                UpdateOpeningAngle(sensorInfo.OpeningAngle, sensorInfo.Distance);
+                _newSensor = false;
+            }
+            var localPos = new Vector3(sensorInfo.LocalPosition.x, 0, sensorInfo.LocalPosition.y);
+            UpdatePositionAndRotation(agent.DynamicData.Position3D + new Vector3(0, 1, 0), localPos, sensorInfo.Heading);
+            CurrentStatus = sensorInfo;
         }
 
         /// <summary>
@@ -91,13 +109,8 @@ namespace Visualization.Agents {
             UpdateVisibility();
         }
 
-        public void SetActive(bool active) {
-            _active = active;
-            UpdateVisibility();
-        }
-
         private void UpdateVisibility() {
-            _child.GetChild(0).gameObject.SetActive(_active && _on);
+            _child.GetChild(0).gameObject.SetActive(_on);
         }
     }
 }

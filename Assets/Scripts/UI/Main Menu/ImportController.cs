@@ -2,9 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Importer;
 using Importer.XMLHandlers;
+using Settings;
 using SimpleFileBrowser;
 using TMPro;
 using UI.Main_Menu.Import;
@@ -21,38 +21,43 @@ namespace UI.Main_Menu {
 
         [Header("File Listing")] public RectTransform content;
 
-        private FolderImporter _folderImporter = new FolderImporter();
+        private readonly FolderImporter _folderImporter = new();
         private string _path;
         
         private List<Tuple<XmlType, XmlHandler>> _handlers;
-        private Dictionary<XmlHandler, ImportEntry> _fileEntries = new Dictionary<XmlHandler, ImportEntry>();
+        private Dictionary<XmlHandler, ImportEntry> _fileEntries = new();
 
         private void Start() {
             open.onClick.AddListener(OpenFileBrowser);
             reload.onClick.AddListener(Reload);
             pathInput.onValueChanged.AddListener(ValueChanged);
 
-            if (PlayerPrefs.HasKey("configPath")) {
-                _path = PlayerPrefs.GetString("configPath");
+            var parentFolder = SettingsManager.Instance.Settings.parentFolder;
+            if (!string.IsNullOrEmpty(parentFolder)) {
+                _path = SettingsManager.Instance.Settings.parentFolder;
                 Reload();
-
-                if (PlayerPrefs.HasKey("selectedConfigs")) {
-                    SetSelected();
-                }
                 
+                if (SettingsManager.Instance.Settings.defaultConfiguration != null) 
+                    SetSelected();
             } else {
                 _path = Environment.GetFolderPath(Environment.SpecialFolder.MyComputer);
             }
+            
             pathInput.SetTextWithoutNotify(_path);
         }
 
         private void SetSelected() {
-            var selected = PlayerPrefs.GetString("selectedConfigs").Split(',');
+            var selected = SettingsManager.Instance.Settings.defaultConfiguration;
+            if (selected.filePaths == null)
+                return;
 
-            foreach (var path in selected) {
+            foreach (var (_, path) in selected.filePaths) {
                 try {
                     _fileEntries.First(x => x.Key.GetFilePath() == path).Value.SetSelected();
-                } catch (Exception) { }
+                }
+                catch (Exception) {
+                    // ignored
+                }
             }
         }
         
@@ -73,20 +78,8 @@ namespace UI.Main_Menu {
             _path = value;
         }
 
-        private ImportType GetTypeByName(string name) {
-            switch (name) {
-                case "ped": return ImportType.PedestrianModels;
-                case "veh": return ImportType.VehicleModels;
-                case "out": return ImportType.Output;
-                case "scene": return ImportType.Scenery;
-                case "profiles": return ImportType.Profiles;
-                case "dream": return ImportType.DReaM;
-                default: return ImportType.Unsupported;
-            }
-        }
-
         private void Reload() {
-            PlayerPrefs.SetString("configPath", _path);
+            SettingsManager.Instance.Settings.parentFolder = _path;
 
             foreach (Transform t in content)
                 Destroy(t.gameObject);
@@ -94,12 +87,12 @@ namespace UI.Main_Menu {
             _fileEntries = new Dictionary<XmlHandler, ImportEntry>();
             _handlers = _folderImporter.GetPossibleFiles(_path);
             
-            var sorted = _handlers.OrderByDescending(x => x.Item1).ThenBy(x => x.Item2.GetName()).ToList();
+            var sorted = _handlers.OrderByDescending(x => x.Item1).ThenBy(x => x.Item2.GetXmlType()).ToList();
             for (var index = 0; index < sorted.Count; index++) {
                 var entry = sorted[index];
                 var handler = entry.Item2;
 
-                var type = GetTypeByName(handler.GetName());
+                var type = handler.GetXmlType();
                 var entryName = handler.GetFilePath().Remove(0, _path.Length).Replace("\\", "/");
                 ImportEntry instantiated;
                 
@@ -111,8 +104,9 @@ namespace UI.Main_Menu {
                     var prefab = Resources.Load<ImportEntry>("Prefabs/UI/MainMenu/ImportEntry");
                     instantiated = Instantiate(prefab, content);
                 }
-                
-                instantiated.name = handler.GetName();
+
+                if (instantiated == null) continue;
+                instantiated.name = type.ToString();
                 instantiated.SetType(type);
                 instantiated.SetName(entryName);
                 instantiated.SetIndex(index);
@@ -133,10 +127,6 @@ namespace UI.Main_Menu {
         public string GetRunId() {
             var handler = GetXmlHandler<SimulationOutputXmlHandler>();
             return (_fileEntries[handler] as SimulationOutputImportEntry)?.CurrentlySelectedRunId;
-        }
-
-        private void OnDestroy() {
-            
         }
     }
 }

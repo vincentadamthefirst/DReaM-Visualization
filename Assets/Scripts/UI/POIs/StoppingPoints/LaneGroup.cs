@@ -11,16 +11,17 @@ namespace UI.POIs.StoppingPoints {
         
         public Toggle toggle;
 
-        public List<StoppingPointEntry> StoppingPointEntries { get; } = new List<StoppingPointEntry>();
+        public List<StoppingPointEntry> StoppingPointEntries { get; } = new();
         
         public IntersectionGroup Parent { get; set; }
 
         public void InitializeData(string laneId, Color color) {
             laneText.text = laneId;
             colorImage.color = color;
+            toggle.onValueChanged.AddListener(delegate { ToggleChange(); });
         }
 
-        public void ToggleChange() {
+        private void ToggleChange() {
             StoppingPointEntries.ForEach(x => x.toggle.isOn = toggle.isOn);
         }
         

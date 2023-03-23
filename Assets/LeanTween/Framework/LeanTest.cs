@@ -25,12 +25,12 @@ public class LeanTester : MonoBehaviour {
 
 public class LeanTest : object {
 	public static int expected = 0;
-	private static int tests = 0;
-	private static int passes = 0;
+	private static int tests;
+	private static int passes;
 
 	public static float timeout = 15f;
-	public static bool timeoutStarted = false;
-	public static bool testsFinished = false;
+	public static bool timeoutStarted;
+	public static bool testsFinished;
 	
 	public static void debug( string name, bool didPass, string failExplaination = null){
 		expect( didPass, name, failExplaination);
