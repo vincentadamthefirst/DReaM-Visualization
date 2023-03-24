@@ -12,7 +12,7 @@ namespace Visualization {
         
         public static SensorManager Instance { get; private set; }
 
-        private Dictionary<string, List<AgentSensor>> _activeSensors = new();
+        private readonly Dictionary<string, List<AgentSensor>> _activeSensors = new();
         
         public void CollectAgents() {
             var allAgents = FindObjectsOfType<Agent>();
@@ -40,10 +40,11 @@ namespace Visualization {
                 _activeSensors.Remove(agent.Id);
                 foreach (var sensor in sensors) {
                     agent.AgentUpdated -= sensor.AgentUpdated;
+                    agent.AgentActiveStatusChanged -= sensor.AgentActiveStatusChanged;
                     Destroy(sensor.gameObject);
                 }
             } else {
-                foreach (var (n, sensorSetup) in agent.StaticData.UniqueSensors) { 
+                foreach (var (_, sensorSetup) in agent.StaticData.UniqueSensors) { 
                     var sensorPrefab = Resources.Load<AgentSensor>("Prefabs/Objects/AgentSensor");
                     var sensor = Instantiate(sensorPrefab, agent.transform.parent);
                     sensor.SensorSetup = sensorSetup;
@@ -54,6 +55,7 @@ namespace Visualization {
                     sensor.SetMeshMaterial(sensorMat);
 
                     agent.AgentUpdated += sensor.AgentUpdated;
+                    agent.AgentActiveStatusChanged += sensor.AgentActiveStatusChanged;
                     
                     LabelManager.Instance.AddSensorToLabel(agent, sensor);
                     

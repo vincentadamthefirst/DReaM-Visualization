@@ -77,7 +77,8 @@ namespace UI {
                 spv.IntersectionStoppingPoints = _dataMover.DReaMOutputXmlHandler.StoppingPoints;
                 spv.GenerateObjects();
             }
-
+            
+            //VisualizationMaster.Instance.Agents.ForEach(x => x.SetActive(false));
             // moving all agents
             visualizationMaster.SmallUpdate();
 

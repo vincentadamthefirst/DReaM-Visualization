@@ -19,7 +19,7 @@ MonoBehaviour:
     width: 1920
     height: 989
   m_ShowMode: 4
-  m_Title: Hierarchy
+  m_Title: Game
   m_RootView: {fileID: 2}
   m_MinSize: {x: 875, y: 371}
   m_MaxSize: {x: 10000, y: 10000}
@@ -119,7 +119,7 @@ MonoBehaviour:
   m_MinSize: {x: 300, y: 200}
   m_MaxSize: {x: 24288, y: 16192}
   vertical: 0
-  controlID: 31
+  controlID: 53
 --- !u!114 &6
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -401,18 +401,18 @@ MonoBehaviour:
       scrollPos: {x: 0, y: 0}
       m_SelectedIDs: 
       m_LastClickedID: 0
-      m_ExpandedIDs: e2faf8ffe8faf8ffeefaf8ff3efbf8ff44fbf8ff4806f9ff4e06f9ff9607f9ffa085f9ffe8b4f9ffa03afbffa63afbffac3afbff0646fbff0c46fbff5447fbffe05cfcffe65cfcffec5cfcff9469fcffaabbfeffb8bbfeffc2bbfeff5e04ffffcaf1ffff32fbffff626b0000f87d00005e7e00001282000072ad000024ae00000cc300004ec4000000c50000cedb00001cdd000006e9000048ea0000faea0000
+      m_ExpandedIDs: b89dfdff6a9efdfff8a0fdff1ea1fdffb698ffff66f2ffff32fbffffd26a0000846b0000
       m_RenameOverlay:
         m_UserAcceptedRename: 0
-        m_Name: chassis
-        m_OriginalName: chassis
+        m_Name: Car #0 [car_bmw_7_1]
+        m_OriginalName: Car #0 [car_bmw_7_1]
         m_EditFieldRect:
           serializedVersion: 2
           x: 0
           y: 0
           width: 0
           height: 0
-        m_UserData: -312672
+        m_UserData: -6552
         m_IsWaitingForDelay: 0
         m_IsRenaming: 0
         m_OriginalEventType: 0
@@ -683,9 +683,9 @@ MonoBehaviour:
   m_PlayAudio: 0
   m_AudioPlay: 0
   m_Position:
-    m_Target: {x: -28.673115, y: -1.6579552, z: -17.370134}
+    m_Target: {x: -14.311263, y: 0.64838785, z: -32.674294}
     speed: 2
-    m_Value: {x: -28.673115, y: -1.6579552, z: -17.370134}
+    m_Value: {x: -14.311263, y: 0.64838785, z: -32.674294}
   m_RenderMode: 0
   m_CameraMode:
     drawMode: 0
@@ -732,13 +732,13 @@ MonoBehaviour:
     m_GridAxis: 1
     m_gridOpacity: 0.5
   m_Rotation:
-    m_Target: {x: -0.23105419, y: -0.7419507, z: 0.31438598, w: -0.54528415}
+    m_Target: {x: -0.6611761, y: -0.10206747, z: 0.091503054, w: -0.73763466}
     speed: 2
-    m_Value: {x: -0.23104838, y: -0.74193203, z: 0.31437808, w: -0.54527044}
+    m_Value: {x: -0.6611599, y: -0.10206497, z: 0.091500804, w: -0.73761654}
   m_Size:
-    m_Target: 38.998478
+    m_Target: 2.9897797
     speed: 2
-    m_Value: 38.998478
+    m_Value: 2.9897797
   m_Ortho:
     m_Target: 0
     speed: 2
@@ -804,22 +804,22 @@ MonoBehaviour:
     m_SkipHidden: 0
     m_SearchArea: 1
     m_Folders:
-    - Assets
+    - Assets/Scripts
     m_Globs: []
     m_OriginalText: 
   m_ViewMode: 1
   m_StartGridSize: 64
   m_LastFolders:
-  - Assets
+  - Assets/Scripts
   m_LastFoldersGridSize: -1
   m_LastProjectPath: C:\Users\vince\Documents\#0 Arbeit\DReaM-Visualization
   m_LockTracker:
     m_IsLocked: 0
   m_FolderTreeState:
     scrollPos: {x: 0, y: 0}
-    m_SelectedIDs: 4a660000
-    m_LastClickedID: 26186
-    m_ExpandedIDs: 000000004a660000766600000aa100000ca1000000ca9a3b
+    m_SelectedIDs: 80660000
+    m_LastClickedID: 26240
+    m_ExpandedIDs: 000000004a6600004c6600004e6600005066000000ca9a3b
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -847,7 +847,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: 000000004a660000
+    m_ExpandedIDs: 000000004a6600004c6600004e66000050660000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -872,9 +872,9 @@ MonoBehaviour:
       m_Icon: {fileID: 0}
       m_ResourceFile: 
   m_ListAreaState:
-    m_SelectedInstanceIDs: 
-    m_LastClickedInstanceID: 0
-    m_HadKeyboardFocusLastEvent: 0
+    m_SelectedInstanceIDs: 80660000
+    m_LastClickedInstanceID: 26240
+    m_HadKeyboardFocusLastEvent: 1
     m_ExpandedInstanceIDs: c623000050a4000000000000
     m_RenameOverlay:
       m_UserAcceptedRename: 0

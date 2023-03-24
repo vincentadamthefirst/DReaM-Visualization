@@ -101,6 +101,10 @@ namespace Visualization.Agents {
             CurrentStatus = sensorInfo;
         }
 
+        public void AgentActiveStatusChanged(object _, bool newStatus) {
+            _meshRenderer.enabled = newStatus;
+        }
+
         /// <summary>
         /// De-/activates the display of this sensor. Overwritten by Active.
         /// </summary>

@@ -13,7 +13,7 @@ namespace Visualization.Agents {
         public Vector3 Position3D { get; set; }
         public Vector2 Position2D => new(Position3D.x, Position3D.z);
 
-        public bool Active { get; set; }
+        public bool Active { get; set; } = true;
 
         public int CurrentTime { get; set; }
 
@@ -42,7 +42,7 @@ namespace Visualization.Agents {
         public StaticData StaticData { get; } = new();
 
         // invoked whenever the agent is deactivated
-        public event EventHandler OnAgentDeactivation;
+        public event EventHandler<bool> AgentActiveStatusChanged;
 
         public event EventHandler AgentUpdated;
 
@@ -192,9 +192,7 @@ namespace Visualization.Agents {
         private void SetActive(bool status) {
             DynamicData.Active = status;
             StaticData.Model.SetActive(status);
-            if (!status) {
-                OnAgentDeactivation?.Invoke(this, EventArgs.Empty);
-            }
+            AgentActiveStatusChanged?.Invoke(this, status);
         }
     }
 }
