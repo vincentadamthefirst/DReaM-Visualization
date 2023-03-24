@@ -7,12 +7,12 @@ namespace Scenery.RoadNetwork {
     public abstract class HoverableElement : VisualizationElement {
         private List<Outline> _outlines;
 
-        private void Start() {
+        private void Awake() {
             if (_outlines == null)
                 FindOutlines();
         }
 
-        protected void FindOutlines() {
+        public void FindOutlines() {
             _outlines = transform.GetComponentsInChildren<Outline>().ToList();
         }
 

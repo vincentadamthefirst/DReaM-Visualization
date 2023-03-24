@@ -1,4 +1,5 @@
-﻿using Scenery.RoadNetwork;
+﻿using System.Linq;
+using Scenery.RoadNetwork;
 using Settings;
 using UI.Main_Menu;
 using UI.Visualization;
@@ -78,7 +79,7 @@ namespace UI {
                 spv.GenerateObjects();
             }
             
-            //VisualizationMaster.Instance.Agents.ForEach(x => x.SetActive(false));
+            FindObjectsOfType<HoverableElement>().ToList().ForEach(x => x.FindOutlines());
             // moving all agents
             visualizationMaster.SmallUpdate();
 
