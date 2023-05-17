@@ -343,8 +343,13 @@ namespace Importer.XMLHandlers {
             foreach (var (valueName, index) in agent.ValuePositions) {
                 var text = sampleSplit[index];
 
-                if (Regex.IsMatch(text, @"[0-9]+.[0-9]+")) {
-                    step.AllInfo.Add(valueName, float.Parse(text, CultureInfo.InvariantCulture.NumberFormat));
+                if (Regex.IsMatch(text, @"[0-9]+\.[0-9]+")) {
+                    try {
+                        step.AllInfo.Add(valueName, float.Parse(text, CultureInfo.InvariantCulture.NumberFormat));
+                    } catch (Exception e) {
+                        Debug.Log(text);
+                        throw e;
+                    }
                 } else {
                     step.AllInfo.Add(valueName, text);
                 }
