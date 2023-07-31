@@ -184,7 +184,9 @@ namespace Scenery.RoadNetwork {
         /// <param name="lane">The Lane for which to generate the Mesh for</param>
         private static void CloseSidewalkMeshForLane(ref Mesh mesh, Lane lane) {
             if (lane.Successor == null) return;
+
             
+
             //Debug.Log($"Successor for {lane.Parent.Parent.Id}:{lane.Id} is {lane.Successor.Parent.Parent.Id}:{lane.Successor.Id}");
      
             var ps = mesh.vertices.ToList();
@@ -206,6 +208,11 @@ namespace Scenery.RoadNetwork {
                 multiplier *= -1;
             }
 
+            if (lane.Parent.Parent.Id == "5" && lane.Id == "-2") {
+                Debug.Log($"Succ Lane: {sl.Id} on .{sl.Parent.Parent.Id}");
+                Debug.Log($"Evaluate for s={s} and cp={lane.SuccessorContactPoint}");
+            }
+            
             var i = ps.Count - 8;
             
             ps.AddRange(new[] {

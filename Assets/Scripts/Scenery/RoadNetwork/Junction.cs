@@ -61,11 +61,6 @@ namespace Scenery.RoadNetwork {
         /// Lanes downwards.
         /// </summary>
         public void DisplaceAllLanesAndRoadMarks() {
-            // var allLanes = new List<Lane>();
-            // foreach (var section in Roads.SelectMany(road => road.Value.LaneSections)) {
-            //     allLanes.AddRange(section.LaneIdMappings.Select(entry => entry.Value));
-            // }
-
             var allLanes = new Dictionary<LaneType, List<Lane>>();
             foreach (var section in Roads.SelectMany(road => road.Value.LaneSections)) {
                 var lanes = section.LaneIdMappings.Values.ToList();
@@ -76,16 +71,24 @@ namespace Scenery.RoadNetwork {
                 }
             }
 
-            var keys = allLanes.Keys.ToList();
-            for (var i = 0; i < keys.Count; i++) {
-                allLanes[keys[i]].ForEach(x => x.transform.position -= new Vector3(0, i * RoadDesign.offsetHeight, 0));
-                LowestPoint = i * RoadDesign.offsetHeight;
+            float highestDrivingLane = 0;
+            if (allLanes.ContainsKey(LaneType.Driving)) {
+                for (var index = 0; index < allLanes[LaneType.Driving].Count; index++) {
+                    var drivingLane = allLanes[LaneType.Driving][index];
+                    drivingLane.transform.position += new Vector3(0, index * RoadDesign.offsetHeight, 0);
+                    highestDrivingLane = index * RoadDesign.offsetHeight;
+                }
             }
 
-            // for (var i = 0; i < ordered.Count; i++) {
-            //     ordered[i].transform.position -= new Vector3(0, i * RoadDesign.offsetHeight, 0);
-            //     LowestPoint = i * RoadDesign.offsetHeight;
-            // }
+            var currentOffsetIndex = 0;
+            foreach (var laneType in new[]{LaneType.Sidewalk, LaneType.Sidewalk, LaneType.Biking, LaneType.Restricted, LaneType.Border, LaneType.Shoulder}) {
+                if (!allLanes.ContainsKey(laneType)) continue;
+                foreach (var lane in allLanes[laneType]) {
+                    lane.transform.position -= new Vector3(0, currentOffsetIndex * RoadDesign.offsetHeight, 0);
+                    currentOffsetIndex++;
+                }
+            }
+            LowestPoint = currentOffsetIndex * RoadDesign.offsetHeight;
 
             var allRoadMarks = new List<RoadMark>();
             foreach (var section in Roads.SelectMany(road => road.Value.LaneSections)) {
@@ -96,7 +99,7 @@ namespace Scenery.RoadNetwork {
                 .ThenBy(rm => rm.ParentLane.LaneType).ToList();
 
             for (var i = 0; i < ordered2.Count; i++) {
-                ordered2[i].transform.position += new Vector3(0, i * RoadDesign.offsetHeight, 0);
+                ordered2[i].transform.position += new Vector3(0, highestDrivingLane + (i + 1) * RoadDesign.offsetHeight, 0);
             }
         }
 

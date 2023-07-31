@@ -157,14 +157,15 @@ namespace Importer.XMLHandlers {
                     step.SensorInformation.Add("driver", sensorInformation);
 
                     // extract other agent information
-                    var otherAgents = new List<Tuple<Vector2, float>>();
+                    var otherAgents = new List<Tuple<string, Vector2, float>>();
                     foreach (var otherAgentString in _valueMapper.GetList("otherAgents")) {
                         var split = otherAgentString.Split(new[] { "|" }, StringSplitOptions.None);
-                        
+
+                        var otherId = split[0];
                         var posX = float.Parse(split[1], CultureInfo.InvariantCulture);
                         var posY = float.Parse(split[2], CultureInfo.InvariantCulture);
                         var hdg  = float.Parse(split[3], CultureInfo.InvariantCulture);
-                        otherAgents.Add(new Tuple<Vector2, float>(new Vector2(posX, posY), hdg));
+                        otherAgents.Add(new Tuple<string, Vector2, float>(otherId, new Vector2(posX, posY), hdg));
                     }
 
                     info.OtherAgents = otherAgents.ToArray();

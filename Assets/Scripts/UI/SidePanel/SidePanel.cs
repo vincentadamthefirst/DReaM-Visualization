@@ -13,6 +13,7 @@ namespace UI.SidePanel {
 
         private TMP_Dropdown _agentSelection;
         private Button _openButton;
+        private TMP_InputField _agentSearch;
 
         private bool _currentOpenStatus;
         private readonly List<SidePanelEntry> _entries = new();
@@ -20,13 +21,28 @@ namespace UI.SidePanel {
 
         private Agent _currentAgent;
         private readonly Dictionary<int, Agent> _agentDropdownIndexMapping = new();
+        private readonly Dictionary<string, int> _agentIdStrings = new();
 
         private void Awake() {
             _openButton = transform.Find("OpenButton").GetComponent<Button>();
             _agentSelection = transform.Find("AgentSelection").GetComponent<TMP_Dropdown>();
+            _agentSearch = transform.Find("AgentSearch").GetComponent<TMP_InputField>();
 
             _openButton.onClick.AddListener(OpenClose);
             _agentSelection.onValueChanged.AddListener(AgentChange);
+            _agentSearch.onValueChanged.AddListener(OnSearch);
+            _agentSearch.onSubmit.AddListener(OnSearchEnd);
+        }
+
+        private void OnSearch(string text) {
+            if (_agentIdStrings.ContainsKey(text)) {
+                _agentSelection.SetValueWithoutNotify(_agentIdStrings[text]);
+            }
+        }
+
+        private void OnSearchEnd(string text) {
+            // clearing the search
+            _agentSearch.SetTextWithoutNotify("");
         }
 
         private void AgentChange(int dropDownIndex) {
@@ -45,6 +61,7 @@ namespace UI.SidePanel {
             foreach (var agent in allAgents) {
                 agentOptionStrings.Add($"Agent #{agent.Id} ({agent.StaticData.AgentTypeDetail.ToString()})");
                 _agentDropdownIndexMapping.Add(agentOptionStrings.Count - 1, agent);
+                _agentIdStrings.Add(agent.Id, agentOptionStrings.Count - 1);
             }
 
             _agentSelection.AddOptions(agentOptionStrings);
@@ -71,7 +88,9 @@ namespace UI.SidePanel {
 
             var i = 0;
             foreach (var (valueName, value) in agent.SimulationSteps.Values.First().AllInfo) {
-                var textEntryPrefab = Resources.Load<TextSidePanelEntry>("Prefabs/UI/SidePanel/TextSidePanelEntry");
+                var textEntryPrefab = value is float
+                    ? Resources.Load<TextSidePanelEntry>("Prefabs/UI/SidePanel/TextSidePanelEntrySmall")
+                    : Resources.Load<TextSidePanelEntry>("Prefabs/UI/SidePanel/TextSidePanelEntry");
                 var textEntry = Instantiate(textEntryPrefab, content);
                 textEntry.Initialize(valueName, i % 2 == 0 ? .4f : .2f);
                 Reference<string> reference;
@@ -80,14 +99,15 @@ namespace UI.SidePanel {
                         var f = (float)agent.DynamicData.ActiveSimulationStep.AllInfo[valueName];
                         return $"{f:F2}";
                     });
-                } else if (value is List<Tuple<Vector2, float>>) {
+                } else if (value is Tuple<string, Vector2, float>[]) {
                     reference = new Reference<string>(() => {
                         var result = "";
                         var list =
-                            (List<Tuple<Vector2, float>>)agent.DynamicData.ActiveSimulationStep.AllInfo[valueName];
-                        for (var index = 0; index < list.Count; index++) {
-                            result += $"[{list[index].Item1:F2}, {list[index].Item2:F2}]";
-                            if (index < list.Count - 2)
+                            (Tuple<string, Vector2, float>[])agent.DynamicData.ActiveSimulationStep.AllInfo[valueName];
+                        for (var index = 0; index < list.Length; index++) {
+                            result +=
+                                $"<b>{list[index].Item1}:</b> [{list[index].Item2.x:F2}, {list[index].Item2.y:F2}]";
+                            if (index != list.Length - 1)
                                 result += "<br>";
                         }
 

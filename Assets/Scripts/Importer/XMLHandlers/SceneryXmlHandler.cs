@@ -175,7 +175,7 @@ namespace Importer.XMLHandlers {
                         CultureInfo.InvariantCulture.NumberFormat);
                     newObj.ZOffset = float.Parse(roadSignal.Attribute("zOffset")?.Value ?? "0",
                         CultureInfo.InvariantCulture.NumberFormat);
-                    newObj.Heading = float.Parse(roadSignal.Attribute("hdg")?.Value ?? "0",
+                    newObj.HOffset = float.Parse(roadSignal.Attribute("hOffset")?.Value ?? "0",
                         CultureInfo.InvariantCulture.NumberFormat);
 
                     switch (orientation) {

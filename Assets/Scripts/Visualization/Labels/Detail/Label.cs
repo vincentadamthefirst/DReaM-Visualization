@@ -163,7 +163,7 @@ namespace Visualization.Labels.Detail {
                 }
                 
                 var localPosition =
-                    _agent.StaticData.AgentCamera.WorldToViewportPoint(new Vector3(current[i].Item1.x, 0, current[i].Item1.y));
+                    _agent.StaticData.AgentCamera.WorldToViewportPoint(new Vector3(current[i].Item2.x, 0, current[i].Item2.y));
 
                 var actualPosition = new Vector2((localPosition.x - 0.5f) * 194, (localPosition.y - 0.5f) * 194);
                 if (actualPosition.x is > 96 or < -96 || actualPosition.y is > 96 or < -96) {

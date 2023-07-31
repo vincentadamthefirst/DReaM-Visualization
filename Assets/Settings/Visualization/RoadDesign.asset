@@ -16,11 +16,11 @@ MonoBehaviour:
   sidewalkCurbWidth: 0.15
   offsetHeight: 0.0001
   laneMaterials:
-  - laneType: 4
+  - laneType: 2
     subType: top
     color: {r: 1, g: 1, b: 1, a: 1}
     material: {fileID: 2100000, guid: 62499ad470b88af42a00f2bf414ae189, type: 2}
-  - laneType: 4
+  - laneType: 2
     subType: curb
     color: {r: 1, g: 1, b: 1, a: 1}
     material: {fileID: 2100000, guid: 7d24d604aa777db468ed99e7ac6de1a5, type: 2}
@@ -28,7 +28,7 @@ MonoBehaviour:
     subType: 
     color: {r: 1, g: 1, b: 1, a: 1}
     material: {fileID: 2100000, guid: ebbd85df5ce737b4f91a457aa60fc20e, type: 2}
-  - laneType: 2
+  - laneType: 3
     subType: 
     color: {r: 0.6037736, g: 0, b: 0, a: 1}
     material: {fileID: 2100000, guid: 62499ad470b88af42a00f2bf414ae189, type: 2}
@@ -36,7 +36,7 @@ MonoBehaviour:
     subType: 
     color: {r: 1, g: 1, b: 1, a: 1}
     material: {fileID: 2100000, guid: 7d24d604aa777db468ed99e7ac6de1a5, type: 2}
-  - laneType: 3
+  - laneType: 4
     subType: 
     color: {r: 0.5377358, g: 0.5377358, b: 0.5377358, a: 1}
     material: {fileID: 2100000, guid: 62499ad470b88af42a00f2bf414ae189, type: 2}
@@ -49,7 +49,7 @@ MonoBehaviour:
   disableRoadMarkForCenterLaneOnJunction: 0
   disableRoadMarkOnJunction: 0
   closeMeshToNextMesh: 1
-  disableStraightSidewalkOnJunction: 1
+  disableStraightSidewalkOnJunction: 0
   disableSidewalkOnJunction: 0
   roadObjectPrefabs:
   - prefabName: Trees/TreeC

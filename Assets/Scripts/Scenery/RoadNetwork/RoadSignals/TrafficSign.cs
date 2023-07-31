@@ -39,7 +39,7 @@ namespace Scenery.RoadNetwork.RoadSignals {
         /// <summary>
         /// The heading of the sign (based on the heading of the road at the given s value of the sign)
         /// </summary>
-        public float Heading { get; set; }
+        public float HOffset { get; set; }
         
         /// <summary>
         /// The overall RoadDesign for the visualization of the road network
@@ -54,15 +54,21 @@ namespace Scenery.RoadNetwork.RoadSignals {
         public override void Show() {
             transform.parent = Parent.transform;
 
-            var trafficSignPrefab = Resources.Load<GameObject>($"Prefabs/Objects/RoadNetwork/TrafficSigns/{Type.ToString()}");
+            GameObject trafficSignPrefab = null;
+            if (Type == TrafficSignType.RightOfWayBegin || Type == TrafficSignType.RightOfWayNextIntersection) {
+                trafficSignPrefab = Resources.Load<GameObject>($"Prefabs/Objects/RoadNetwork/TrafficSigns/RightOfWayNextIntersection");
+            } else {
+                trafficSignPrefab = Resources.Load<GameObject>($"Prefabs/Objects/RoadNetwork/TrafficSigns/{Type.ToString()}");
+            }
             if (trafficSignPrefab == null) return;
 
             var trafficSign = Instantiate(trafficSignPrefab, transform, true);
             trafficSign.layer = 19;
             var m = Orientation == RoadObjectOrientation.Negative ? -1 : 1;
-            trafficSign.transform.position = Parent.EvaluatePoint(S, m * Mathf.Abs(T), ZOffset);
+            trafficSign.transform.position = Parent.EvaluatePoint(S, m * T, ZOffset - 3.8835f); 
+            // FIXME quick hack for german signs: height of 3.8835 is deducted every time
             
-            var completeHdg = Mathf.PI - Parent.EvaluateHeading(S) + Heading;
+            var completeHdg = Mathf.PI + Parent.EvaluateHeading(S) + HOffset;
             trafficSign.transform.Rotate(Vector3.up, Mathf.Rad2Deg * completeHdg);
             
             trafficSign.transform.localScale = new Vector3(1.5f, 1.5f, 1.5f);
@@ -71,7 +77,7 @@ namespace Scenery.RoadNetwork.RoadSignals {
                 case TrafficSignType.Stop:
                     break;
                 case TrafficSignType.GiveWay:
-                    trafficSign.transform.Rotate(Vector3.up, -90);
+                    // trafficSign.transform.Rotate(Vector3.up, -90);
                     break;
                 case TrafficSignType.RightOfWayNextIntersection:
                     break;

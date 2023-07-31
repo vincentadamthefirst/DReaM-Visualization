@@ -120,6 +120,10 @@ namespace Scenery.RoadNetwork {
                     
                         foreach (var lane in ls.LaneIdMappings.Values) {
                             // each internal right Lane has the ContactPoint Start to the next right Lane
+                            if (Id == "5" && lane.Parent.Parent.Id == "84") {
+                                Debug.Log("Overwriting ContactPoint [1]...");
+                            }
+
                             lane.SuccessorContactPoint = ContactPoint.Start;
 
                             if (lane.LaneDirection == LaneDirection.Center) {
@@ -154,11 +158,12 @@ namespace Scenery.RoadNetwork {
                         var lastLane = lastLaneSection.LaneIdMappings[ll.From];
                         var nextLane = nextLaneSection.LaneIdMappings[ll.To];
 
-                        // TODO maybe add? Changes lane that is considered the important successor)
-                        //if (lastLane.Successor == null) {
-                            lastLane.Successor = nextLane;
-                            lastLane.SuccessorContactPoint = conn.ContactPoint;
-                        //}
+                        if (Id == "5" && nextLane.Parent.Parent.Id == "84") {
+                            Debug.Log($"Lane {lastLane.Id} gets Successor {nextLane.Id} with cp {conn.ContactPoint}");
+                        }
+                        
+                        lastLane.Successor = nextLane;
+                        lastLane.SuccessorContactPoint = conn.ContactPoint;
                     }
                 }
             }
@@ -179,8 +184,15 @@ namespace Scenery.RoadNetwork {
 
                 // setting the Lanes SuccessorContactPoint (Lanes at the end of the Road receive the Roads ContactPoint)
                 foreach (var entry in LaneSections[i].LaneIdMappings) {
-                    entry.Value.SuccessorContactPoint =
-                        i == LaneSections.Count - 1 ? SuccessorContactPoint : ContactPoint.Start;
+                    if (i == LaneSections.Count - 1) {
+                        if (Successor is Junction)
+                            continue;
+                        else {
+                            entry.Value.SuccessorContactPoint = SuccessorContactPoint;
+                            continue;
+                        }
+                    }
+                    entry.Value.SuccessorContactPoint = ContactPoint.Start;
                 }
 
                 // checking if the LaneSection is completely within a LineGeometry

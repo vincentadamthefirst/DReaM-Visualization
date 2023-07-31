@@ -23,7 +23,7 @@ namespace Visualization {
         /// Other Agents that his agent sees at this point in time, initialized in world coordinates but gets converted
         /// into the agent-local coordinate system (agent location is point 0,0) for displaying
         /// </summary>
-        public Tuple<Vector2, float>[] OtherAgents { get; set; }
+        public Tuple<string, Vector2, float>[] OtherAgents { get; set; }
 
     }
 }
