@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Xml;
 using System.Xml.Linq;
 using UnityEngine;
@@ -14,6 +15,7 @@ namespace Importer.XMLHandlers {
     public class ValueMapper {
         private readonly Dictionary<string, int> _defaultPositionMapping = new();
         private readonly Dictionary<string, int> _listPositionMapping = new();
+        private readonly Dictionary<string, int> _tuplePositionMapping = new();
 
         private string[] _currentSplitSample;
         
@@ -26,6 +28,9 @@ namespace Importer.XMLHandlers {
                     // list element
                     var listSplit = part.Split(new[] { "[{" }, StringSplitOptions.None);
                     _listPositionMapping.Add(listSplit[0].Replace(" ", ""), index);
+                } else if (part.Contains("{")) {
+                    var tupleSplit = part.Split(new[] { "{" }, StringSplitOptions.None);
+                    _tuplePositionMapping.Add(tupleSplit[0].Replace(" ", ""), index);
                 } else {
                     // default element
                     _defaultPositionMapping.Add(part.Replace(" ", ""), index);
@@ -53,6 +58,25 @@ namespace Importer.XMLHandlers {
 
             return listSplit.Select(element => element.Replace("{", "").Replace("}", "").Replace(" ", ""))
                 .Where(cleaned => !string.IsNullOrEmpty(cleaned)).ToList();
+        }
+
+        public ITuple GetTuple(string name) {
+            if (!_tuplePositionMapping.ContainsKey(name))
+                return null;
+            
+            var tuple = _currentSplitSample[_tuplePositionMapping[name]];
+            tuple = tuple.Replace("{", "").Replace("}", "");
+            var tupleSplit = tuple.Split(new[] { "|" }, StringSplitOptions.None);
+
+            return tupleSplit.Length switch {
+                1 => new Tuple<float>(float.Parse(tupleSplit[0], CultureInfo.InvariantCulture)),
+                2 => new Tuple<float, float>(float.Parse(tupleSplit[0], CultureInfo.InvariantCulture),
+                    float.Parse(tupleSplit[1], CultureInfo.InvariantCulture)),
+                3 => new Tuple<float, float, float>(float.Parse(tupleSplit[0], CultureInfo.InvariantCulture),
+                    float.Parse(tupleSplit[1], CultureInfo.InvariantCulture),
+                    float.Parse(tupleSplit[2], CultureInfo.InvariantCulture)),
+                _ => null
+            };
         }
     }
     
@@ -170,6 +194,14 @@ namespace Importer.XMLHandlers {
 
                     info.OtherAgents = otherAgents.ToArray();
                     step.AllInfo.Add("otherAgents", otherAgents.ToArray());
+                    
+                    // get (global) position of UFOV
+                    var startPosUfov = _valueMapper.GetTuple("startPosUFOV");
+                    if (startPosUfov is Tuple<float, float> startPosTuple) {
+                        if (step.SensorInformation.TryGetValue("driver", out var driverSensor)) {
+                            driverSensor.GlobalPosition = new Vector2(startPosTuple.Item1, startPosTuple.Item2);
+                        }
+                    }
                 }
             }
         }

@@ -76,6 +76,11 @@ namespace Visualization {
         public Vector2 LocalPosition { get; set; }
 
         /// <summary>
+        /// The global position of this sensor, if null use the local position.
+        /// </summary>
+        public Vector2? GlobalPosition { get; set; } = null;
+
+        /// <summary>
         /// Has any of the stored values changed towards the next or previous SimulationStep
         /// </summary>
         public bool ValuesChangedTowardsNeighbors { get; set; }

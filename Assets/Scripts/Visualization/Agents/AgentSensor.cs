@@ -4,13 +4,13 @@ using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
 
 namespace Visualization.Agents {
-
     /**
      * Setup information for a sensor.
      */
     public struct SensorSetup {
         // name of this sensor
         public string sensorName;
+
         // color of this sensor
         public Color color;
     }
@@ -24,7 +24,7 @@ namespace Visualization.Agents {
         private Transform _child;
         private MeshFilter _meshFilter;
         private MeshRenderer _meshRenderer;
-        
+
         private bool _on = true;
 
         public SensorInformation CurrentStatus { get; private set; } = new();
@@ -58,6 +58,11 @@ namespace Visualization.Agents {
             _child.rotation = Quaternion.Euler(0, (-globalRotation) * Mathf.Rad2Deg, 0);
         }
 
+        private void UpdatePositionAndRotation(Vector3 globalPosition, float globalRotation) {
+            _child.position = globalPosition;
+            _child.rotation = Quaternion.Euler(0, (-globalRotation) * Mathf.Rad2Deg, 0);
+        }
+
         /// <summary>
         /// Generates a new mesh based on a new opening angle and viewing distance.
         /// </summary>
@@ -67,7 +72,7 @@ namespace Visualization.Agents {
             var newMesh = new Mesh();
 
             var currentAngle = -angleRadians / 2f;
-            
+
             var verts = new List<Vector3> { Vector3.zero };
             var tris = new List<int>();
 
@@ -76,7 +81,7 @@ namespace Visualization.Agents {
                 var y = distance * Mathf.Sin(currentAngle);
                 verts.Add(new Vector3(x, 0, y));
                 if (i != 0)
-                    tris.AddRange(new [] {0, verts.Count - 1, verts.Count - 2});
+                    tris.AddRange(new[] { 0, verts.Count - 1, verts.Count - 2 });
 
                 currentAngle += angleRadians / 10;
             }
@@ -96,8 +101,15 @@ namespace Visualization.Agents {
                 UpdateOpeningAngle(sensorInfo.OpeningAngle * Mathf.Deg2Rad, sensorInfo.Distance);
                 _newSensor = false;
             }
-            var localPos = new Vector3(sensorInfo.LocalPosition.x, 0, sensorInfo.LocalPosition.y);
-            UpdatePositionAndRotation(agent.DynamicData.Position3D + new Vector3(0, 1, 0), localPos, sensorInfo.Heading);
+
+            if (sensorInfo.GlobalPosition == null) {
+                var localPos = new Vector3(sensorInfo.LocalPosition.x, 0, sensorInfo.LocalPosition.y);
+                UpdatePositionAndRotation(agent.DynamicData.Position3D + Vector3.up, localPos, sensorInfo.Heading);
+            } else {
+                var globalPos = (Vector2)sensorInfo.GlobalPosition;
+                UpdatePositionAndRotation(new Vector3(globalPos.x, 0, globalPos.y) + Vector3.up, sensorInfo.Heading);
+            }
+
             CurrentStatus = sensorInfo;
         }
 

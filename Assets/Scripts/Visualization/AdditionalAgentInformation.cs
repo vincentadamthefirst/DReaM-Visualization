@@ -18,12 +18,12 @@ namespace Visualization {
         /// The current Scan Area of Interest of the driver
         /// </summary>
         public string ScanAoI { get; set; }
-        
+
         /// <summary>
         /// Other Agents that his agent sees at this point in time, initialized in world coordinates but gets converted
         /// into the agent-local coordinate system (agent location is point 0,0) for displaying
         /// </summary>
-        public Tuple<string, Vector2, float>[] OtherAgents { get; set; }
+        public Tuple<string, Vector2, float>[] OtherAgents { get; set; } = Array.Empty<Tuple<string, Vector2, float>>();
 
     }
 }
